@@ -1,0 +1,28 @@
+# Configuration of code formatting
+[tool.blue]
+line-length = 100
+target-version = ['py310']
+extend-exclude = 'migrations'
+
+[tool.isort]
+line_length = 100
+profile = 'black'  # We use blue which is close enough to black.
+py_version = 310
+extend_skip_glob = ['**/migrations/*']
+
+[tool.pylint.messages_control]
+max-line-length = 100
+
+enable = [
+  'useless-suppression',                      # helpful to remove dead lint ignore comments
+]
+
+disable = [
+  'missing-docstring',                        # C0111 missing docstrings are ok
+  'missing-function-docstring',               # C0116 missing docstrings are ok
+  'missing-module-docstring',                 # C0114 missing docstrings are ok
+  'missing-class-docstring',                  # C0115 missing docstrings are ok
+  'too-few-public-methods',                   # R0903 allow simple data/entity classes etc.
+]
+
+ignore = 'migrations'  # Do not enforce naming rules for generated files.
