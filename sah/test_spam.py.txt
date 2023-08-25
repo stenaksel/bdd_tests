@@ -1,0 +1,20 @@
+import pytest
+
+print('accessing option on module level', pytest.config.getoption('--spam'))
+
+
+def util():
+    print('accessing option from non-test function', pytest.config.getoption('--spam'))
+
+
+@pytest.fixture
+def myfixture(request, pytestconfig):
+    print('accessing option in fixture via request', request.config.getoption('--spam'))
+    print('accessing option in fixture via session', request.session.config.getoption('--spam'))
+    print('accessing option in fixture via pytestconfig', pytestconfig.getoption('--spam'))
+
+
+def test_spam(request, pytestconfig):
+    print('accessing option in fixture via request', request.config.getoption('--spam'))
+    print('accessing option in fixture via session', request.session.config.getoption('--spam'))
+    print('accessing option in fixture via pytestconfig', pytestconfig.getoption('--spam'))

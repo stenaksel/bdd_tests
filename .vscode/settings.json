@@ -1,7 +1,28 @@
 {
-    "python.testing.pytestArgs": [
-        "."
-    ],
+    "files.trimTrailingWhitespace": true,
+    "python.formatting.provider": "black", // We use blue, the plugin believes it is black.
+    "python.formatting.blackPath": "blue",
+    "[python]": {
+        "editor.formatOnSave": true
+    },
+    "editor.defaultFormatter": "ms-python.python",
     "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "[toml]": {
+        "editor.defaultFormatter": "tamasfe.even-better-toml"
+    },
+    "[feature]": {
+        "editor.defaultFormatter": "alexkrechik.cucumberautocomplete"
+    },
+
+    "cucumberautocomplete.stepRegExSymbol": "'",
+    "cucumberautocomplete.steps": [
+        "**/conftest.py",                   // example with glue in conftest.py
+        "**/*_steps.py"
+    ],
+    "cucumberautocomplete.strictGherkinCompletion": true,
+    "cucumberautocomplete.gherkinDefinitionPart":
+        "@(given|when|then|step)\\((?:\\s*parsers.parse\\(|)",
+    "cucumberautocomplete.skipDocStringsFormat": true,
+    "terminal.integrated.fontFamily": "",
 }

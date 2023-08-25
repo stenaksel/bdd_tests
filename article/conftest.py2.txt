@@ -1,0 +1,57 @@
+# content of article/conftest.py
+import pytest
+
+# import tests.common.glue_fixtures
+
+# @pytest.fixture
+# def context() -> dict:
+#     """
+#     context docstring
+#     """
+#     ret = {'fixture name': 'context', 'steps': []}
+#     print(f'\n\t@pytest.fixture\n\tdef context() -> dict: {ret}')
+#     return ret
+
+
+@pytest.fixture
+def author_name() -> str:
+    """
+    Fixture 'author_name' returns a name to be used as author in some tests
+    """
+    ret = 'Sten Aksel'
+    print('\n\t(in article/conftest.py)\n\t@pytest.fixture\n\tdef author_name() -> str: {ret}')
+    return ret
+
+
+@pytest.fixture(autouse=True)
+def dbg_test_context(request):
+    # feature_name = request.node.parent.name
+    # scenario_name = request.node.name
+    # print(f'\n==>Feature: "{feature_name}", Scenario: "{scenario_name}"')
+    print('\n(in article/conftest.py)\n\t@pytest.fixture(autouse=True)')
+    print(
+        f'\tdef dbg_test_context(request): "{request.node.parent.name}" > "{request.node.name}()"'
+    )
+    return True
+
+
+# # def pytest_bdd_before_scenario(request, scenario):
+# def pytest_bdd_before_scenario(request, feature, scenario):
+#     # _ = request  # _ indicates that the variable is intentionally unused
+#     # print(f'\nxxx==> {inspect.currentframe().f_code.co_name}:\n')
+#     if feature.name is not None:
+#         print(f'=> feature: {str(feature.name)}\n')
+#     if scenario.name is not None:
+#         print(f'=> scenario: {str(scenario.name)}\n')
+
+#     # # context = request.config.cache.get('context')
+
+
+# """
+#     print(f'=> request: (param request)\n\t{request}\n')
+#     context = request.getfixturevalue('context')
+#     assert context is not None
+#     print(f'=> context: {context}\n')
+#  """
+# # # You can perform any additional actions you need to on the scenario object here
+# # # context.scenario

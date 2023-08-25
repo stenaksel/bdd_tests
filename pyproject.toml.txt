@@ -32,6 +32,7 @@ ignore = 'migrations' # Do not enforce naming rules for generated files.
 
 [tool.pytest.ini_options]
 log_level = "DEBUG"
+# log_format = "%(asctime)s %(levelname)s %(message)s"
 log_format = "%(levelname)s %(message)s"
 # norecursedirs = ['article', 'eat', 'sample_1']
 #norecursedirs = ['article', 'sah', 'eat', 'sample_1']
@@ -42,10 +43,53 @@ markers = [
   "order: marks ordering for tests (example)",
 ]
 # testpaths = ['tests', 'article', 'conftest_glue', 'eat', 'sah']
-testpaths = ['tests', 'eat']
-pythonpath = ['eat', 'tests']
+testpaths = ['tests', 'sah']
 # pythonpath = ['conftest_glue', 'src', 'tests']
-# pythonpath = ['sah', 'src', 'tests']
+pythonpath = ['sah', 'src', 'tests']
 # bdd_features_base_dir = 'sah'
 
+# testpaths = 'article'
+# testpaths = 'sample_1'
 addopts = '--ignore=temp' # Don't look for py files in temp folder
+# testpaths = ['sample_1']
+# #testpaths = ['tests', '../features/steps']
+# #pythonpath: Sets list of directories that should be added to the python search path.
+# pythonpath = ['sah', 'tests']
+# #pythonpath = ['domain', 'sample_1/step_defs']
+
+# #python_files: File patterns determining which python files are considered as test modules.
+# #python_files = ['test_*.py', '*_steps.py']
+# #python_files = *_steps.py
+# #python_files = test_*.py
+# #python_files = *_steps.py
+# python_files = ['test_*.py', '*_steps.py']
+# #python_paths = ['.']
+
+# [tool.pyright]
+# #include = ["src"]
+# include = ["**/step_defs"]
+# exclude = [
+#   "**/node_modules",
+#   "**/__pycache__",
+#   #    "src/experimental",
+#   #    "src/typestubs"
+# ]
+# ignore = ["temp"]
+# defineConstant = { DEBUG = true }
+# #stubPath = "src/stubs"
+# venv = ".venv"
+
+# reportMissingImports = true
+# reportMissingTypeStubs = false
+
+# pythonVersion = "3.11"
+# #pythonPlatform = "Linux"
+# pythonPlatform = "Windows"
+
+# executionEnvironments = [
+#   #  { root = "src/web", pythonVersion = "3.5", pythonPlatform = "Windows", extraPaths = [ "src/service_libs" ] },
+#   #  { root = "src/sdk", pythonVersion = "3.0", extraPaths = [ "src/backend" ] },
+#   #  { root = "src/tests", extraPaths = ["src/tests/e2e", "src/sdk" ]},
+#   #  { root = "src" }
+#   { root = "features" },
+# ]

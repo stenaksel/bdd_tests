@@ -1,0 +1,10 @@
+import pytest
+
+
+@pytest.fixture
+def xcontext() -> dict:
+    """
+    xcontext docstring
+    """
+    print(' ==> function xcontext() in conftest.py --> will return a dictionary')
+    return {'sum': 0, 'steps': []}

@@ -1,0 +1,13 @@
+class Article:
+    name = '?'
+    author = '?'
+
+
+def __init__(self):
+    self.name = 'name?'
+    self.author = 'author?'
+
+
+def __init__(self, name, author):
+    self.name = name
+    self.author = author
