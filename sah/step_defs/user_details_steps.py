@@ -1,6 +1,7 @@
 import json
 
 import requests
+
 from pytest_bdd import given, when, then   # isort:skip
 
 

@@ -1,9 +1,10 @@
 import logging
 
-from pytest_bdd import parsers, given, when, then   # isort:skip
-
 from tests.common.log_glue import *
 from tests.common.log_glue_incl import DBG_LOG_PARAMS
+
+from pytest_bdd import parsers, given, when, then   # isort:skip
+
 
 # pylint: disable=invalid-name ## ( => sah: using "it" )
 

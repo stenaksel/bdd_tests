@@ -1,5 +1,5 @@
-import sys
 import inspect
+import sys
 from pprint import pprint
 
 from pytest_bdd import given

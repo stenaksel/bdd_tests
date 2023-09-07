@@ -19,7 +19,6 @@ so the conftest.py file have been put in the root folder.
 
 import logging
 from logging import WARN
-from pytest_bdd import parsers, given, when, then  # isort:skip
 from typing import Any, Callable, List, Optional
 
 import pytest
@@ -28,8 +27,6 @@ import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from pytest_bdd.parser import Feature, Scenario, Step
-
-# import tomli
 
 from tests.common.log_glue_incl import (
     DBG_LOG_PARAMS,
@@ -51,6 +48,13 @@ from tests.common.log_glue_incl import (
     ret_dict_info,
     ret_func_name,
 )
+
+from pytest_bdd import parsers, given, when, then  # isort:skip
+
+
+
+# import tomli
+
 
 NO_LOGGING = True
 # from pytest_bdd.parsers import parse

@@ -1,15 +1,15 @@
 [loggers]
-keys=['root','bdd_tests']
+keys = ['root', 'bdd_tests']
 
 [handlers]
-keys='consoleHandler'
+keys = 'consoleHandler'
 
 [formatters]
-keys='consoleFormatter'
+keys = 'consoleFormatter'
 
 [logger_root]
-level='ERROR'
-handlers='consoleHandler'
+level = 'ERROR'
+handlers = 'consoleHandler'
 
 # [logger_bdd_tests]
 # level=DEBUG

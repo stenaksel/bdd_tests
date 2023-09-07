@@ -19,10 +19,10 @@ Feature: Debug Off
 
   @wip
   Scenario: No logging from log_glue functions
-  When Pytest-BDD is run
-  Then there should not be any logging from "log_glue" functions
+    When Pytest-BDD is run
+    Then there should not be any logging from "log_glue" functions
 
   Scenario: Set logging to on
-  Given I set "TEST_CONTEXT" item "logging" with value "True"
-  When Pytest-BDD is run
-  Then there should not be any logging from "log_glue" functions
+    Given I set "TEST_CONTEXT" item "logging" with value "True"
+    When Pytest-BDD is run
+    Then there should not be any logging from "log_glue" functions

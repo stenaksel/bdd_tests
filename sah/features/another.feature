@@ -8,7 +8,3 @@
 
   Scenario: My 3rd Another Scenario
      When "player_name" performs another illegal "action"
-
-
-
-
