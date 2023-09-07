@@ -25,4 +25,10 @@
         "@(given|when|then|step)\\((?:\\s*parsers.parse\\(|)",
     "cucumberautocomplete.skipDocStringsFormat": true,
     "terminal.integrated.fontFamily": "",
+    "[markdown]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[ignore]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
+    },
 }

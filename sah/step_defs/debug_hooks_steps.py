@@ -1,20 +1,21 @@
 import logging
+
 logger = logging.getLogger(__name__)
 
 from logging import DEBUG, INFO, WARNING
+
+from tests.common.log_glue import *
+from tests.common.log_glue_incl import (  # log_msg_end,
+    KEY_DBG_LOG_GLUE,
+    TEST_CONTEXT,
+    log_msg,
+    ret_dict_info,
+)
 
 from pytest_bdd import parsers, given, when, then  # isort:skip
 
 # from pytest_bdd.parsers import parse
 
-from tests.common.log_glue import *
-from tests.common.log_glue_incl import (
-    KEY_DBG_LOG_GLUE,
-    TEST_CONTEXT,
-    log_msg,
-    # log_msg_end,
-    ret_dict_info,
-)
 
 # Some "globals":
 the_when_func_was_called = False   # pylint: disable=invalid-name

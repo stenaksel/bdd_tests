@@ -4,6 +4,7 @@
 # import pprint
 
 import pytest
+
 from pytest_bdd import parsers, given, when, then  # isort:skip
 
 
@@ -42,7 +43,7 @@ def then_bar_should_have_value(context, what: str, str_value: str):
     print(f'==> Then {what} should have value "${str_value}"')
     print('==> then_bar_should_have_value  (conftest_glue/conftest.py)')
     assert what in ['context', 'target_fixture'], 'Illegal value for "what"!'
-    if what is 'context':
+    if what == 'context':
         assert 'bar' in context
         assert context['bar'] == str_value
     # else:

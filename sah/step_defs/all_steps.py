@@ -2,7 +2,6 @@
 # from .step_defs.example_steps import *
 from pytest_bdd import parsers, when
 
-
 # @when(parsers.parse('"{name}" performs an "{action}"'))
 # @when(parsers.parse('"{name}" performs another "{action}"'))
 # def performs_an_action(name, action):

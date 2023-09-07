@@ -1,4 +1,5 @@
 import logging
+
 from src.my_module import run_func
 
 LOGGER = logging.getLogger(__name__)
