@@ -6,6 +6,6 @@ All steps are in file: debug_hooks_steps.py
 
 from pytest_bdd import scenarios
 
-from .step_defs.debug_hooks_steps import *
+from .step_defs.debug_off_steps import *
 
-scenarios('./features/debug_hooks.feature')
+scenarios('./features/debug_off.feature')

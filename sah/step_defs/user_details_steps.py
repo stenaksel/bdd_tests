@@ -1,7 +1,7 @@
 import json
 
 import requests
-from pytest_bdd import given, then, when
+from pytest_bdd import given, when, then   # isort:skip
 
 
 @given('I have the following user details:')

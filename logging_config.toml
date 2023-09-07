@@ -1,0 +1,28 @@
+[loggers]
+keys=['root','bdd_tests']
+
+[handlers]
+keys='consoleHandler'
+
+[formatters]
+keys='consoleFormatter'
+
+[logger_root]
+level='ERROR'
+handlers='consoleHandler'
+
+# [logger_bdd_tests]
+# level=DEBUG
+# handlers=consoleHandler
+# qualname=bdd_tests
+# propagate=0
+
+# [handler_consoleHandler]
+# class=StreamHandler
+# level=INFO
+# formatter=consoleFormatter
+# args=(sys.stdout,)
+
+# [formatter_consoleFormatter]
+# format=%(asctime)s - %(name)s - %(levelname)s - %(message)s
+# datefmt=%Y-%m-%d %H:%M:%S

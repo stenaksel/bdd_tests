@@ -1,4 +1,4 @@
-Feature: Example
+Feature: Some E_xamples
   Scenario: My 1st Scenario
        When "player_name" performs an "action"
 

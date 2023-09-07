@@ -1,7 +1,7 @@
 # content of publish_article.feature
 Feature: Publish article
 
-  A site where you can publish your articles.
+  Some info: A site where you can publish your articles.
 
 
   Scenario: Publishing the article

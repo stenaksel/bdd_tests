@@ -2,7 +2,6 @@ Feature:Eating cucumbers
 
   Some text in the feature
 
-  @wip
   Scenario: Arguments for given, when, then
     Given there are 5 cucumbers
     When I eat 3 cucumbers

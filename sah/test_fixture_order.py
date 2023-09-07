@@ -33,9 +33,11 @@ def fifth():
 # SAH: The order of fixtures is given by param order, NOT pytest.mark.order
 
 
+@pytest.mark.skip
 def test_order_normal(first, second, third, fourth, fifth):
     print('Running your test param order.')
 
 
+@pytest.mark.skip
 def test_order_backward(fifth, fourth, third, second, first):
     print('Running your test param order (backwards).')

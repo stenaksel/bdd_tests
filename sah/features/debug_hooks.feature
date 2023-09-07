@@ -1,12 +1,12 @@
 # content of debug_glue.feature
 Feature: Debug Hooks
 
-  Background: Using log_glue
-    Given a pytest-bdd test using the "log_glue" module
-    And the "conftest.py" uses hooks that calls the corresponding log_glue function
-  # eg. "pytest_bdd_before_step" calls "log_before_step"
+  # Background: Using log_glue
+  #   Given a Pytest-BDD test using the "log_glue" module
+  #   And the "x" uses Pytest-BDD hooks that calls the corresponding "log_glue" functions
+  # # eg. "pytest_bdd_before_step" calls "before_step"
 
-  # Scenario: Using pytest-bdd in vscode
+  # Scenario: Using Pytest-BDD in vscode
   # Given you're in the feature file in vscode
   # And you would like to go from Step to the Step Definition (the "glue code")
   # And your vscode don't use the "Pytest BDD" extension
@@ -15,12 +15,44 @@ Feature: Debug Hooks
   # When you asks to "Go to Definition" from the step in a feature file
   # Then the correct Step Definition (aka glue function) will be shown
 
-  @wiz
-  Scenario: Inform about the running hook
-    Given this scenario is tagged with "wip"
-    And a "pytest_bdd_before_scenario" pytest.hook function in conftest.py
+  @wipz
+  Scenario: Inform about the test run
+    Given a "pytest_bdd_before_scenario" Pytest-BDD hook function in conftest.py
+    When the scenario is run
+    # Then information in context "TEST_CONTEXT", will include "Current glue"
+    Then "TEST_CONTEXT" should show that the function "before_scenario" have been run
+
+    # Then information in context, will include "Current glue"
+  # And information in context "TEST_CONTEXT", will include:
+  # "|Func" with value "before_scenario"
+  # | key              | value
+  # | Current feature  | Debug Hooks
+  # | Current scenario | Inform about the test run
+  # | Current Step     | N/A or Then/And? "TEST_CONTEXT" should show that the function "before_scenario" have been run
+  # | Current glue     | N/A
+
+  Scenario: Current information added to TEST_CONTEXT when running
+    # Given the variable "DO_INCL_CURR_INFO" is set to "True"
+    When the step definition is run
+    Then information in TEST_CONTEXT will not include "Current glue"
+
+  Scenario Outline: Add information in TEST_CONTEXT when running
+    Given a Pytest-BDD hook function <hook> in conftest.py
+    When the step definition is run
+    Then information in TEST_CONTEXT about functions run will include "<func>"
+    Examples:
+      | hook                       | func            |
+      | pytest_bdd_before_scenario | before_scenario |
+      | pytest_bdd_after_scenario  | after_scenario  |
+      | pytest_bdd_before_step     | before_step     |
+      | pytest_bdd_after_step      | after_step      |
+
+
+  @wipz
+  Scenario: Inform about the running Feature
+    Given a "pytest_bdd_before_scenario" pytest.hook function in conftest.py
     When you run "pytest -rA -m wip"
-    Then information about context stored in "TEST_CONTEXT" will include
+    Then information about context stored in "TEST_CONTEXT" will include:
       | key              |
       | Current glue     |
       | Current Step     |
@@ -28,10 +60,9 @@ Feature: Debug Hooks
       | Current feature  |
 
   Scenario: Inform about the running Scenario
-    Given this scenario is tagged with "wip"
-    And a "pytest_bdd_before_scenario" pytest.hook function in conftest.py
+    Given a "pytest_bdd_before_scenario" pytest.hook function in conftest.py
     When you run "pytest -rA -m wip"
-    Then information about context stored in "TEST_CONTEXT" will include
+    Then information about context stored in "TEST_CONTEXT" will include:
       | key              |
       | Current glue     |
       | Current Step     |
@@ -39,52 +70,33 @@ Feature: Debug Hooks
       | Current feature  |
 
 
-  Scenario: Inform about the pytest-bdd process (no params)
+  Scenario: Inform about the Pytest-BDD process (no params)
     Given a glue function without any parameters
-    And at the start of the glue code "log_glue" function is called
-  # And at the end of the glue "log_glue_end" function is called
+    And at the start of the glue code "log_params" function is called
+    Then information that no parameters will be shown
+  # And at the end of the glue "xlog_glue_end" function is called
   # When you run "pytest -rA -m wip"
   # Then pytest will execute the tests tagged "@wip"
   # # (tests = scenarioes)
   # And provide a detailed summary report
   # And the "log_glue" function will also display informative texts for the run
 
-  Scenario: Inform about the pytest-bdd process
-    Given a glue function
-    And at the start of the glue code "log_glue" function is called
-    And at the end of the glue "log_glue_end" function is called
+  Scenario: Inform about the Pytest-BDD process
+    Given a step definition (aka a glue function)
     When you run "pytest -rA -m wip"
     Then pytest will execute the tests tagged "@wip"
     # (tests = scenarioes)
+    And at before each step the "before_step" function is called
+    And at after each step the "after_step" function is called
     And provide a detailed summary report
     And the "log_glue" function will also display informative texts for the run
 
-  @wiz
-  Scenario: Add information with current glue context when running
-    Given a step definition using the "context" fixture
-    And the step definition is calling the "log_glue" function
-    # And the variable "DO_INCL_CURR_INFO" is set to "True"
-    When the step definition is run
-    Then information about context will include "Current glue" until log_glue_end is called
 
-  Scenario Outline: Add information in current context when running
-    Given a step definition using the "context" fixture
-    And the step definition is calling the "log_glue" function
-    # And the variable "DO_INCL_CURR_INFO" is set to "True"
-    When the step definition is run
-    Then information about context will include "<info>" until log_glue_end is called
-    Examples:
-      | info             |
-      | Current glue     |
-      | Current Step     |
-      | Current scenario |
-      | Current feature  |
-
-  @wiz
+  @wipz
   Scenario: Add information in context when running
     Given a scenario step using the "log_glue" function
     And the variable "DO_INCL_CURR_INFO" is set to "True"
-    When the step definition is run
+    When _you run "pytest -rA -m wip"
     Then information about context stored in "TEST_CONTEXT" will include
       | key              |
       | Current glue     |
@@ -94,7 +106,7 @@ Feature: Debug Hooks
 
   Scenario: glue function without any parameters - no context param
     Given I have a glue function "glue_func_no_params" without parameters
-    When "glue_func_no_params" is called by pytest-bdd
+    When "glue_func_no_params" is called by Pytest-BDD
     Then information about the called function should be logged
   #   And the log should include text "glue_func_no_params()"
   #   And the log should include text "context: NOT provided!"
@@ -106,7 +118,7 @@ Feature: Debug Hooks
 
   Scenario: glue function with only context param
     Given I have glue function "glue_func_with_context" with "context" parameter
-    When it is calledby pytest-bdd
+    When it is calledby Pytest-BDD
     Then information about the called function should be logged
     And the log should include text "glue_func_with_context(context)"
     And the log should include text "context: 1 key"
@@ -123,11 +135,12 @@ Feature: Debug Hooks
   # Given a given step
   # When a when step
   # Then a then step
+
   #####################################################################
   # Hooks
   #####################################################################
 
-  @wiz
+  @wipz
   Scenario:
     Given I have the hook function "pytest_bdd_before_scenario" declared
     And it calls the function "before_scenario"

@@ -24,14 +24,14 @@ Feature: DocStrings
     When I ask for how many lines the message have
     Then I should be told it was 2 lines
 
-@wiz
-Scenario: Assign string value from DocString with multiple lines
-  Given I have step with a Docstring:
-        """
+  @wipz
+  Scenario: Assign string value from DocString with multiple lines
+    Given I have step with a Docstring:
+      """
         This is a test message.
         This is a second message.
         This is the third test message.
-        """
+      """
     When I ask for how many lines the message have
     Then I should be told it was 3 lines
 
@@ -54,3 +54,13 @@ Scenario: Assign string value from DocString with multiple lines
 #   Given I have the following user details:
 #    When I send a POST request to the /users endpoint
 #    Then the response status code should be 201
+
+  Scenario: Formatting the docstring based on content type: xml
+    Given I have step with a Docstring:
+      """xml
+      <xml>
+      <tag>Content</tag>
+      </xml>
+      """
+    When I ask for how many lines the message have
+    Then I should be told it was 3 lines

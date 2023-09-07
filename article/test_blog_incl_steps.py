@@ -2,7 +2,7 @@
 """
 All stepdefs are in this file (not in seperate *steps.py file)
 """
-from pytest_bdd import given, when, then, scenarios  # isort:skip
+from pytest_bdd import scenarios, given, when, then # isort:skip
 
 from src.domain.article import Article
 from src.domain.result import Result

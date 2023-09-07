@@ -4,10 +4,7 @@
 # import pprint
 
 import pytest
-from pytest_bdd.parsers import parse
-from pytest_bdd import given, when, then    # isort:skip
-
-from tests.common.log_glue import *
+from pytest_bdd import parsers, given, when, then  # isort:skip
 
 
 # conftest.py is a special file in pytest that allows you to define fixtures,
@@ -16,12 +13,10 @@ from tests.common.log_glue import *
 # (The glue code here is not "shared", but just examples of the possibility)
 
 
-@given(parse('I have a key {str} in the context'))
+@given(parsers.parse('I have a key {key} in the context'))
 def given_i_have_a_bar_key_in(context, key):
-    log_glue(context=context, key=key)
     context[key] = 'bar-context'
     print(f'\n\t<== context: {context}')
-    log_glue_end(context)
     return 'bar'
 
 
@@ -42,7 +37,7 @@ def _():
 
 
 # @then('{str} bar should have value "{str}"')
-@then(parse('{what} bar should have value "{str_value}"'))
+@then(parsers.parse('{what} bar should have value "{str_value}"'))
 def then_bar_should_have_value(context, what: str, str_value: str):
     print(f'==> Then {what} should have value "${str_value}"')
     print('==> then_bar_should_have_value  (conftest_glue/conftest.py)')

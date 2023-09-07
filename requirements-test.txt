@@ -1,11 +1,11 @@
 # Additional packages needed to run the test suite.
 -r requirements.txt      # Pull in regular requirements
 blue ~= 0.9.1            # Main code formatting tool
-coverage ~= 7.3.0        # Code coverage testing for Python.
-coverage ~= 7.3.0        # Code coverage testing for Python.
+coverage ~= 7.3.1        # Code coverage testing for Python.
 isort ~= 5.12.0          # Import statement sorting tool
 pylint ~= 2.17.5         # Our agreed linter
-pytest ~= 7.4.0          # The pytest framework makes it easy to write small, readable tests
+pytest ~= 7.4.1          # The pytest framework makes it easy to write small, readable tests
 pytest-bdd ~= 6.1.1      # BDD tool
-pytest-env ~= 1.0.0      # Setting environment in pytest, needed for vscode.
+pytest-mock ~= 3.11.1
+pytest-env ~= 1.0.1      # Setting environment in pytest, needed for vscode.
 pytest-cov ~= 4.1.0      # Linking coverage and pytest.

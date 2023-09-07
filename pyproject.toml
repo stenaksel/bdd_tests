@@ -31,21 +31,24 @@ ignore = 'migrations' # Do not enforce naming rules for generated files.
 
 
 [tool.pytest.ini_options]
-log_level = "DEBUG"
-log_format = "%(levelname)s %(message)s"
+log_cli = true
+log_cli_format = "%(asctime)s %(levelname)s %(message)s"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+log_level = "INFO"
+# log_format = "%(asctime)s %(levelname)8s %(message)s"
 # norecursedirs = ['article', 'eat', 'sample_1']
 #norecursedirs = ['article', 'sah', 'eat', 'sample_1']
 #norecursedirs = ['article', 'tests', 'eat', 'sample1']
 markers = [
   "wip: marks tests as work-in-progress (deselect with '-m \"not wip\"')",
-  "wiz: marks tests as work-in-progesz (deselect with '-m \"not wiz\"')",
+  "wipz: marks tests as unfinished work-in-progesz (deselect with '-m \"not wipz\"')",
+  "todo: marks tests as unfinished (deselect with '-m \"not todo\"')",
+  "ok: marks tests as tested ok (deselect with '-m \"not ok\"')",
   "order: marks ordering for tests (example)",
 ]
 # testpaths = ['tests', 'article', 'conftest_glue', 'eat', 'sah']
-testpaths = ['tests', 'eat']
-pythonpath = ['eat', 'tests']
-# pythonpath = ['conftest_glue', 'src', 'tests']
-# pythonpath = ['sah', 'src', 'tests']
+testpaths = ['tests', 'sah', 'conftest_glue', 'article']
+pythonpath = ['tests', 'sah', 'article']
 # bdd_features_base_dir = 'sah'
 
 addopts = '--ignore=temp' # Don't look for py files in temp folder
