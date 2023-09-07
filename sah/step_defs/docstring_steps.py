@@ -4,10 +4,11 @@ import sys
 from pprint import pprint
 from types import FrameType
 
+from tests.common.log_glue import xlog_glue, xlog_glue_end
+
 # from parsers import parse
 from pytest_bdd import parsers, given, when, then   # isort:skip
 
-from tests.common.log_glue import xlog_glue, xlog_glue_end
 
 # pytest --fixtures
 # TODO Investigate fixtures cache, caplog doctest_namespace,

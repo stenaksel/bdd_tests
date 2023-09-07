@@ -1,9 +1,10 @@
 import logging
 
-from pytest_bdd import parsers, given, when, then   # isort:skip
-
 from tests.common.log_glue import *
 from tests.common.log_glue_incl import KEY_DBG_LOG_GLUE, TEST_CONTEXT, ret_dict_info
+
+from pytest_bdd import parsers, given, when, then   # isort:skip
+
 
 # Some "globals":
 the_when_func_was_called = False   # pylint: disable=invalid-name

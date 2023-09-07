@@ -22,7 +22,7 @@ Feature: Debug Hooks
     # Then information in context "TEST_CONTEXT", will include "Current glue"
     Then "TEST_CONTEXT" should show that the function "before_scenario" have been run
 
-    # Then information in context, will include "Current glue"
+  # Then information in context, will include "Current glue"
   # And information in context "TEST_CONTEXT", will include:
   # "|Func" with value "before_scenario"
   # | key              | value

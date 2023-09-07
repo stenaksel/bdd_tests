@@ -1,6 +1,8 @@
 from logging import Logger
-import pytest
 from unittest import mock
+
+import pytest
+
 from src.my_module import run_func
 
 

@@ -35,25 +35,25 @@ Feature: DocStrings
     When I ask for how many lines the message have
     Then I should be told it was 3 lines
 
-#    When eg. ask for how many lines the DocString is
-#    Then I should be told it was 3 lines long
+  #    When eg. ask for how many lines the DocString is
+  #    Then I should be told it was 3 lines long
 
-#    Then the message should be delivered successfull
+  #    Then the message should be delivered successfull
 
-# Scenario: Send an email
-#   Given I have an email address "john@example.com"
-#     And I have a message:
-#         """
-#         This is a test message.
-#         """
-#    When I send the message to the email address
-#    Then the message should be delivered successfull
+  # Scenario: Send an email
+  #   Given I have an email address "john@example.com"
+  #     And I have a message:
+  #         """
+  #         This is a test message.
+  #         """
+  #    When I send the message to the email address
+  #    Then the message should be delivered successfull
 
 
-# Scenario: Create a new user
-#   Given I have the following user details:
-#    When I send a POST request to the /users endpoint
-#    Then the response status code should be 201
+  # Scenario: Create a new user
+  #   Given I have the following user details:
+  #    When I send a POST request to the /users endpoint
+  #    Then the response status code should be 201
 
   Scenario: Formatting the docstring based on content type: xml
     Given I have step with a Docstring:
