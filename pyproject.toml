@@ -35,6 +35,7 @@ log_cli = true
 log_cli_format = "%(asctime)s %(levelname)s %(message)s"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 log_level = "INFO"
+log_format = "%(levelname)8s %(message)s"
 # log_format = "%(asctime)s %(levelname)8s %(message)s"
 # norecursedirs = ['article', 'eat', 'sample_1']
 #norecursedirs = ['article', 'sah', 'eat', 'sample_1']

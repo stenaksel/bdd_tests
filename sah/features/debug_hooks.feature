@@ -74,7 +74,6 @@ Feature: Debug Hooks
     Given a glue function without any parameters
     And at the start of the glue code "log_params" function is called
     Then information that no parameters will be shown
-  # And at the end of the glue "xlog_glue_end" function is called
   # When you run "pytest -rA -m wip"
   # Then pytest will execute the tests tagged "@wip"
   # # (tests = scenarioes)

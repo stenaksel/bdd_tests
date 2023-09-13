@@ -42,11 +42,11 @@ def ret_item_info(name: str, item, prefix: str = 'i') -> str:
 
 
 @given('I have a step with glue code')
-def step_with_glue_code(*args, **kwargs):
+def step_with_glue_code(*args, **kwargs) -> None:
     return 'Original glue code'
 
 
-def test_my_monkeypatch(monkeypatch):
+def test_my_monkeypatch(monkeypatch) -> None:
 
     print('Calling original function: ')
     result = step_with_glue_code(None, None)
@@ -59,7 +59,7 @@ def test_my_monkeypatch(monkeypatch):
         return 'Patched glue code'
 
     module_name = inspect.getmodule(step_with_glue_code).__name__
-    # print('module_name: ')
+    # print("module_name: ")
     # print(module_name)
 
     function_name = 'step_with_glue_code'
@@ -81,7 +81,7 @@ def test_my_monkeypatch(monkeypatch):
     # Get the signature of the original function
     # sig = inspect.signature(the_path)
 
-    print(ret_dict_info(param, 'params'))
+    print(ret_dict_info(params, 'params'))
 
     print('Calling original function again: ')
     # Test code that calls the glue code function

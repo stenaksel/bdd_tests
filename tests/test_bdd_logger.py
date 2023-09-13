@@ -1,24 +1,31 @@
 import logging
 from logging import DEBUG, INFO, WARN, LogRecord
-from typing import List
+from typing import Callable, Generator, List
 from unittest import mock
 from unittest.mock import call, patch
 
 import pytest
 from pytest_bdd.parser import Feature, Scenario, ScenarioTemplate, Step
+from pytest_mock import MockerFixture
 
-from tests.common.log_glue_incl import log_dict  # TODO Make test
+from tests.common.bdd_logger import BddLogger
+from tests.common.log_glue_incl import log_func_name  # tested
+from tests.common.log_glue_incl import ret_func_name  # tested
 from tests.common.log_glue_incl import ret_sorted  # tested
-from tests.common.log_glue_incl import (  # KEY_CURR_FEATURE,; KEY_LOGGER,; after_step,; log_configure,; log_func_call_info,
+from tests.common.log_glue_incl import (
     KEY_LOG_GLUE,
     TEST_CONTEXT,
-    log_func_name,
-    log_list,
-    ret_before_or_after,
+    assert_messages,
+    log_msg,
+    log_msg_start,
     ret_dict_info,
-    ret_func_name,
-    ret_keys,
 )
+
+# Configure the logger you want to capture log messages from
+logger = logging.getLogger(KEY_LOG_GLUE)
+
+bdd_logger = BddLogger()
+
 
 """
     Many tests here use caplog (CAPtured LOGged messages)
@@ -61,40 +68,6 @@ def test_just_show_test_context() -> None:
     logging.info('TEST_CONTEXT: ')
     logging.info(TEST_CONTEXT)
     logging.info('<== test_just_show_test_context')
-
-
-@pytest.mark.ok
-def test_ret_func_name() -> None:
-
-    logging.info('==> test_ret_func_name')
-
-    assert ret_func_name() == 'test_ret_func_name'
-    # The different _func have a default "prev" param
-    # that will be passed on to _the_caller and should return themself
-    # _the_caller is the only function calling ret_func_name function.
-
-    assert _the_caller0() == '_the_caller0'   # a caller of the ret_func_name()
-    assert _the_caller() == '_the_caller'   # _the_caller of ret_func_name
-    assert _func1() == '_func1'             # will only call _the_caller
-    assert _func2() == '_func2'             # will only call _func1
-    assert _func3() == '_func3'             # will only call _func2
-    assert _func3(3) == '_func3'            # will only call _func2(prev=3)
-    assert _func3(2) == '_func2'            # will only call _func2(prev=2)
-    assert _func3(1) == '_func1'            # will only call _func2(prev=1)
-    assert _func3(0) == '_the_caller'       # will only call _func2(prev=0)
-
-    # log_msg_end()
-    logging.info('<== test_ret_func_name')
-
-
-def test_ret_func_name2() -> None:
-    this_file = '?'
-    print(__file__)
-    with mock.patch('tests.common.log_glue_incl.logging') as mock_logger:
-        this_file = ret_func_name()
-        mock_logger.debug.assert_called_once_with('>> ret_func_name')
-
-    assert this_file == 'test_ret_func_name'
 
 
 @pytest.mark.ok
@@ -171,7 +144,7 @@ def _is_increasing_sequence(lst) -> None:
     return True
 
 
-def assert_messages(caplog, level, messages: List, in_sequence: bool = False) -> None:
+def _assert_messages(caplog, level, messages: List, in_sequence: bool = False) -> None:
     print('#### messages:')
     for msg in messages:
         print(msg)
@@ -219,10 +192,9 @@ def assert_messages(caplog, level, messages: List, in_sequence: bool = False) ->
 
 
 @pytest.mark.ok
-def test_log_func_name_caplog(caplog) -> None:
+def test_log_func_name_caplog(caplog: pytest.LogCaptureFixture):
     assert caplog, '*** No caplog param! ***'
-    # Set the logger to capture log messages from
-    caplog.set_logger(logging.getLogger(KEY_LOG_GLUE))
+    caplog.set
     # Background:
     # Given a function (that log messages):
     #  def log_func_name(prev: int = 0, inRow: bool = True, fillchar: str = '#')
@@ -303,7 +275,7 @@ def test_log_msg_start() -> None:
 
 
 @pytest.fixture
-def feature_mock(mocker) -> None:
+def feature_mock(mocker: Callable[..., Generator[MockerFixture, None, None]]):
     # Create a mock object for the ExternalService class
     mock_service = mocker.Mock()
     # Set the return value for the get_data() method
@@ -313,4 +285,98 @@ def feature_mock(mocker) -> None:
 
 # @mock.patch('tests.common.log_glue_incl.log_msg_start')
 # @mock.patch('tests.common.log_glue_incl.log_msg')
+# @mock.patch('tests.common.log_glue_incl.log_feature')
 # @mock.patch('tests.common.log_glue_incl.log_msg_end')
+
+
+@pytest.mark.ok
+def test_before_feature() -> None:
+    bdd_logger = BddLogger()
+    assert isinstance(bdd_logger, BddLogger)
+    #### No feature
+    with pytest.raises(AssertionError) as assert_msg:
+        bdd_logger.before_feature(None, None)
+    assert str(assert_msg.value) == 'No feature param!1'
+    #### Empty feature name
+    feature = Feature(None, '', '', '', set(), None, 1, '')
+    assert feature.name == ''
+    with pytest.raises(AssertionError) as assert_msg:
+        bdd_logger.before_feature(None, feature)
+        assert str(assert_msg.value) == 'Feature unknown!'
+    # ####
+
+    feature = Feature(None, '', '', 'Feature_name', set(), None, 1, '')
+    # feature = Feature(
+    #     {'scenario.name'}, 'filename', 'rel_filename', 'Feature_name', set(), None, 1, 'descr.'
+    # )
+    # scenario = Scenario(feature, '', 11, None, None)
+    # #### Assert functions called
+    module = 'tests.common.bdd_logger'
+    with patch(module + '.log_msg_start') as mock_log_msg_start, patch(
+        module + '.log_feature'
+    ) as mock_log_feature, patch(module + '.log_msg_end') as mock_log_msg_end:
+        # When I call
+        logging.info('When I call: before_feature(None, feature)')
+        assert isinstance(bdd_logger, BddLogger)
+
+        bdd_logger.before_feature(None, feature)
+
+        # Then assert that the mocked functions were called
+        logging.info('Then assert that the mocked functions were called')
+        mock_log_msg_start.assert_called_once()
+        mock_log_feature.assert_called_once()
+        mock_log_msg_end.assert_called_once()
+
+
+@pytest.mark.wipz
+def test_before_feature_2() -> None:
+    feature = Feature(None, '', '', 'Feature_name', set(), None, 1, '')
+    logging.info('-> Created feature with name "%s"', feature.name)
+
+    # #### Assert functions called
+    module = 'tests.common.log_glue_incl' # tests.common.log_glue_incl
+    with (
+        patch(f'{module}.log_msg_start') as mock_log_msg_start,
+        patch(f'{module}.log_feature') as mock_log_feature,
+        patch(f'{module}.log_msg_end') as mock_log_msg_end,
+    ):
+        # When I call
+        print('When I call: before_feature(None, feature)')
+        logging.info('When I call: before_feature(None, feature)')
+        bdd_logger.before_feature(None, feature)
+
+        # Then assert that the mocked functions were called
+        print('Then assert that the mocked functions were called')
+        logging.info('Then assert that the mocked functions were called')
+        mock_log_msg_start.assert_called_once()
+        mock_log_feature.assert_called_once()
+        mock_log_msg_end.assert_called_once()
+        # And expect sequence of calls:
+        logging.info('And expect sequence of calls:')
+        expected_calls = [
+            # call.log_msg('Found feature: '),  #
+            # call.log_msg('Found feature: '),  #
+            call.log_msg_start(),  #
+            call.log_feature(feature),  #
+            # # call.log_feature(),  #
+            call.log_msg_end(),  #
+        ]
+        # expected_calls:
+        for func in expected_calls:
+            logging.info('  %s', func)
+        mock_log_msg_end.assert_has_calls(expected_calls)
+
+
+@pytest.mark.skip   # TODO Not working yet
+def test_log_msg() -> None:
+    with patch('logging.info') as mock_info:
+        log_msg('Testing')
+
+        # Assert that the mock_info was called times with the expected arguments
+        mock_info.assert_has_calls(
+            [
+                call('%s', '#' * 75),
+                call('%s', '  test_log_func_name  '.center(75, '#')),
+                call('%s', '#' * 75),
+            ]
+        )

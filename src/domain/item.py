@@ -1,5 +1,5 @@
 class Item:
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         print('\tItem.__init__(self, name)')
         self.name = name
 

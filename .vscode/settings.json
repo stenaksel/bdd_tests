@@ -31,4 +31,7 @@
     "[ignore]": {
         "editor.defaultFormatter": "foxundermoon.shell-format"
     },
+    "python.analysis.extraPaths": [
+        "./tests/common"
+    ],
 }

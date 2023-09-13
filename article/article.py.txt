@@ -3,11 +3,11 @@ class Article:
     author = '?'
 
 
-def __init__(self):
+def __init__(self) -> None:
     self.name = 'name?'
     self.author = 'author?'
 
 
-def __init__(self, name, author):
+def __init__(self, name, author) -> None:
     self.name = name
     self.author = author

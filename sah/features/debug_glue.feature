@@ -19,6 +19,7 @@ Feature: Debug Glue
     When the step definition is run -> glue
     Then information in context, will not include "Current glue"
 
+
   Scenario: glue function without any parameters - no context param
     Given I have a glue function "glue_func_no_params" without parameters
     When "glue_func_no_params" is called by Pytest-BDD

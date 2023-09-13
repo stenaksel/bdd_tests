@@ -4,7 +4,7 @@ from pytest_bdd import parsers, when
 
 # @when(parsers.parse('"{name}" performs an "{action}"'))
 # @when(parsers.parse('"{name}" performs another "{action}"'))
-# def performs_an_action(name, action):
+# def performs_an_action(name, action) -> None:
 #     # pylint: disable=unused-argument
 #     # Add Your Code Here
 #     pass
@@ -12,6 +12,6 @@ from pytest_bdd import parsers, when
 
 @when(parsers.parse('{name} performs an illegal {action}'))
 @when(parsers.parse('{name} performs another illegal {action}'))
-def performs_an_illegal_action(name, action):
+def performs_an_illegal_action(name, action) -> None:
     # pylint: disable=unused-argument
     assert False
