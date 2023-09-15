@@ -1,12 +1,23 @@
 
 Feature: DocStrings
 
-  Scenario: Assign string value from DocString with no lines
-    # But no message in the step
-    Given I have a step without a message
+  @wip
+  Scenario: Assign string value without DocString
+    Given I have step with no Docstring
+    Given I have step without a Docstring:
+    # Given I have a step without a message
     When I ask for how many lines the message have
     Then I should be told it was 0 lines
 
+  @wipz
+  Scenario: Assign string value from DocString with no lines
+    Given I have step with a Docstring:
+      """
+      """
+    When I ask for how many lines the message have
+    Then I should be told it was 0 lines
+
+  @ok
   Scenario: Assign string value from DocString with one line
     Given I have a message:
       """
@@ -15,6 +26,7 @@ Feature: DocStrings
     When I ask for how many lines the message have
     Then I should be told it was 1 line
 
+  @wipz
   Scenario: Assign string value from DocString with two lines
     Given I have a message:
       """
@@ -55,12 +67,71 @@ Feature: DocStrings
   #    When I send a POST request to the /users endpoint
   #    Then the response status code should be 201
 
+  @wipz
   Scenario: Formatting the docstring based on content type: xml
     Given I have step with a Docstring:
       """xml
       <xml>
-      <tag>Content</tag>
+        <tag>Content: This is a test message.</tag>
       </xml>
       """
     When I ask for how many lines the message have
     Then I should be told it was 3 lines
+
+  @wipz
+  Scenario: Formatting the docstring based on content type: xml 1 line
+    Given I have step with a Docstring:
+      """ <xml><tag>Content: This is a test message.</tag></xml> """
+    When I ask for how many lines the message have
+    Then I should be told it was 1 lines
+
+  @wipz
+  Scenario: Formatting the docstring based on content type: xml 1 line
+    Given I have step with a Docstring:
+      """<xml><tag>Content: This is a test message.</tag></xml>"""
+    When I ask for how many lines the message have
+    Then I should be told it was 2 lines  #Q: Why 2 lines?
+
+# Feature: DocString variations
+
+#   Scenario: minimalistic
+#     Given a simple DocString
+#       """
+#       first line (no indent)
+#         second line (indented with two spaces)
+
+#       third line was empty
+#       """
+#     Given a DocString with content type
+#       """xml
+#       <foo>
+#         <bar />
+#       </foo>
+#       """
+#     And a DocString with wrong indentation
+#       """
+#     wrongly indented line
+#       """
+#     And a DocString with alternative separator
+#       ```
+#       first line
+#       second line
+#       ```
+#     And a DocString with normal separator inside
+#       ```
+#       first line
+#       """
+#       third line
+#       ```
+#     And a DocString with alternative separator inside
+#       """
+#       first line
+#       ```
+#       third line
+#       """
+#     And a DocString with escaped separator inside
+#       """
+#       first line
+#       \"\"\"
+#       third line
+#       """

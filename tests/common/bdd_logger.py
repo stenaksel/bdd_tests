@@ -4,17 +4,21 @@ from typing import Any, Callable
 
 from pytest import Config, FixtureRequest
 from pytest_bdd.parser import Feature, Scenario, ScenarioTemplate, Step
+from tests.common.logger_interface import LoggerInterface
 
 from tests.common.log_glue_incl import (  # log_func_name,; log_func_call_info,; ret_before_or_after,; ret_sorted,
     COL_GRAY,
     KEY_CURR_GLUE,
     TEST_CONTEXT,
     assert_object,
+    log_dict,
     log_feature,
+    log_func_name,
     log_msg_end,
     log_msg_start,
     log_scenario,
     log_step,
+    old_log_msg,    # TODO remove
     ret_dict_info,
     ret_func_name,
 )
@@ -71,13 +75,21 @@ KEY_STEP_COUNTER = 'step_counter'
 ################################################################################
 
 
-class BddLogger:
+class BddLogger(LoggerInterface):   # rename to PytestBddLogger
     """
-    BddLogger can be used by your conftest.py to log messages from Pytest BDD hooks
+    BddLogger can be used by your conftest.py
+    to log messages from Pytest BDD hooks
     """
+
+    def get_test_context(self) -> dict:
+        return TEST_CONTEXT
 
     def configure(config: Config) -> None:
         print('configure BddLogger')
+
+    def _assert_before_feature_params(self, _request: FixtureRequest, feature: Feature) -> None:
+        assert feature and feature.name, 'No feature param!'
+        assert feature is not None and feature.name != '', 'No named feature!'
 
     def before_feature(self, _request: FixtureRequest, feature: Feature) -> None:
         """
@@ -85,18 +97,27 @@ class BddLogger:
         So this function will be called by pytest_bdd_before_scenario,
         when the first scenario in the feature is run.
         """
-        assert feature and feature.name, 'No feature param!1'
-        assert feature is not None and feature.name != '', 'No feature param!2'
-        # log_msg('Found feature: ') # + feature.name)
+        assert feature and feature.name, 'No feature param!'
+        assert feature is not None and feature.name != '', 'No named feature!'
+        self._assert_before_feature_params(_request, feature)
+        self.log('1 Found feature: ' + feature.name)
+        old_log_msg(ret_func_name(1), show_caller=True)
         log_msg_start()
         log_feature(feature)
         log_msg_end()
+        logging.warning('before_feature <-------------------------------------------')
+        TEST_CONTEXT[KEY_CURR_FEATURE] = feature.name
+
+
+    def log_context_now(self, the_dict: dict, name: str, prefix: str = '¤') -> None:
+        logging.info(ret_dict_info(the_dict, name, prefix))
 
     def before_scenario(
         self, _request: FixtureRequest, feature: Feature, scenario: Scenario
     ) -> None:
         assert feature, 'No feature!'
         logging.info('in before_scenario with feature: %s', feature)
+        log_func_name(inRow=False)
         # assert_object(feature, 'No feature param!4')
         assert_object(feature.name, 'No feature name!')
         assert scenario, 'No scenario param!'
@@ -117,7 +138,7 @@ class BddLogger:
 
         logging.log(INFO, '|%30s| %s %s(<< %s)', caller, '-' * 55, COL_GRAY, caller)
 
-        self.log_msg('-' * 55)
+        self.log('-' * 55)
 
         logging.info('|%s', '_' * 65)
         log_scenario(scenario)
@@ -139,10 +160,12 @@ class BddLogger:
         log_msg_start()
         log_msg_start()
         # logging.info(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT'))
-        self.log_msg('----')
-        self.log_msg(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT0'))
-        self.log_msg('----')
-        self.log_msg('Resetting TEST_CONTEXT before scenario starts')
+        self.log('----B')
+        self.log(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT00'))
+        self.log('----A')
+        self.log_context_now(TEST_CONTEXT, 'TEST_CONTEXT00')
+        self.log('----')
+        self.log('Resetting TEST_CONTEXT before scenario starts')
         # Reset TEST_CONTEXT before scenario starts
         TEST_CONTEXT = {}
         TEST_CONTEXT[KEY_FUNC] = [
@@ -151,13 +174,13 @@ class BddLogger:
         TEST_CONTEXT['dbg_log_glue'] = True   # TODO remove line
 
         logging.info('| TEST_CONTEXT: |')
-        self.log_msg('|TEST_CONTEXT 1: |')
-        self.log_msg(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT1'), INFO, '-1-')
+        self.log('|TEST_CONTEXT 1: |')
+        self.log(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT1'), INFO, '-1-')
         # logging.info(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT1'))
-        self.log_msg('|TEST_CONTEXT 2: |')
-        self.log_msg(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT2'), INFO, '-2-')
-        self.log_msg(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT2'))
-        self.log_msg('| TEST_CONTEXT _: |')
+        self.log('|TEST_CONTEXT 2: |')
+        self.log(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT2'), INFO, '-2-')
+        self.log(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT2'))
+        self.log('| TEST_CONTEXT _: |')
 
         log_scenario(scenario)
         # Inform if the Scenario is created from a Scenario Outline or not
@@ -189,8 +212,10 @@ class BddLogger:
         # logging.warning(gherkinScenario)
         # # logging.warning(ret_dict_info('XXX', scenario.feature.scenarios))
         logging.info(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT3', '<----'))
-        logging.info('before_scenario <-------------------------------------------')
+        # logging.info(ret_dict_info(context, 'TEST_CONTEXT3', '<----'))
+        logging.warning('before_scenario <-------------------------------------------')
         log_msg_end()
+
 
     def before_step(
         self,
@@ -220,6 +245,7 @@ class BddLogger:
 
     def after_scenario(self, request: FixtureRequest, feature: Feature, scenario: Scenario) -> None:
         print('-> after_scenario')
+        logging.warning('after_scenario <-------------------------------------------')
 
     def after_step(
         self,
@@ -231,13 +257,49 @@ class BddLogger:
         step_func_args: dict[str, Any],
     ) -> None:
         """Handle cleanup after step function is successfully executed."""
+        logging.warning('---->  after_step')
+        logging.warning('\tin after_step before log_msg_start()')
         log_msg_start()
-        logging.warning('----> Entered after_step')
+        logging.warning('\tin after_step after log_msg_start()')
         logging.warning(ret_dict_info(step_func_args, 'step_func_args'))
+        logging.warning('\tin after_step before log_msg_end()')
         log_msg_end()
+        logging.warning('\tin after_step after log_msg_end()')
+        logging.warning('<--- after_step <-------------------------------------------')
 
-    def log_msg(  # TODO Maybe rename to just "log"
-        self, _msg: str, _log_level: int = logging.INFO, _pre: str = '', _show_caller: bool = False
+    def log(
+        self, msg: str, log_level: int = logging.INFO, pre: str = '', show_caller: bool = False
     ) -> None:
-        print('-> log_msg')
-        #
+        # caller = ret_func_name(1)
+        # print('-> log_msg <- ' + caller)
+        # log_func_name()
+        # # logging.info('-> log_msg <- %s', caller)
+        # #
+        caller = ret_func_name(1)
+        logging.info('-> log <- ' + caller)
+        # print('-> log <- ' + caller)
+
+        logging.debug('>> log')
+        if len(msg) == 0:   # only show_caller in first column
+            caller = ret_func_name(2)
+            msg = f'{pre}{caller}'
+            logging.log(log_level, '|%s%30s%s|', COL_SCENARIO, '─' * 30, COL_RESET)
+            logging.log(
+                log_level, '|%s%30s%s|%s << log', COL_SCENARIO, msg.center(30), COL_RESET, COL_GRAY
+            )
+            logging.log(log_level, '|%s%30s%s|', COL_SCENARIO, '─' * 30, COL_RESET)
+        elif show_caller:
+            caller = ret_func_name(1)
+            logging.log(log_level, '|%s%21s log:| %s  (<< %s)', COL_GRAY, pre, msg, caller)
+        else:
+            logging.log(log_level, '%s|%21s log:| %s  ', COL_GRAY, pre, msg)
+
+        if len(msg) == 0 and 'dbg:TEST_CONTEXT' in TEST_CONTEXT:
+            logging.info(
+                'dbg:TEST_CONTEXT was found in log. Reporting TEST_CONTEXT:'
+            )  # TODO: debug
+            logging.info(ret_dict_info(TEST_CONTEXT, '* => TEST_CONTEXT'))
+            log_dict(TEST_CONTEXT, 'TEST_CONTEXT')
+            del TEST_CONTEXT['dbg:TEST_CONTEXT']
+
+        logging.debug('<< log')

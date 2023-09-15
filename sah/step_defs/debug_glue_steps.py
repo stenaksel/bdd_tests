@@ -86,7 +86,7 @@ def given_i_have_a_glue_func_no_params(context: dict, func: str) -> None:
     logging.info('<Given I have a glue function "glue_func_no_params" without parameters')
 
 
-@when('the step definition is run')
+@when('the step definition is run -> glue')
 def when_glue_is_run(context: dict) -> None:
     context['dbg_log_glue'] = True
     # xlog_glue(context=context)

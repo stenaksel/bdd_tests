@@ -17,10 +17,36 @@ Feature: Debug Off
   # When you asks to "Go to Definition" from the step in a feature file
   # Then the correct Step Definition (aka glue function) will be shown
 
-  @wip #TODO work-in-progress
-  Scenario: Just testing
-  Given a Pytest-BDD test using the "log_glue" module
 
+  # KEY_CURR_FEATURE = 'Current feature'
+  # KEY_CURR_GLUE = 'Current glue'
+  # KEY_CURR_SCENARIO = 'Current scenario'
+  # KEY_CURR_STEP = 'Current step'
+  # KEY_CONTEXT = 'context'
+  # KEY_DBG_FUNC_NAME = 'dbg:func_name'
+  # KEY_LOG_GLUE = 'log_glue'    # TODO: Values: None (=False), False,  True, Hooks (=True), Feature, Scenario, Step
+  # KEY_LOGGER = 'logger'    # TODO: Values: None (=False), False,  True
+  # KEY_STEP_COUNTER = 'step_counter'
+  # TEST_CONTEXT = {'name': 'TEST_CONTEXT'}
+  # GLUE_LOGGER = logging.getLogger(KEY_LOG_GLUE)
+
+  @wipz #TODO work-in-progress
+  Scenario: Just testing
+    Given a Pytest-BDD test using the "log_glue" module
+    Given the "TEST_CONTEXT" item "Current feature" is present
+  # Given the "TEST_CONTEXT" item "Current scenario" is present
+  # Given the "TEST_CONTEXT" item "logger" is present
+  # Given the "TEST_CONTEXT" item "logger" is present
+  # But the item value is "False"
+  # Given the "TEST_CONTEXT" item "logger" is not present or value "False"
+
+  Scenario: Current feature should be logged
+    Given a Pytest-BDD test using the "log_glue" module
+    When the scenario is run
+
+    Given the "TEST_CONTEXT" item "Current feature" is present
+
+  @wipz #TODO work-in-progress
   Scenario: No logging from log_glue functions
     # Given the "TEST_CONTEXT" item "logger" is present
     # But the item value is "False"

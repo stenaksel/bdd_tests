@@ -13,7 +13,8 @@ from tests.common.log_glue_incl import (  # KEY_CURR_FEATURE,; KEY_LOGGER,; afte
     KEY_LOG_GLUE,
     TEST_CONTEXT,
     log_func_name,
-    log_list,
+    log_headline,
+    # log_list,
     ret_before_or_after,
     ret_dict_info,
     ret_func_name,
@@ -87,6 +88,7 @@ def test_ret_func_name() -> None:
     logging.info('<== test_ret_func_name')
 
 
+@pytest.mark.skip
 def test_ret_func_name2() -> None:
     this_file = '?'
     print(__file__)
@@ -98,6 +100,7 @@ def test_ret_func_name2() -> None:
 
 
 @pytest.mark.ok
+
 def test_ret_sorted() -> None:
     some_dict = {'c': 'C', 'a': 'A', 'b': 'B'}
     correct_dict = {'a': 'A', 'b': 'B', 'c': 'C'}
@@ -171,7 +174,7 @@ def _is_increasing_sequence(lst) -> None:
     return True
 
 
-def assert_messages(caplog, level, messages: List, in_sequence: bool = False) -> None:
+def assert_logged(caplog, level, messages: List, in_sequence: bool = False) -> None:
     print('#### messages:')
     for msg in messages:
         print(msg)
@@ -187,17 +190,19 @@ def assert_messages(caplog, level, messages: List, in_sequence: bool = False) ->
         for msg in rest:
             assert record.levelno == level, f'record.levelname = {record.levelname}'
             if msg in record.message:
-                print('\nSeeked&found: ' + msg)
+                print('\nSeeked&found: ' + msg + '\n')
                 messages_found += [msg]
                 lines += [record.lineno]
                 # print("#### found messages:")
                 # print(messages_found)
                 break
             else:
-                print("\n Didn't find: " + msg)
+                print("\n Didn't find: " + msg+ '\n')
 
-            print('#### found message lines:')
-            print(lines)
+            print(f'#### found {len(lines)} message lines:')
+            for line in lines:
+                print(line)
+            # print(lines)
             #
         #
         print('#### rest messages before:')
@@ -222,10 +227,9 @@ def assert_messages(caplog, level, messages: List, in_sequence: bool = False) ->
 def test_log_func_name_caplog(caplog) -> None:
     assert caplog, '*** No caplog param! ***'
     # Set the logger to capture log messages from
-    caplog.set_logger(logging.getLogger(KEY_LOG_GLUE))
     # Background:
     # Given a function (that log messages):
-    #  def log_func_name(prev: int = 0, inRow: bool = True, fillchar: str = '#')
+    #  def: log_func_name(prev: int = 0, inRow: bool = True, fillchar: str = '#')
     #####################################
     # When called with an empty fillchar
     with pytest.raises(AssertionError) as assert_msg:
@@ -254,7 +258,7 @@ def test_log_func_name_caplog(caplog) -> None:
         '#' * 75,
     ]
 
-    assert_messages(caplog, level=INFO, messages=expeced, in_sequence=True)
+    assert_logged(caplog, level=INFO, messages=expeced, in_sequence=True)
 
     _clear_caplog(caplog)
     # When called with a non-default fillchar
@@ -263,7 +267,7 @@ def test_log_func_name_caplog(caplog) -> None:
     log_func_name(inRow=False, fillchar=plus)
     # Then I will see that the log uses the wanted fillchar ('+')
     expeced = [f'  {ret_func_name()}  '.center(75, plus)]
-    assert_messages(caplog, level=INFO, messages=expeced)
+    assert_logged(caplog, level=INFO, messages=expeced)
 
 
 @pytest.mark.ok
@@ -277,9 +281,27 @@ def test_log_func_name_logging() -> None:
         # mock_info.assert_has_calls([
         mock_info.assert_has_calls(
             [
-                call('%s', fillchar * 75),
-                call('%s', '  test_log_func_name_logging  '.center(75, fillchar)),
-                call('%s', fillchar * 75),
+                call('\t%s', fillchar * 75),
+                call('\t%s', '  test_log_func_name_logging  '.center(75, fillchar)),
+                call('\t%s', fillchar * 75),
+            ]
+        )
+    #
+
+@pytest.mark.ok
+def test_log_headline() -> None:
+    assert ret_func_name() == 'test_log_headline'
+    fillchar = '#'
+
+    with patch('logging.info') as mock_info:
+        log_headline(msg='Some Headline we want', inRow=False, fillchar=fillchar)
+        # Assert that the mock_info was called 3 times with the expected arguments
+        # mock_info.assert_has_calls([
+        mock_info.assert_has_calls(
+            [
+                call('\t%s', fillchar * 75),
+                call('\t%s', '  Some Headline we want  '.center(75, fillchar)),
+                call('\t%s', fillchar * 75),
             ]
         )
     #

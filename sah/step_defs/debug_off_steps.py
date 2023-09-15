@@ -8,7 +8,7 @@ from tests.common.log_glue_incl import (  # log_msg_end,
     KEY_LOGGER,
     TEST_CONTEXT,
     assert_messages,
-    log_msg,
+    old_log_msg,
     ret_dict_info,
 )
 
@@ -36,7 +36,7 @@ from pytest_bdd import parsers, given, when, then  # isort:skip
 def given_context_item_present(context_name: str, item: str, presence: str, context: dict) -> bool:
     assert context is not None
     assert context_name == 'TEST_CONTEXT'
-    assert item == KEY_LOGGER
+    # assert item == KEY_LOGGER
     assert presence == 'not present' or presence == 'present', f'Unknown "presence" ("{presence}")!'
 
     print(f'==> Given the "{context_name}" item "{item}" is {presence} <==')
@@ -57,9 +57,9 @@ def given_context_item_present(context_name: str, item: str, presence: str, cont
     print(f"==> should_be_present = {should_be_present} (the_value: '{the_value}')")
 
     if should_be_present:
-        assert the_value is not None, 'Expected a value!'
+        assert the_value is not None, f'Expected "{item}" had a value in "{context_name}"!'
     else:
-        assert the_value is None, f'Expected no value! But got "{the_value}"'
+        assert the_value is None, f'Expected "{item}" to not be present! (value: "{the_value}")'
 
     ctx['context_checked'] = ctx
     ctx['context_name'] = context_name

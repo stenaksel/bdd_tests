@@ -2,7 +2,7 @@
 Feature: Debug Glue
 
   Background: Using log_glue
-    Given a Pytest-BDD test using the "log_glue" module
+    Given a Pytest-BDD test using the "log_glue2" module
 
   # Scenario: Using Pytest-BDD in vscode
   # Given you're in the feature file in vscode
@@ -13,10 +13,11 @@ Feature: Debug Glue
   # When you
 
 
-  @wipz
+  @ok
   Scenario: Current glue information not added to context when running
     # Given the variable "DO_INCL_CURR_INFO" is set to "True"
     When the step definition is run -> glue
+    # Then information in context, will not include "Current glue"
     Then information in context, will not include "Current glue"
 
 

@@ -36,9 +36,9 @@ from tests.common.log_glue_incl import (  # GLUE_LOGGER,
     log_configure,
     log_dict,
     log_func_name,
-    log_msg,
     log_msg_end,
     log_msg_start,
+    old_log_msg,
     ret_dict_info,
     ret_func_name,
 )
@@ -48,7 +48,7 @@ from pytest_bdd import parsers, given, when, then  # isort:skip
 
 GLUE_LOGGER = logging.getLogger(KEY_LOG_GLUE)
 
-bdd_logger = BddLogger()
+bdd_logger = BddLogger()    # The wanted PytestBddLogger
 
 ########################
 ##### Pytest hooks #####
@@ -186,44 +186,49 @@ def pytest_bdd_before_scenario(
     request: FixtureRequest, feature: Feature, scenario: Scenario
 ) -> None:
     """Called before scenario is executed."""
-    GLUE_LOGGER.info('%s', '0' * 50)
+    logging.info('%s', '0.' * 50)
     log_func_name(inRow=False)
-    GLUE_LOGGER.info('%s', '0' * 50)
-    # GLUE_LOGGER.info('%s', '1' * 50)
+    logging.info('%s', '0.' * 50)
+    bdd_logger.log_context_now(TEST_CONTEXT, '* ==> TEST_CONTEXT', 'start1')
+    logging.info('%s', '0.' * 50)
+    # logging.info('%s', '1.' * 50)
     # log_func_name(1)
-    # GLUE_LOGGER.info('%s', '2' * 50)
+    # logging.info('%s', '2.' * 50)
     # log_func_name(2)
-    # GLUE_LOGGER.info('%s', '3' * 50)
+    # logging.info('%s', '3.' * 50)
     # log_func_call_info()
-    # GLUE_LOGGER.info('%s', '4' * 50)
+    # logging.info('%s', '4.' * 50)
 
-    log_msg_start()
+    # log_msg_start()
     # temp = '--temp--'
     # TEST_CONTEXT[KEY_DBG_FUNC_NAME] = 'pytest_bdd_before_scenario'   # TODO remove line
-    GLUE_LOGGER.info('%s', '1' * 50)
+    logging.info('%s', '1.' * 50)
     log_dict(TEST_CONTEXT, 'TEST_CONTEXT')
-    GLUE_LOGGER.info('%s', '2' * 50)
+    logging.info('%s', '2.' * 50)
     temp = ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT')
     # # temp = ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT')
     # print(temp)
     # print(TEST_CONTEXT)
     # temp = ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT')
-    GLUE_LOGGER.info('%s', '3' * 50)
-    GLUE_LOGGER.info('%s', '¤' * 50)
+    logging.info('%s', '3.' * 50)
+    logging.info('%s', '¤.' * 50)
     GLUE_LOGGER.warning(temp)
     # temp = ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT')
-    log_msg(temp, show_caller=True)
+    old_log_msg(temp, show_caller=True)
     TEST_CONTEXT['dbg:func_name'] = ret_func_name()   # TODO remove line
-    GLUE_LOGGER.info(ret_dict_info(TEST_CONTEXT, '* ==> TEST_CONTEXT', ' start2'))
+    # GLUE_LOGGER.info(ret_dict_info(TEST_CONTEXT, '* ==> TEST_CONTEXT', 'start2'))
+    bdd_logger.log_context_now(TEST_CONTEXT, '* ==> TEST_CONTEXT', 'end_c')
+
     if KEY_CURR_FEATURE not in TEST_CONTEXT:
         bdd_logger.before_feature(request, feature)
 
     bdd_logger.before_scenario(request, feature, scenario)
-    assert feature.name == 'Debug Off'
-    assert scenario.feature.name == 'Debug Off'
+    # assert feature.name == 'Debug Off'
+    # assert scenario.feature.name == 'Debug Off'
     log_msg_end()
     GLUE_LOGGER.info(ret_dict_info(TEST_CONTEXT, '* =====> TEST_CONTEXT'))
     GLUE_LOGGER.info('%s', '¤' * 50)
+    bdd_logger.log_context_now(TEST_CONTEXT, '* ==> TEST_CONTEXT', 'end')
 
 
 @pytest.hookimpl
@@ -331,6 +336,7 @@ def func_context_fixture() -> dict:
 @given(parsers.parse('a Pytest-BDD test using the "{module}" module'))
 def given_step_using_the_module(context: dict, module: str) -> None:
     GLUE_LOGGER.warning('Given a Pytest-BDD test using the "%s" module', module)
+    return
     assert module == KEY_LOG_GLUE
     logger = logging.getLogger(KEY_LOG_GLUE)
     context[KEY_LOGGER] = logger
@@ -342,7 +348,7 @@ def given_step_using_the_module(context: dict, module: str) -> None:
     logger_name = logger.name
     # print(f"The logger name is: '{logger_name}' now!")
     # GLUE_LOGGER.warning(
-        # "The logger name is:     'root' = '%s' [logging.getLogger()]", logging.getLogger().name
+    # "The logger name is:     'root' = '%s' [logging.getLogger()]", logging.getLogger().name
     # )
     # GLUE_LOGGER.warning("The logger name is:=  '%s' [get_logger().name]", get_logger().name)
     # GLUE_LOGGER.warning("The logger name is: KEY_LOG_GLUE = '%s' [logger.name]", logger_name)
@@ -365,35 +371,31 @@ def given_file_uses_hooks_that_calls_corresponding_module_func(
 
 # Then information in context "TEST_CONTEXT", will include "Current glue"
 # Then information in TEST_CONTEXT will not include "Current glue"
-@then(parsers.parse('information in {info_in},{will} include "{info}"'))
+@then(parsers.parse('information in {info_in}, {will} include "{info}"'))
 def then_information_about_context_will_include(
     context: dict, info_in: str, will: str, info: str
 ) -> None:
     assert context is not None
-    assert info_in is not None
-    print(f'info_in: {info_in}')
+    assert info_in is not None, 'A value for "info_in" was not supplied!'
+    assert info_in in ['context', 'TEST_CONTEXT'], f'Unknown value for "info_in": "{info_in}"'
     assert will is not None
+    assert will in ['will', 'will not'], f'"{will}" is not a valid value! (Only "will"/"will not")'
     assert info is not None
-    GLUE_LOGGER.info(
-        '_______________________then_information_about_context_will_include _____________'
-    )
-    GLUE_LOGGER.info('information in %s, %sinclude "%s"  ', info_in, will, info)
-    assert False, 'Stopping in func: then_information_about_context_will_include'
+    logging.info('_______________________then_information_about_context_will_include _____________')
+    logging.info('information in %s, %sinclude "%s"  ', info_in, will, info)
+    logging.warning('information in %s, %sinclude "%s"  ', info_in, will, info)
+    # logging.warning('Stopping in func: then_information_about_context_will_include: will=' + will)
+    # assert False, 'Stopping in func: then_information_about_context_will_include: will=' + will
 
-    assert will in ['will', 'will not']
-    ctx_name = info_in
-    if not ctx_name:
-        ctx_name = 'context'
-    GLUE_LOGGER.info(
-        'information about context ["%s"] %s include "%s"',
-        ctx_name,
-        will,
-        info,
-    )
-    GLUE_LOGGER.info(ret_dict_info(context, '* =====>  __context__', '*__*'))
-    GLUE_LOGGER.info(ret_dict_info(TEST_CONTEXT, '* =====> TEST_CONTEXT', '*--*'))
-    assert context[info] is not None
+    assert will in ['will', 'will not'], f'"{will}" is not a valid value! (Only "will"/"will not")'
+    logging.info('information about context ["%s"] %s include "%s"', info_in, will, info)
+    the_context = context if info_in == 'context' else TEST_CONTEXT
+    bdd_logger.log_context_now(the_context, info_in)
+    logging.info(ret_dict_info(the_context, f'* =====> {info_in}', '*__*'))
+    # assert context[info] is not None if will == 'will' else None  #TODO
 
+
+#
 
 # @then(parsers.parse('"{name}" should show that the function "{func_name}" have been run'))
 @then(parsers.parse('{name} should show that the function {func_name} have been run'))

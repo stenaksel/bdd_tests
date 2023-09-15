@@ -66,43 +66,74 @@ def get_logger(name=KEY_LOG_GLUE) -> Logger:    # TODO Is this needed
     return logging.getLogger(name)
 
 
+def log_headline(
+    msg: str, prev: int = 0, inRow: bool = not True, fillchar: str = '#'
+) -> None:  # tested
+    assert msg != None, f'No message! (Got: None)'
+    assert fillchar != None, f'No fillchar! (Got: None)'
+    assert fillchar and len(fillchar) == 1, f"No fillchar (len 1)! (Got: '{fillchar}')"
+    caller = ret_func_name(1)
+    logging.debug(
+        "log_headline(msg='%s', prev=%s, inRow=%s, fillchar='%s') << %s",
+        msg,
+        prev,
+        inRow,
+        fillchar,
+        caller,
+    )
+    logging.debug('(using prev %s)', 1 + prev)
+
+    caller = ret_func_name(1 + prev)
+    if inRow:
+        old_log_msg(msg, show_caller=True)
+        old_log_msg('', show_caller=True)
+    else:
+        name_info = f'  {msg}  '
+        # TODO debug:
+        logging.debug('Found "%s" (Used prev %s)', name_info, 1 + prev)
+        ###########################################################################
+        ###########################################################################
+        logging.info('\t%s', fillchar * 75)
+        logging.info('\t%s', name_info.center(75, fillchar))
+        logging.info('\t%s', fillchar * 75)
+
+
 def log_func_name(prev: int = 0, inRow: bool = True, fillchar: str = '#') -> None:  # tested
     assert fillchar != None, f'No fillchar! (Got: None)'
     assert fillchar and len(fillchar) != 0, f"No fillchar! (Got '{fillchar}' <- empty)"
     assert fillchar and len(fillchar) == 1, f"No fillchar! (Got string '{fillchar}')"
     caller = ret_func_name(1)
-    GLUE_LOGGER.info(
-        "log_func_name(prev=%s, inRow=%s, fillchar='%s') << %s", prev, inRow, fillchar, caller
+    logging.info(
+        "%slog_func_name(prev=%s, inRow=%s, fillchar='%s') %s<< %s",
+        COL_INFO,
+        prev,
+        inRow,
+        fillchar,
+        COL_GRAY,
+        caller,
     )
-    GLUE_LOGGER.debug('(using prev %s)', 1 + prev)
+    logging.debug('(using prev %s)', 1 + prev)
 
     caller = ret_func_name(1 + prev)
-    if inRow:
-        log_msg(caller, show_caller=True)
-        log_msg('', show_caller=True)
-    else:
-        name_info = f'  {caller}  '
-        # TODO debug:
-        GLUE_LOGGER.debug('Found "%s" (Used prev %s)', name_info, 1 + prev)
-        GLUE_LOGGER.info('%s', fillchar * 75)
-        GLUE_LOGGER.info('%s', name_info.center(75, fillchar))
-        GLUE_LOGGER.info('%s', fillchar * 75)
+    log_headline(caller, prev, inRow, fillchar)
 
 
 def log_msg_start(log_level: int = logging.INFO) -> None:
-    print('***log_msg_start***')
-    print(__name__)
-    print('***log_msg_start***')
+    logging.info('>> ***log_msg_start***')
+    # print('***log_msg_start***')
+    # print(__name__)
+    # print('***log_msg_start***')
     GLUE_LOGGER.warning('***log_msg_start*** - %s', __name__)
     GLUE_LOGGER.log(log_level, '***log_msg_start*** - %s', __name__)
     TEST_CONTEXT[KEY_DBG_FUNC_NAME] = ret_func_name()   # TODO remove line
-    # log_msg(ret_func_name() + ' -> ' + TEST_CONTEXT)
-    log_msg(ret_func_name(1), show_caller=not True)
+    # old_log_msg(ret_func_name() + ' -> ' + TEST_CONTEXT)
+    old_log_msg(ret_func_name(1), show_caller=True)
     # GLUE_LOGGER.log(log_level, 'Heisann!')
 
-    # log_msg(TEST_CONTEXT)
+    # old_log_msg(TEST_CONTEXT)
     # log_dict(TEST_CONTEXT, 'TEST_CONTEXT', False)
     # log_func_call_info(log_level, 1, 'INFO')
+    logging.warning('<< ***log_msg_start***')
 
 
 def log_msg_end(log_level: int = logging.INFO) -> None:
@@ -119,7 +150,7 @@ def log_func_call_info(
     # TODO info -> msg? and first param?
     # GLUE_LOGGER.info(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT'))
     caller = ret_func_name(1 + prev)
-    log_msg(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT', caller + '--> log_func_call_info---->'))
+    # old_log_msg(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT', caller + '--> log_func_call_info---->'))
     its_caller = ret_func_name(2 + prev)
 
     if caller.startswith('pytest_bdd_'):
@@ -145,7 +176,7 @@ def log_func_call_info(
             log_level, '|%s%-19s %s%s| %s', COL_GRAY, its_caller, info, COL_RESET, caller
         )
         TEST_CONTEXT['dbg:TEST_CONTEXT'] = True
-        log_msg('dbg:TEST_CONTEXT = True')
+        old_log_msg('dbg:TEST_CONTEXT = True')
     elif '--' in info:   # a hook
         GLUE_LOGGER.log(log_level, '|%s%-25s %s| %s', COL_GRAY, its_caller, info, caller)
     else:
@@ -154,33 +185,43 @@ def log_func_call_info(
         )
 
 
-def log_msg(
+def old_log_msg(
     msg: str, log_level: int = logging.INFO, pre: str = '', show_caller: bool = False
 ) -> None:
-    GLUE_LOGGER.debug('>> log_msg')
+    caller = ret_func_name(1)
+    # logging.info('-> old_log_msg -> ' + msg)
+    logging.info('log:|%s %s  %s(<< %s)', pre, msg, COL_GRAY, caller)
+    # print('-> old_log_msg <- ' + caller)
+
+    GLUE_LOGGER.debug('>> old_log_msg')
     if len(msg) == 0:   # only show_caller in first column
         caller = ret_func_name(2)
         msg = f'{pre}{caller}'
         GLUE_LOGGER.log(log_level, '|%s%30s%s|', COL_SCENARIO, '─' * 30, COL_RESET)
         GLUE_LOGGER.log(
-            log_level, '|%s%30s%s|%s << log_msg', COL_SCENARIO, msg.center(30), COL_RESET, COL_GRAY
+            log_level,
+            '|%s%30s%s|%s << old_log_msg',
+            COL_SCENARIO,
+            msg.center(30),
+            COL_RESET,
+            COL_GRAY,
         )
         GLUE_LOGGER.log(log_level, '|%s%30s%s|', COL_SCENARIO, '─' * 30, COL_RESET)
     elif show_caller:
         caller = ret_func_name(1)
-        GLUE_LOGGER.log(log_level, '|%s%21s log_msg:| %s  (<< %s)', COL_GRAY, pre, msg, caller)
+        GLUE_LOGGER.log(log_level, '|%s%21s old_log_msg:| %s  (<< %s)', COL_GRAY, pre, msg, caller)
     else:
-        GLUE_LOGGER.log(log_level, '%s|%21s log_msg:| %s  ', COL_GRAY, pre, msg)
+        GLUE_LOGGER.log(log_level, '%s|%21s old_log_msg:| %s  ', COL_GRAY, pre, msg)
 
     if len(msg) == 0 and 'dbg:TEST_CONTEXT' in TEST_CONTEXT:
         GLUE_LOGGER.info(
-            'dbg:TEST_CONTEXT was found in log_msg. Reporting TEST_CONTEXT:'
+            'dbg:TEST_CONTEXT was found in old_log_msg. Reporting TEST_CONTEXT:'
         )  # TODO: debug
         GLUE_LOGGER.info(ret_dict_info(TEST_CONTEXT, '* => TEST_CONTEXT'))
         log_dict(TEST_CONTEXT, 'TEST_CONTEXT')
         del TEST_CONTEXT['dbg:TEST_CONTEXT']
 
-    GLUE_LOGGER.debug('<< log_msg')
+    GLUE_LOGGER.debug('<< old_log_msg')
 
 
 def ret_sorted(obj) -> Any:    # tested
@@ -210,11 +251,11 @@ def ret_item_info(name: str, item, prefix: str = 'i') -> str:   # tested
     """
     item_type = f'[{type(item).__name__}]'
     if len(prefix) > 0 and prefix[0] == 'p':   # p => param
-        return f'{prefix}\t{name:<20} : {item_type:>10}: {item}\n'
+        return f'{prefix:>8}-{name:<20}-: {item_type:>10}: {item}'
     else:
-        return f'{" " * 8}_{prefix}_{name.rjust(20, " ")} : {item_type:>10}: {item}\n'
-        # return f'{prefix}\t{name.rjust(20, " ")} : {item_type:>10}: {item}\n'
-        # return f'{prefix}{name:>20} : {item_type:>10}: {item}\n'
+        return f'{"." * 8}{prefix:>8}{name.rjust(25, " ")}_ : {item_type:>10}: {item}'
+        # return f'{prefix}\t{name.rjust(20, " ")} : {item_type:>10}: {item}'
+        # return f'{prefix}{name:>20} : {item_type:>10}: {item}'
 
 
 def ret_dict_info(the_dict: dict, name: str, prefix: str = '') -> str:  # tested
@@ -230,22 +271,24 @@ def ret_dict_info(the_dict: dict, name: str, prefix: str = '') -> str:  # tested
     if the_dict:   # Some items in the_dict
         the_length = len(the_dict)
 
-    ret = f'{prefix} {name:<15}: [dict] (#={the_length})'
+    ret = f'{prefix} {name:<15}: [dict] (#={the_length})\n'
     # the_dict['temp'] = 'hallo'
-    show_items = not True
+    show_items = True
     if show_items and the_dict and the_length != 0:   # Include the items in the_dict
-        ret += ret_item_info('____key____', '____value____', prefix)
-        ret += ret_item_info('____key____', '____value____', '____')
+        ret += ret_item_info('____key____', '____value____', '_item_') + '\n'
+        inum = 1
         for key, value in ret_sorted(the_dict).items():
-            ret += ret_item_info(key, value, prefix)
-            ret += ret_item_info(key, value)
+            # ret += ret_item_info(key, value, prefix) + '\n'
+            ret += ret_item_info(key, value, f'i {inum}') + '\n'
+            inum = inum + 1
 
-    log_msg(msg=ret, show_caller=False)
-    # log_msg('ret_dict_info() : ', INFO, ret)
+    old_log_msg(msg=ret, show_caller=False)
+    # old_log_msg('ret_dict_info() : ', INFO, ret)
     GLUE_LOGGER.info('ret_dict_info() >> %s ', ret)
+    logging.warning('%sret_dict_info() >>%s %s ', COL_GRAY, COL_RESET, ret)
 
-    return ret
-    # return COL_GRAY + ret + COL_RESET
+    # return ret
+    return COL_INFO + ret + COL_RESET
 
 
 def log_list(the_list: list, name: str = 'a list') -> None:
@@ -257,7 +300,7 @@ def log_list(the_list: list, name: str = 'a list') -> None:
     GLUE_LOGGER.info(name)
     counter = 1
     for element in the_list:
-        info = ret_item_info(name=str(counter), item=name)
+        info = ret_item_info(name=str(counter), item=name) + '\n'
         counter += 1
         GLUE_LOGGER.info(info)
 
@@ -348,9 +391,9 @@ def log_feature(feature: Feature) -> None:
 def log_scenario(scenario: Scenario) -> None:
     caller: str = ret_func_name(1)
     GLUE_LOGGER.info('|%s', '-' * 55)
-    log_msg('-' * 55)
+    old_log_msg('-' * 55)
     log_msg_start()
-    log_msg('-' * 55)
+    old_log_msg('-' * 55)
     GLUE_LOGGER.info('|%s', '"' * 55)
 
     GLUE_LOGGER.debug('=> log_scenario(scenario) (<< "%s") ', caller)
@@ -463,7 +506,8 @@ def log_step(step: Step, scenario: Scenario) -> None:
 #     GLUE_LOGGER.warning('----> Entered after_step')
 #     GLUE_LOGGER.warning(ret_dict_info(step_func_args, 'step_func_args'))
 
-def assert_messages(caplog, level, messages: List=[], in_sequence: bool = False) -> None:
+
+def assert_messages(caplog, level, messages: List = [], in_sequence: bool = False) -> None:
     print('#### messages:')
     for msg in messages:
         print(msg)
@@ -483,7 +527,7 @@ def assert_messages(caplog, level, messages: List=[], in_sequence: bool = False)
                 print('\nSeeked&found: ' + msg)
                 messages_found += [msg]
                 lines += [record.lineno]
-                print("#### found messages:")
+                print('#### found messages:')
                 print(messages_found)
                 break
             else:
