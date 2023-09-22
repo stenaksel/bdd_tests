@@ -19,9 +19,9 @@ def ret_dict_info(the_dict: dict, name: str, prefix: str = '::') -> str:
 
     ret = f'{prefix} {name:<15}: [dict] (#={the_length}) (<< "{caller}")\n\n'
 
-    ret += ret_item_info('____key____', '____value____', '____') +'\n'
+    ret += ret_item_info('____key____', '____value____', '____') + '\n'
     for key, value in ret_sorted(the_dict).items():
-        ret += ret_item_info(key, value) +'\n'
+        ret += ret_item_info(key, value) + '\n'
 
     return '\x1b[90m' + ret + '\x1b[0m'
 

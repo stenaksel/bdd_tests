@@ -13,10 +13,10 @@ from pytest_bdd import parsers, given, when, then   # isort:skip
 # TODO Investigate pytestbdd fixtures: pytestbdd_stepdef_given_trace, ++
 
 
-
 @given(parsers.parse('I have a message_:'))
 def given_i_have_a_message0(context) -> None:
     pass
+
 
 # @given('I have a message:')
 @given(parsers.parse('I have a message:\n{doc_string}'))
@@ -35,22 +35,22 @@ def given_i_have_a_message(context, doc_string: str) -> None:
         print(f'\tthe context: {context}\n\tdok_str:  {doc_string}\n')
         pprint(doc_string)
         context['message'] = doc_string   # .text
-    #endif
+    # endif
+
 
 def print_function_name() -> None:
     print(inspect.currentframe().f_code.co_name)
 
 
-
-
 @given('I have a step without a message')
-@given('I have step with no Docstring_')
+@given('I have step with no Docstring')
 @given(parsers.parse('I have step without a Docstring:'))
 def given_i_have_step_without_a_docstring(context, doc_string: str = None) -> None:
     print('==> given_i_have_step_without_a_docstring:\n')
     assert doc_string is None, 'Not supposed to be handed a DocString'
     print(f'\tthe context: {context}\n\tdoc_string:  {doc_string}\n')
     given_i_have_step_with_a_docstring(context, doc_string)
+
 
 @given(parsers.parse('I have step with a Docstring:\n{doc_string}'))
 def given_i_have_step_with_a_docstring(context, doc_string: str) -> None:
@@ -73,7 +73,7 @@ def when_i_ask_for_how_many_lines_the_message_have(context) -> None:
     try:
         message = context.get('message', None)
         # assert message is not None, 'No message in the context!'
-        if message is not None: # Found a message in the context!
+        if message is not None:   # Found a message in the context!
             logging.warning(message)
             # logging.warning(message.splitlines())
             # num_lines = len(message.splitlines())

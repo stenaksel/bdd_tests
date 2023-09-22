@@ -187,8 +187,6 @@ def test_before_feature_params() -> None:
     # ####
 
 
-
-
 @pytest.mark.ok
 def test_before_feature() -> None:
     bdd_logger = BddLogger()
@@ -213,7 +211,7 @@ def test_before_feature() -> None:
         mock_log_msg_end.assert_called_once()
 
 
-@pytest.mark.wipz
+@pytest.mark.todo
 def test_before_feature_do_update_context() -> None:
     bdd_logger = BddLogger()
     assert bdd_logger.get_test_context() == TEST_CONTEXT

@@ -1,77 +1,81 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "My Task",
-            "type": "shell",
-            "command": "echo",
-            "args": [
-              "Processing file:",
-              "${fileDirname}".replace(/\\\\/g, "/") + "/filename.ext"
-            ],
-            "options": {
-              "cwd": "${workspaceFolder}"
-            },
-            "group": {
-              "kind": "build",
-              "isDefault": true
-            },
-            "presentation": {
-              "echo": true,
-              "reveal": "always",
-              "focus": true,
-              "panel": "shared"
-            },
-            "problemMatcher": []
-          },
-          {
-            "label": "My Echo Task",
-            "type": "shell",
-            "command": "blue",
-            "args": [
-                "EXAMPLE_REPLACE: " + "${fileDirname}".replace("\\", "/")
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "My Task",
+      "type": "shell",
+      "command": "echo",
+      "args": [
+        "Processing file:",
+        "${fileDirname}".replace(/\\\\/g,
+        "/") + "/filename.ext"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "My Echo Task",
+      "type": "shell",
+      "command": "blue",
+      "args": [
+        "EXAMPLE_REPLACE: " + "${fileDirname}".replace("\\",
+        "/")
                 // Executing task: blue 'EXAMPLE_REPLACE: ' C:\Users\StenAkselHeien\vscodeProjects\bdd_tests\tests\common
-                // "EXAMPLE_REPLACE: " + "${file}"
-                // Executing task: blue 'EXAMPLE_REPLACE: ' C:\Users\StenAkselHeien\vscodeProjects\bdd_tests\tests\common\log_glue_incl.py
-                // "EXAMPLE_REPLACE: " + "${file}".replace(/\\/g, "/")
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared"
-            },
-            "problemMatcher": []
-        },
-        {
-            "label": "Format with Blue",
-            "type": "shell",
-            // "command": "~/.virtualenvs/bdd_tests/Scripts/blue.exe "${fileDirname}".replace(/\\/g, "/") + "/"${fileBasename}",
-            "command": "blue",
-            "args": [ "${file}".replace(/\\/g, "/")
-            ],
-            // "args": [
-            //     "${workspaceFolder}/" + "${fileDirname}".replace(/\\/g,
-            //     "/") + "/" + "${fileBasename}"
-            // ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": true,
-                "panel": "shared"
-            },
-            "problemMatcher": []
-        }
-    ]
+        // "EXAMPLE_REPLACE: " + "${file}"
+        // Executing task: blue 'EXAMPLE_REPLACE: ' C:\Users\StenAkselHeien\vscodeProjects\bdd_tests\tests\common\log_glue_incl.py
+        // "EXAMPLE_REPLACE: " + "${file}".replace(/\\/g, "/")
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Format with Blue",
+      "type": "shell",
+      // "command": "~/.virtualenvs/bdd_tests/Scripts/blue.exe "${fileDirname}".replace(/\\/g, "/") + "/"${fileBasename}",
+      "command": "blue",
+      "args": [
+        "${file}".replace(/\\/g,
+        "/")
+      ],
+      // "args": [
+      //     "${workspaceFolder}/" + "${fileDirname}".replace(/\\/g,
+      //     "/") + "/" + "${fileBasename}"
+      // ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
 }

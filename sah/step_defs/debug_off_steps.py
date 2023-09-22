@@ -156,6 +156,14 @@ def given_file_uses_hooks_calling_module(filename: str, module: str) -> None:
     assert module == KEY_LOG_GLUE, f'Uventet innhold i module: "{module}"'
 
 
+# def given_file_uses_hooks_calling_module(context: dict, filename: str, module: str):
+def given_file_uses_hooks_calling_module(filename: str, module: str):
+    logging.warning('Given a Pytest-BDD test using the "%s" file', filename)
+    logging.warning('*' * 50)
+    assert filename == 'conftest.py', f'Uventet innhold i filename: "{filename}"'
+    assert module == 'log_glue', f'Uventet innhold i module: "{module}"'
+
+
 # Given I set "TEST_CONTEXT" item "logging" with valid value True
 @given(parsers.parse('I set {context_name}" item "{item}" with value "{value}"'))
 @given(parsers.parse('the "{context_name}" item "{item}" is "{value}"'))
@@ -192,6 +200,34 @@ def given_run_is_configured_with_at_least_log_level(
     assert isinstance(glue_logger, logging.Logger)
     # From string to int for log level:
     wanted = logging.getLevelName(wanted_log_level)
+
+
+# # Given I set "TEST_CONTEXT" item "logging" with valid value "True"
+# @given(parsers.parse('I set {context_name}" item "{item}" with value "{value}"'))
+# # But the "TEST_CONTEXT" item "logging" is not present or is False
+# def given_context_item_not_present_or_is(context: dict, context_name: str, item: str, value: str):
+#     assert context is not None
+#     assert context_name == 'TEST_CONTEXT'
+#     assert item == 'dbg_logging'
+#     assert value == 'False'
+
+
+def _just_show_test_context():
+    logging.info('==> test_just_show_test_context')
+    logging.info('TEST_CONTEXT: ')
+    logging.info(TEST_CONTEXT)
+    logging.info('<== test_just_show_test_context')
+
+
+# Given the "TEST_CONTEXT" item "dbg_logging" is not present or is "False"
+@given(parsers.parse('the "{context_name}" item "{item}" is not present or is "{value}"'))
+# But the "TEST_CONTEXT" item "logging" is not present or is False
+def given_context_item_not_present_or_is(context: dict, context_name: str, item: str, value: str):
+    assert context is not None
+    assert context_name == 'TEST_CONTEXT'
+    assert item == 'dbg_logging'
+    assert value == 'False'
+    _just_show_test_context()
 
     assert isinstance(actual, int)
     assert isinstance(wanted, int)
@@ -247,6 +283,27 @@ def _is_logging(logger, tf_caplog) -> bool:
     return True
 
 
+# Given the run is configured with at least log_level = "INFO"
+@given(parsers.parse('the run is configured with at least log_level = "{wanted_log_level}"'))
+def given_run_is_configured_with_at_least_log_level(
+    caplog_fixture, context: dict, wanted_log_level: str
+):
+    logging.warning(f'Given the run is configured with at least log_level = "{wanted_log_level}"')
+    assert wanted_log_level == 'INFO', f'Unexpected log_level: "{wanted_log_level}"'
+    # TODO Implement scenario "Given the run is configured with at least log_level = "INFO""
+    # Get logger used for logging
+    logger = logging.getLogger()
+    logger_name = logger.name
+    print(f'The logger name is: {logger_name}')
+    # Get the log level in use
+    log_level = logger.getEffectiveLevel()
+
+    wanted_log_level_int = logging.getLevelNamesMapping().get(wanted_log_level)
+    assert (
+        log_level >= wanted_log_level_int
+    ), f'Unexpected log_level: "{logging.getLevelName(log_level)}" {log_level})'
+
+
 @when('Pytest-BDD is run')
 @when('the scenario is run')
 def when_the_scenario_is_run(caplog_fixture, context: dict) -> None:
@@ -284,6 +341,18 @@ def given_step_using_the_module(caplog_fixture, context: dict, want: str, module
     assert module == KEY_LOG_GLUE
 
     # assert False, 'Stopping in func: given_step_using_the_module'
+    assert len(caplog_fixture.records) == 0
+    assert caplog_fixture.text == ''
+    logging.warning('\nwhen_the_scenario_is_run\n')
+
+
+# TODO Then there should not be any logging from "BDDLogger" functions
+@then(parsers.parse('there should not be any logging from "{module}" functions'))
+def given_step_using_the_module(caplog_fixture, context: dict, module: str):
+    assert module == 'log_glue'
+    # assert False, 'Stop here!!! (given_step_using_the_module)'
+    context[KEY_DBG_LOG_GLUE] = True
+    context[KEY_DBG_LOGGING] = None
 
     # Use the caplog_fixture to access the caplog object,
     # and assert that the log is empty
@@ -302,3 +371,21 @@ def given_step_using_the_module(caplog_fixture, context: dict, want: str, module
 
     else:
         assert len(want) == 0, f'Unknown value for "want" (: "{want}")!'
+    assert num_logs == 0, f'caplog is not empty! Found {num_logs} logs'
+    assert caplog_fixture.text == '', f'caplog is not empty! Found text!'
+
+
+# Then there should not be any logging from "log_glue" functions
+@then(parsers.parse('there should be logging from "{module}" functions'))
+def given_step_using_the_module(caplog_fixture, context: dict, module: str):
+    assert module == 'log_glue'
+    # assert False, 'Stop here!!! (given_step_using_the_module)'
+    context[KEY_DBG_LOG_GLUE] = True
+    context[KEY_DBG_LOGGING] = None
+
+    # Use the caplog_fixture to access the caplog object,
+    # and assert that the log is empty
+    # assert 'HUMBUG' in caplog_fixture.text, f'caplog is not empty! Found text: HUMBUG!'
+    num_logs = len(caplog_fixture.records)
+    assert num_logs == 0, f'caplog is not empty! Found {num_logs} logs'
+    assert caplog_fixture.text == '', f'caplog is not empty! Found text!'

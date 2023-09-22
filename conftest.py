@@ -24,6 +24,7 @@ from typing import Any, Callable, Optional
 import pytest
 from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
+from pytest_bdd import parsers, given, when, then  # isort:skip
 from pytest_bdd.parser import Feature, Scenario, Step
 
 from tests.common.bdd_logger import BddLogger
@@ -32,7 +33,7 @@ from tests.common.log_glue_incl import (  # GLUE_LOGGER,
     KEY_LOG_GLUE,
     KEY_LOGGER,
     TEST_CONTEXT,
-    get_logger,
+    # get_logger,
     log_configure,
     log_dict,
     log_func_name,
@@ -42,8 +43,6 @@ from tests.common.log_glue_incl import (  # GLUE_LOGGER,
     ret_dict_info,
     ret_func_name,
 )
-
-from pytest_bdd import parsers, given, when, then  # isort:skip
 
 
 GLUE_LOGGER = logging.getLogger(KEY_LOG_GLUE)

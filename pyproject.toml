@@ -49,7 +49,7 @@ markers = [
 ]
 # testpaths = ['tests', 'article', 'conftest_glue', 'eat', 'sah']
 testpaths = ['tests', 'sah', 'conftest_glue', 'article']
-pythonpath = ['tests', 'sah', 'article']
+pythonpath = ['tests', 'sah', 'conftest_glue', 'article']
 # bdd_features_base_dir = 'sah'
 
 addopts = '--ignore=temp' # Don't look for py files in temp folder

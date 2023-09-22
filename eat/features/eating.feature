@@ -1,13 +1,15 @@
-Feature:Eating cucumbers
+Feature: Eating cucumbers
 
   Some text in the feature
 
+  @ok
   Scenario: Arguments for given, when, then
     Given there are 5 cucumbers
     When I eat 3 cucumbers
     And I eat 2 cucumbers
     Then I should have 0 cucumbers
 
+  @ok
   Scenario Outline: Eating: <case>
     Given there are <start> cucumbers
     When I eat <eat> cucumbers

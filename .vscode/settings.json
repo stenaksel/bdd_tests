@@ -12,17 +12,23 @@
         "editor.defaultFormatter": "tamasfe.even-better-toml"
     },
     "[feature]": {
-        "editor.defaultFormatter": "alexkrechik.cucumberautocomplete"
+        "editor.defaultFormatter": "alexkrechik.cucumberautocomplete",
+        "editor.formatOnSave": true,
+        "editor.quickSuggestions": {
+            "other": "on",
+            "comments": "off",
+            "strings": "on"
+        },
+        "editor.tabSize": 2,
+        "editor.detectIndentation": false
     },
-
     "cucumberautocomplete.stepRegExSymbol": "'",
     "cucumberautocomplete.steps": [
-        "**/conftest.py",                   // example with glue in conftest.py
+        "**/conftest.py", // example with glue in conftest.py
         "**/*_steps.py"
     ],
     "cucumberautocomplete.strictGherkinCompletion": true,
-    "cucumberautocomplete.gherkinDefinitionPart":
-        "@(given|when|then|step)\\((?:\\s*parsers.parse\\(|)",
+    "cucumberautocomplete.gherkinDefinitionPart": "@(given|when|then|step)\\((?:\\s*parsers.parse\\(|)",
     "cucumberautocomplete.skipDocStringsFormat": true,
     "terminal.integrated.fontFamily": "",
     "[markdown]": {

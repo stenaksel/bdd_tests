@@ -30,7 +30,7 @@ Feature: Debug Off
   # TEST_CONTEXT = {'name': 'TEST_CONTEXT'}
   # GLUE_LOGGER = logging.getLogger(KEY_LOG_GLUE)
 
-  @wipz #TODO work-in-progress
+  @todo #TODO work-in-progress
   Scenario: Just testing
     Given a Pytest-BDD test using the "log_glue" module
     Given the "TEST_CONTEXT" item "Current feature" is present
@@ -46,7 +46,7 @@ Feature: Debug Off
 
     Given the "TEST_CONTEXT" item "Current feature" is present
 
-  @wipz #TODO work-in-progress
+  @todo #TODO work-in-progress
   Scenario: No logging from log_glue functions
     # Given the "TEST_CONTEXT" item "logger" is present
     # But the item value is "False"
@@ -55,6 +55,7 @@ Feature: Debug Off
     When Pytest-BDD is run
     Then there should not be logging from "log_glue" functions
 
+  @todo
   Scenario: Set logging to on
     Given I set "TEST_CONTEXT" item "logger" with value "True"
     When Pytest-BDD is run

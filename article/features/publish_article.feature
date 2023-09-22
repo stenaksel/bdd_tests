@@ -3,7 +3,7 @@ Feature: Publish article
 
   Some info: A site where you can publish your articles.
 
-
+  @ok
   Scenario: Publishing the article
     Given Im an author user
     Given I'm an author user

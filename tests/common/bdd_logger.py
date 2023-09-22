@@ -1,5 +1,5 @@
 import logging
-from logging import DEBUG, INFO, WARN
+from logging import INFO
 from typing import Any, Callable
 
 from pytest import Config, FixtureRequest
@@ -7,7 +7,6 @@ from pytest_bdd.parser import Feature, Scenario, ScenarioTemplate, Step
 from tests.common.logger_interface import LoggerInterface
 
 from tests.common.log_glue_incl import (  # log_func_name,; log_func_call_info,; ret_before_or_after,; ret_sorted,
-    COL_GRAY,
     KEY_CURR_GLUE,
     TEST_CONTEXT,
     assert_object,
@@ -18,7 +17,7 @@ from tests.common.log_glue_incl import (  # log_func_name,; log_func_call_info,;
     log_msg_start,
     log_scenario,
     log_step,
-    old_log_msg,    # TODO remove
+    old_log_msg,  # TODO remove
     ret_dict_info,
     ret_func_name,
 )
@@ -27,9 +26,9 @@ from tests.common.log_glue_incl import (  # log_func_name,; log_func_call_info,;
 
 # COL_GLUE = '\033[1;36m'
 # COL_INFO = '\033[1;34m'
-# COL_GRAY = '\033[90m'   # \x1b[90m
-# COL_RESET = '\033[0m'   # TODO Remove reset at log end (in normal logging)
-# COL_SCENARIO = '\033[1;33m'
+COL_GRAY = '\033[90m'   # \x1b[90m
+COL_RESET = '\033[0m'   # TODO Remove reset at log end (in normal logging)
+COL_SCENARIO = '\033[1;33m'
 # COL_STEP = '\033[1;32m'
 # COL_ info:
 # ANSI escapes always start with \x1b , or \e , or \033 .
@@ -84,7 +83,7 @@ class BddLogger(LoggerInterface):   # rename to PytestBddLogger
     def get_test_context(self) -> dict:
         return TEST_CONTEXT
 
-    def configure(config: Config) -> None:
+    def configure(self, config: Config) -> None:
         print('configure BddLogger')
 
     def _assert_before_feature_params(self, _request: FixtureRequest, feature: Feature) -> None:
@@ -107,7 +106,6 @@ class BddLogger(LoggerInterface):   # rename to PytestBddLogger
         log_msg_end()
         logging.warning('before_feature <-------------------------------------------')
         TEST_CONTEXT[KEY_CURR_FEATURE] = feature.name
-
 
     def log_context_now(self, the_dict: dict, name: str, prefix: str = '¤') -> None:
         logging.info(ret_dict_info(the_dict, name, prefix))
@@ -216,7 +214,6 @@ class BddLogger(LoggerInterface):   # rename to PytestBddLogger
         logging.warning('before_scenario <-------------------------------------------')
         log_msg_end()
 
-
     def before_step(
         self,
         request: FixtureRequest,
@@ -276,7 +273,7 @@ class BddLogger(LoggerInterface):   # rename to PytestBddLogger
         # # logging.info('-> log_msg <- %s', caller)
         # #
         caller = ret_func_name(1)
-        logging.info('-> log <- ' + caller)
+        logging.info('-> log <- %s', caller)
         # print('-> log <- ' + caller)
 
         logging.debug('>> log')

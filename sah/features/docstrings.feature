@@ -1,7 +1,7 @@
 
 Feature: DocStrings
 
-  @wip
+  @ok
   Scenario: Assign string value without DocString
     Given I have step with no Docstring
     Given I have step without a Docstring:
@@ -9,7 +9,7 @@ Feature: DocStrings
     When I ask for how many lines the message have
     Then I should be told it was 0 lines
 
-  @wipz
+  @todo
   Scenario: Assign string value from DocString with no lines
     Given I have step with a Docstring:
       """
@@ -26,7 +26,7 @@ Feature: DocStrings
     When I ask for how many lines the message have
     Then I should be told it was 1 line
 
-  @wipz
+  @todo
   Scenario: Assign string value from DocString with two lines
     Given I have a message:
       """
@@ -36,7 +36,7 @@ Feature: DocStrings
     When I ask for how many lines the message have
     Then I should be told it was 2 lines
 
-  @wipz
+  @todo
   Scenario: Assign string value from DocString with multiple lines
     Given I have step with a Docstring:
       """
@@ -67,7 +67,7 @@ Feature: DocStrings
   #    When I send a POST request to the /users endpoint
   #    Then the response status code should be 201
 
-  @wipz
+  @todo
   Scenario: Formatting the docstring based on content type: xml
     Given I have step with a Docstring:
       """xml
@@ -78,14 +78,14 @@ Feature: DocStrings
     When I ask for how many lines the message have
     Then I should be told it was 3 lines
 
-  @wipz
+  @todo
   Scenario: Formatting the docstring based on content type: xml 1 line
     Given I have step with a Docstring:
       """ <xml><tag>Content: This is a test message.</tag></xml> """
     When I ask for how many lines the message have
     Then I should be told it was 1 lines
 
-  @wipz
+  @todo
   Scenario: Formatting the docstring based on content type: xml 1 line
     Given I have step with a Docstring:
       """<xml><tag>Content: This is a test message.</tag></xml>"""

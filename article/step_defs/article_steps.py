@@ -84,17 +84,17 @@ def author_user(context, author) -> None:
 
 
 @given('I have injecting given', target_fixture='strfoo')
-def injecting_given() -> str:
+def given_i_have_injecting_given() -> str:
     return 'injected strfoo'
 
 
 @then('foo should be "injected foo"')
-def foo_is_foo(strfoo: str) -> None:
+def then_foo_should_be_foo(strfoo: str) -> None:
     assert strfoo == 'injected strfoo'
 
 
 @given('I have an article', target_fixture='farticle')
-def i_have_an_article(author: str = 'Selveste') -> str:
+def given_i_have_an_article(author: str = 'Selveste') -> str:
     ret = create_test_article(author_name=author)
     return ret
 

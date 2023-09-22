@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import logging
 from typing import Any, Callable
 from pytest import Config, FixtureRequest
-from pytest_bdd.parser import Feature, Scenario, ScenarioTemplate, Step
+from pytest_bdd.parser import Feature, Scenario, Step
 
 
 class LoggerInterface(ABC):    # TODO rename to BddLoggerInterface
@@ -11,7 +11,7 @@ class LoggerInterface(ABC):    # TODO rename to BddLoggerInterface
     """
 
     @abstractmethod
-    def configure(config: Config) -> None:
+    def configure(self, config: Config) -> None:
         raise NotImplementedError()
 
     @abstractmethod

@@ -15,6 +15,7 @@ from tests.common.log_glue_incl import (  # KEY_CURR_FEATURE,; KEY_LOGGER,; afte
     log_func_name,
     log_headline,
     # log_list,
+    log_msg_start,
     ret_before_or_after,
     ret_dict_info,
     ret_func_name,
@@ -100,7 +101,6 @@ def test_ret_func_name2() -> None:
 
 
 @pytest.mark.ok
-
 def test_ret_sorted() -> None:
     some_dict = {'c': 'C', 'a': 'A', 'b': 'B'}
     correct_dict = {'a': 'A', 'b': 'B', 'c': 'C'}
@@ -157,7 +157,7 @@ def test_ret_before_or_after() -> None:
 
 def _clear_caplog(caplog) -> None:
     """
-    Function used in test to clear the caplog log while running the test.
+    Function used in tests to clear the caplog log while running the test.
     """
     # Clear the captured log records and formatted log output
     caplog.clear()
@@ -167,11 +167,11 @@ def _clear_caplog(caplog) -> None:
     assert caplog.text == ''
 
 
-def _is_increasing_sequence(lst) -> None:
-    for i in range(len(lst) - 1):
-        if lst[i] >= lst[i + 1]:
-            return False
-    return True
+# def _is_increasing_sequence(lst) -> None:
+#     for i in range(len(lst) - 1):
+#         if lst[i] >= lst[i + 1]:
+#             return False
+#     return True
 
 
 def assert_logged(caplog, level, messages: List, in_sequence: bool = False) -> None:
@@ -197,7 +197,7 @@ def assert_logged(caplog, level, messages: List, in_sequence: bool = False) -> N
                 # print(messages_found)
                 break
             else:
-                print("\n Didn't find: " + msg+ '\n')
+                print("\n Didn't find: " + msg + '\n')
 
             print(f'#### found {len(lines)} message lines:')
             for line in lines:
@@ -288,6 +288,7 @@ def test_log_func_name_logging() -> None:
         )
     #
 
+
 @pytest.mark.ok
 def test_log_headline() -> None:
     assert ret_func_name() == 'test_log_headline'
@@ -307,7 +308,7 @@ def test_log_headline() -> None:
     #
 
 
-@pytest.mark.skip
+# @pytest.mark.todo
 def test_log_msg_start() -> None:
 
     with patch('logging.info') as mock_info:
@@ -324,13 +325,13 @@ def test_log_msg_start() -> None:
         )
 
 
-@pytest.fixture
-def feature_mock(mocker) -> None:
-    # Create a mock object for the ExternalService class
-    mock_service = mocker.Mock()
-    # Set the return value for the get_data() method
-    mock_service.get_data.return_value = 'Mocked data'
-    return mock_service
+# @pytest.fixture
+# def feature_mock(mocker) -> None:
+#     # Create a mock object for the ExternalService class
+#     mock_service = mocker.Mock()
+#     # Set the return value for the get_data() method
+#     mock_service.get_data.return_value = 'Mocked data'
+#     return mock_service
 
 
 # @mock.patch('tests.common.log_glue_incl.log_msg_start')

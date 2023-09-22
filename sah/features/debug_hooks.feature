@@ -15,7 +15,7 @@ Feature: Debug Hooks
   # When you asks to "Go to Definition" from the step in a feature file
   # Then the correct Step Definition (aka glue function) will be shown
 
-  @wipz
+  @todo
   Scenario: Inform about the test run
     Given a "pytest_bdd_before_scenario" Pytest-BDD hook function in conftest.py
     When the scenario is run
@@ -48,7 +48,7 @@ Feature: Debug Hooks
       | pytest_bdd_after_step      | after_step      |
 
 
-  @wipz
+  @todo
   Scenario: Inform about the running Feature
     Given a "pytest_bdd_before_scenario" pytest.hook function in conftest.py
     When you run "pytest -rA -m wip"
@@ -91,7 +91,7 @@ Feature: Debug Hooks
     And the "log_glue" function will also display informative texts for the run
 
 
-  @wipz
+  @todo
   Scenario: Add information in context when running
     Given a scenario step using the "log_glue" function
     And the variable "DO_INCL_CURR_INFO" is set to "True"
@@ -139,7 +139,7 @@ Feature: Debug Hooks
   # Hooks
   #####################################################################
 
-  @wipz
+  @todo
   Scenario:
     Given I have the hook function "pytest_bdd_before_scenario" declared
     And it calls the function "before_scenario"
