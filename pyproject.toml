@@ -1,7 +1,7 @@
 # Configuration of code formatting
 [tool.blue]
 line-length = 100
-target-version = ['py310']
+target-version = ['py311']
 extend-exclude = 'migrations'
 
 [tool.isort]
@@ -18,13 +18,13 @@ enable = [
 ]
 
 disable = [
-  'wildcard-import',            #
-  'missing-docstring',          # C0111 missing docstrings are ok
-  'missing-function-docstring', # C0116 missing docstrings are ok
-  'missing-module-docstring',   # C0114 missing docstrings are ok
-  'missing-class-docstring',    # C0115 missing docstrings are ok
+  # 'wildcard-import',            #
+  # 'missing-docstring',          # C0111 missing docstrings are ok
+  # 'missing-function-docstring', # C0116 missing docstrings are ok
+  # 'missing-module-docstring',   # C0114 missing docstrings are ok
+  # 'missing-class-docstring',    # C0115 missing docstrings are ok
   'too-few-public-methods',     # R0903 allow simple data/entity classes etc.
-  'unused-wildcard-import',     #
+  # 'unused-wildcard-import',     #
 ]
 
 ignore = 'migrations' # Do not enforce naming rules for generated files.

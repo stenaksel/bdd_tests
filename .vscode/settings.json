@@ -3,7 +3,8 @@
     "python.formatting.provider": "black", // We use blue, the plugin believes it is black.
     "python.formatting.blackPath": "blue",
     "[python]": {
-        "editor.formatOnSave": true
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.black-formatter"
     },
     "editor.defaultFormatter": "ms-python.python",
     "python.testing.unittestEnabled": false,

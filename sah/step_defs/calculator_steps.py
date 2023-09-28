@@ -1,7 +1,7 @@
 import logging
 
 # from tests.common.log_glue import *
-from tests.common.log_glue_incl import ret_dict_info
+from tests.common.log_glue_incl import old_ret_dict_info
 
 from pytest_bdd import parsers, given, when, then   # isort:skip
 
@@ -53,7 +53,7 @@ def when_i_add_num1_and_num2(context, num1, num2) -> None:
 # @then('the result should be {int}')
 @then(parsers.parse('the result should be {total:d}'))
 def then_result_should_be(context, total: int) -> None:
-    logging.debug(ret_dict_info(context, 'context', '----'))
+    logging.debug(old_ret_dict_info(context, 'context', '----'))
 
     for it in context:
         logging.info('then_result_should_be\tit=%s, value=%s', it, context[it])

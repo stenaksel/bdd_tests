@@ -1,43 +1,44 @@
 import inspect
-
 import pytest
 from pytest_bdd import given
+from tests.common.pytest_bdd_logger_interface import ret_dict_info, ret_item_info
 
 
-def ret_dict_info(the_dict: dict, name: str, prefix: str = '::') -> str:
-    """
-    Function ret_dict_info returns a string with info
-    about the named dictionary and its content
-        Param 1: name: str
-        Param 2: it: dict
-    """
-    assert isinstance(the_dict, dict), 'A dict was not given!'
-    the_length = '--EMPTY!'
-    if the_dict:
-        the_length = len(the_dict)
-    caller: str = inspect.stack()[1][3]
 
-    ret = f'{prefix} {name:<15}: [dict] (#={the_length}) (<< "{caller}")\n\n'
+# def _ret_dict_info(the_dict: dict, name: str, prefix: str = '::') -> str:
+#     """
+#     Function ret_dict_info returns a string with info
+#     about the named dictionary and its content
+#         Param 1: name: str
+#         Param 2: it: dict
+#     """
+#     assert isinstance(the_dict, dict), 'A dict was not given!'
+#     the_length = '--EMPTY!'
+#     if the_dict:
+#         the_length = len(the_dict)
+#     caller: str = inspect.stack()[1][3]
 
-    ret += ret_item_info('____key____', '____value____', '____') + '\n'
-    for key, value in ret_sorted(the_dict).items():
-        ret += ret_item_info(key, value) + '\n'
+#     ret = f'{prefix} {name:<15}: [dict] (#={the_length}) (<< "{caller}")\n\n'
 
-    return '\x1b[90m' + ret + '\x1b[0m'
+#     ret += ret_item_info('____key____', '____value____', '____') + '\n'
+#     for key, value in ret_sorted(the_dict).items():
+#         ret += ret_item_info(key, value) + '\n'
+
+#     return '\x1b[90m' + ret + '\x1b[0m'
 
 
-def ret_item_info(name: str, item, prefix: str = 'i') -> str:
-    """
-    Function ret_item_info returns a string with info
-    about the named item, its type and its content
-        Param 1: name: str
-        Param 2: item
-    """
-    item_type = f'[{type(item).__name__}]'
-    if len(prefix) > 0 and prefix[0] == 'p':   # p => param
-        return f'{prefix}\t{name:<20} : {item_type:>10}: {item}'
-    else:
-        return f'{prefix}\t{name.rjust(20, " ")} : {item_type:>10}: {item}'
+# def _ret_item_info(name: str, item, prefix: str = 'i') -> str:
+#     """
+#     Function ret_item_info returns a string with info
+#     about the named item, its type and its content
+#         Param 1: name: str
+#         Param 2: item
+#     """
+#     item_type = f'[{type(item).__name__}]'
+#     if len(prefix) > 0 and prefix[0] == 'p':   # p => param
+#         return f'{prefix}\t{name:<20} : {item_type:>10}: {item}'
+#     else:
+#         return f'{prefix}\t{name.rjust(20, " ")} : {item_type:>10}: {item}'
 
 
 @given('I have a step with glue code')
@@ -45,7 +46,7 @@ def step_with_glue_code(*args, **kwargs) -> None:
     return 'Original glue code'
 
 
-def test_my_monkeypatch(monkeypatch) -> None:
+def test_my_monkeypatch(monkeypatch: pytest.MonkeyPatch) -> None:
 
     print('Calling original function: ')
     result = step_with_glue_code(None, None)

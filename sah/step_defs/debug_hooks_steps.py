@@ -1,14 +1,14 @@
 import logging
 
-from tests.common.bdd_logger import KEY_HOOKS, BddLogger
-
 # from tests.common.log_glue import *
 from tests.common.log_glue_incl import (  # log_msg, log_msg_end,
     KEY_LOG_GLUE,
     TEST_CONTEXT,
     get_logger,
-    ret_dict_info,
+    old_ret_dict_info,
 )
+# from tests.common.pytest_bdd_logger import PytestBddTracer
+from tests.common.pytest_bdd_logger_interface import KEY_HOOKS
 
 # logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ EXPECTED_NUM_PARAMS = None  # TODO Implement scenario "Then" step for checking?
 def given_this_scenario_is_tagged_with_wip(tag: str) -> None:
     assert tag == 'wip'
 
-
+# pytest.hook function in conftest.py
 @given(parsers.parse('a "{func_name}" Pytest-BDD hook function in conftest.py'))
 def pytest_bdd_hook_function_in_conftest_py(context, func_name: str) -> None:
     print('pytest_bdd_hook_function_in_conftest_py context: %s', context)
@@ -42,8 +42,8 @@ def pytest_bdd_hook_function_in_conftest_py(context, func_name: str) -> None:
     logger.info(func_name)
     logger.info(__file__)
     logger.info(func_name)
-    logger.info(ret_dict_info(TEST_CONTEXT, 'dbg =====> TEST_CONTEXT', '*--*'))
-    assert func_name == '_pytest_bdd_before_scenario'   ##TODO remove
+    logger.info(old_ret_dict_info(TEST_CONTEXT, 'dbg =====> TEST_CONTEXT', '*--*'))
+    assert func_name == 'pytest_bdd_before_scenario', f'assert - {func_name}'   ##TODO remove
     called_functions = TEST_CONTEXT.get(KEY_HOOKS, None)
     logger.info(called_functions)
     logger.info(called_functions)
@@ -52,6 +52,11 @@ def pytest_bdd_hook_function_in_conftest_py(context, func_name: str) -> None:
     # TODO assert func_name in called_functions
     # xlog_glue_end(context)
 
+@when('the step definition is run')
+def when_glue_is_run(context: dict) -> None:
+    context['dbg_log_glue'] = True
+    # xlog_glue(context=context)
+    # xlog_glue_end(context)
 
 @then('I have the hook function {str} declared')
 @then('I have the hook function "{hook_function}" declared')
@@ -85,11 +90,11 @@ def given_step_definiton_using_fixture(context: dict, fixture_name: str) -> None
 
 # @given('a scenario step using the {str} function')
 # @given('the step definition is calling the {str} function')
-@given(parsers.parse('the step definition is calling the "{func_name}" function'))
-def given_scenario_step_func(context: dict, func_name: str) -> None:
-    # xlog_glue(context=context, func_name=func_name)
-    assert func_name == KEY_LOG_GLUE
-    # xlog_glue_end(context)
+# @given(parsers.parse('the step definition is calling the "{func_name}" function'))
+# def given_scenario_step_func(context: dict, func_name: str) -> None:
+#     # xlog_glue(context=context, func_name=func_name)
+#     assert func_name == KEY_LOG_GLUE
+#     # xlog_glue_end(context)
 
 
 @given('the variable "{variable}" is set to "{val}"')

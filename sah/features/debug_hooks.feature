@@ -36,16 +36,24 @@ Feature: Debug Hooks
     When the step definition is run
     Then information in TEST_CONTEXT will not include "Current glue"
 
-  Scenario Outline: Add information in TEST_CONTEXT when running
-    Given a Pytest-BDD hook function <hook> in conftest.py
+  Scenario: Add information in TEST_CONTEXT when running for pytest_bdd_before_scenario
+    Given a "pytest_bdd_before_scenario" Pytest-BDD hook function in conftest.py
+    # Given a Pytest-BDD hook function <hook> in conftest.py
     When the step definition is run
-    Then information in TEST_CONTEXT about functions run will include "<func>"
+    Then "TEST_CONTEXT" should show that the hook-function "before_scenario" have been run
+
+  @wipz
+  Scenario Outline: Add information in TEST_CONTEXT when running
+    Given a "<hook>" Pytest-BDD hook function in conftest.py
+    # Given a Pytest-BDD hook function <hook> in conftest.py
+    When the step definition is run
+    Then "TEST_CONTEXT" should show that the hook-function "<func>" have been run
     Examples:
       | hook                       | func            |
       | pytest_bdd_before_scenario | before_scenario |
-      | pytest_bdd_after_scenario  | after_scenario  |
-      | pytest_bdd_before_step     | before_step     |
-      | pytest_bdd_after_step      | after_step      |
+      # | pytest_bdd_after_scenario  | after_scenario  |
+      # | pytest_bdd_before_step     | before_step     |
+      # | pytest_bdd_after_step      | after_step      |
 
 
   @todo

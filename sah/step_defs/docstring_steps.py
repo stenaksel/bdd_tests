@@ -62,6 +62,7 @@ def given_i_have_step_with_a_docstring(context, doc_string: str) -> None:
     # Put doc_string into context.doc_string
     context['message'] = doc_string   # .text
     # xlog_glue_end(context)
+    assert False, 'Not supposed to pass this point! bdd_tracer.py - docstring_steps.py - given_i_have_step_with_a_docstring'
 
 
 @when('I ask for how many lines the message have')
@@ -77,6 +78,7 @@ def when_i_ask_for_how_many_lines_the_message_have(context) -> None:
             logging.warning(message)
             # logging.warning(message.splitlines())
             # num_lines = len(message.splitlines())
+            print('message have %s lines', message.count('\n'))
             num_lines = 1 + message.count('\n')
         # endif
 

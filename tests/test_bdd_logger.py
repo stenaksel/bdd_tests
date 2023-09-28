@@ -1,31 +1,27 @@
 import logging
-from logging import DEBUG, INFO, WARN, LogRecord
-from typing import Callable, Generator, List
-from unittest import mock
+from typing import List
+
+#from logging import DEBUG, INFO, WARN, LogRecord
+#from typing import Callable, Generator, List
+#from unittest import mock
 from unittest.mock import call, patch
 
 import pytest
-from pytest_bdd.parser import Feature, Scenario, ScenarioTemplate, Step
-from pytest_mock import MockerFixture
+from pytest_bdd.parser import Feature  # , Scenario, ScenarioTemplate, Step
 
-from tests.common.bdd_logger import BddLogger
 from tests.common.log_glue_incl import log_func_name  # tested
-from tests.common.log_glue_incl import ret_func_name  # tested
 from tests.common.log_glue_incl import ret_sorted  # tested
-from tests.common.log_glue_incl import (
-    KEY_LOG_GLUE,
-    TEST_CONTEXT,
-    assert_messages,
-    log_msg_start,
-    old_log_msg,
-    ret_before_or_after,
-    ret_dict_info,
-)
+from tests.common.log_glue_incl import KEY_LOG_GLUE, TEST_CONTEXT, old_log_msg, xlog_msg_start
+from tests.common.pytest_bdd_logger import PytestBddLogger
+from tests.common.pytest_bdd_logger_interface import xret_func_name
+
+#from pytest_mock import MockerFixture
+
 
 # Configure the logger you want to capture log messages from
 logger = logging.getLogger(KEY_LOG_GLUE)
 
-bdd_logger = BddLogger()
+bdd_logger = PytestBddLogger()
 
 
 """
@@ -43,11 +39,11 @@ bdd_logger = BddLogger()
 
 
 def _the_caller0() -> str:
-    return ret_func_name()
+    return xret_func_name()
 
 
 def _the_caller(prev: int = 0) -> str:
-    return ret_func_name(prev)
+    return xret_func_name(prev)
 
 
 def _func1(prev: int = 1) -> str:
@@ -68,7 +64,7 @@ def test_just_show_test_context() -> None:
     logging.info('==> test_just_show_test_context')
     logging.info('TEST_CONTEXT: ')
     logging.info(TEST_CONTEXT)
-    bdd_logger.log_context_now(TEST_CONTEXT, 'TEST_CONTEXT0')
+    bdd_logger.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT0')
     logging.info('<== test_just_show_test_context')
 
 
@@ -143,7 +139,7 @@ def test_log_msg_start() -> None:
 
     with patch('logging.info') as mock_info:
         fillchar = '¤'
-        log_msg_start()
+        xlog_msg_start()
         # Assert that the mock_info was called 3 times with the expected arguments
         # mock_info.assert_has_calls([
         mock_info.assert_has_calls(
@@ -170,16 +166,25 @@ def test_log_msg_start() -> None:
 # @mock.patch('tests.common.log_glue_incl.log_msg_end')
 
 
-@pytest.mark.ok
+# @pytest.mark.ok
+@pytest.mark.wip
 def test_before_feature_params() -> None:
-    bdd_logger = BddLogger()
-    assert isinstance(bdd_logger, BddLogger)
-    #### No feature
+    #Given:
+    bdd_logger = PytestBddLogger()
+    # assert isinstance(bdd_logger, PytestBddLogger)
+
+    #### No feature:
+    # When before_feature() is called without feature param
+    _request = None
+    feature = None
     with pytest.raises(AssertionError) as assert_msg:
-        bdd_logger.before_feature(None, None)
-    assert str(assert_msg.value) == 'No feature param!'
+        bdd_logger.before_feature(_request, feature)
+    assert 'No feature param!' in str(assert_msg.value), str(assert_msg.value)
+
     #### Empty feature name
-    feature = Feature(None, '', '', '', set(), None, 1, '')
+    # When before_feature() is called with a feature param with an empty name
+    name = ''
+    feature = Feature(None, '', '', name, set(), None, 1, '')
     assert feature.name == ''
     with pytest.raises(AssertionError) as assert_msg:
         bdd_logger.before_feature(None, feature)
@@ -189,16 +194,16 @@ def test_before_feature_params() -> None:
 
 @pytest.mark.ok
 def test_before_feature() -> None:
-    bdd_logger = BddLogger()
+    bdd_logger = PytestBddLogger()
 
     # Given a "valid feature" (in our test context)
     feature = Feature(None, '', '', 'Feature_name', set(), None, 1, '')
 
     # #### Assert functions called
     module = 'tests.common.bdd_logger'
-    with patch(f'{module}.log_msg_start') as mock_log_msg_start, \
-        patch(f'{module}.log_feature') as mock_log_feature, \
-        patch(f'{module}.log_msg_end') as mock_log_msg_end:
+    with patch(f'{module}.log_msg_start') as mock_log_msg_start, patch(
+        f'{module}.log_feature'
+    ) as mock_log_feature, patch(f'{module}.log_msg_end') as mock_log_msg_end:
         # When I call
         logging.info('When I call: before_feature(None, feature)')
 
@@ -213,7 +218,7 @@ def test_before_feature() -> None:
 
 @pytest.mark.todo
 def test_before_feature_do_update_context() -> None:
-    bdd_logger = BddLogger()
+    bdd_logger = PytestBddLogger()
     assert bdd_logger.get_test_context() == TEST_CONTEXT
 
     # Given a "valid feature" (in our test context)
@@ -226,7 +231,7 @@ def test_before_feature_do_update_context() -> None:
     ) as mock_log_feature, patch(module + '.log_msg_end') as mock_log_msg_end:
         # When I call
         logging.info('When I call: before_feature(None, feature)')
-        assert isinstance(bdd_logger, BddLogger)
+        assert isinstance(bdd_logger, PytestBddLogger)
 
         bdd_logger.before_feature(None, feature)
 

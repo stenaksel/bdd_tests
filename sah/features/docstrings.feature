@@ -9,13 +9,15 @@ Feature: DocStrings
     When I ask for how many lines the message have
     Then I should be told it was 0 lines
 
-  @todo
+  @wipz
   Scenario: Assign string value from DocString with no lines
     Given I have step with a Docstring:
       """
+      1
+      2
       """
     When I ask for how many lines the message have
-    Then I should be told it was 0 lines
+    Then I should be told it was 2 lines
 
   @ok
   Scenario: Assign string value from DocString with one line

@@ -7,19 +7,17 @@ from unittest.mock import call, patch
 import pytest
 from pytest_bdd.parser import Feature, Scenario, ScenarioTemplate, Step
 
-from tests.common.log_glue_incl import log_dict  # TODO Make test
+# from tests.common.log_glue_incl import log_dict  # TODO Make test
 from tests.common.log_glue_incl import ret_sorted  # tested
-from tests.common.log_glue_incl import (  # KEY_CURR_FEATURE,; KEY_LOGGER,; after_step,; log_configure,; log_func_call_info,
-    KEY_LOG_GLUE,
+from tests.common.log_glue_incl import (  # KEY_CURR_FEATURE,; KEY_LOGGER,; after_step,; log_configure,; log_func_call_info,; log_list,
+    # KEY_LOG_GLUE,
     TEST_CONTEXT,
     log_func_name,
     log_headline,
-    # log_list,
-    log_msg_start,
+    old_ret_dict_info,
     ret_before_or_after,
-    ret_dict_info,
-    ret_func_name,
     ret_keys,
+    xlog_msg_start,
 )
 
 """
@@ -37,11 +35,11 @@ from tests.common.log_glue_incl import (  # KEY_CURR_FEATURE,; KEY_LOGGER,; afte
 
 
 def _the_caller0() -> str:
-    return ret_func_name()
+    return xret_func_name()
 
 
 def _the_caller(prev: int = 0) -> str:
-    return ret_func_name(prev)
+    return xret_func_name(prev)
 
 
 def _func1(prev: int = 1) -> str:
@@ -66,17 +64,17 @@ def test_just_show_test_context() -> None:
 
 
 @pytest.mark.ok
-def test_ret_func_name() -> None:
+def test_xret_func_name() -> None:
 
-    logging.info('==> test_ret_func_name')
+    logging.info('==> test_xret_func_name')
 
-    assert ret_func_name() == 'test_ret_func_name'
+    assert xret_func_name() == 'test_ret_func_name'
     # The different _func have a default "prev" param
     # that will be passed on to _the_caller and should return themself
-    # _the_caller is the only function calling ret_func_name function.
+    # _the_caller is the only function calling xret_func_name function.
 
-    assert _the_caller0() == '_the_caller0'   # a caller of the ret_func_name()
-    assert _the_caller() == '_the_caller'   # _the_caller of ret_func_name
+    assert _the_caller0() == '_the_caller0'   # a caller of the xret_func_name()
+    assert _the_caller() == '_the_caller'   # _the_caller of xret_func_name
     assert _func1() == '_func1'             # will only call _the_caller
     assert _func2() == '_func2'             # will only call _func1
     assert _func3() == '_func3'             # will only call _func2
@@ -86,18 +84,18 @@ def test_ret_func_name() -> None:
     assert _func3(0) == '_the_caller'       # will only call _func2(prev=0)
 
     # log_msg_end()
-    logging.info('<== test_ret_func_name')
+    logging.info('<== test_xret_func_name')
 
 
 @pytest.mark.skip
-def test_ret_func_name2() -> None:
-    this_file = '?'
+def test_xret_func_name2() -> None:
+    this_func = '?'
     print(__file__)
     with mock.patch('tests.common.log_glue_incl.logging') as mock_logger:
-        this_file = ret_func_name()
-        mock_logger.debug.assert_called_once_with('>> ret_func_name')
+        this_func = xret_func_name()
+        mock_logger.debug.assert_called_once_with('>> xret_func_name')
 
-    assert this_file == 'test_ret_func_name'
+    assert this_func == 'test_xret_func_name'
 
 
 @pytest.mark.ok
@@ -120,7 +118,7 @@ def test_ret_sorted() -> None:
 @pytest.mark.ok
 def test_ret_dict_info() -> None:
     some_dict = {'a': 'A', 'b': 'B', 'c': 'C'}
-    ret = ret_dict_info(some_dict, 'the name', '-prefix-')
+    ret = old_ret_dict_info(some_dict, 'the name', '-prefix-')
     print(ret)
     assert 'the name' in ret
     assert ': [dict] (#=3)' in ret
@@ -254,7 +252,7 @@ def test_log_func_name_caplog(caplog) -> None:
     # Then I will see that the log uses the default fillchar
     expeced = [
         '#' * 75,
-        f'  {ret_func_name()}  '.center(75, '#'),
+        f'  {xret_func_name()}  '.center(75, '#'),
         '#' * 75,
     ]
 
@@ -266,13 +264,13 @@ def test_log_func_name_caplog(caplog) -> None:
     # Then I will see that the log uses that fillchar instead of the default
     log_func_name(inRow=False, fillchar=plus)
     # Then I will see that the log uses the wanted fillchar ('+')
-    expeced = [f'  {ret_func_name()}  '.center(75, plus)]
+    expeced = [f'  {xret_func_name()}  '.center(75, plus)]
     assert_logged(caplog, level=INFO, messages=expeced)
 
 
 @pytest.mark.ok
 def test_log_func_name_logging() -> None:
-    assert ret_func_name() == 'test_log_func_name_logging'
+    assert xret_func_name() == 'test_log_func_name_logging'
     fillchar = '#'
 
     with patch('logging.info') as mock_info:
@@ -291,7 +289,7 @@ def test_log_func_name_logging() -> None:
 
 @pytest.mark.ok
 def test_log_headline() -> None:
-    assert ret_func_name() == 'test_log_headline'
+    assert xret_func_name() == 'test_log_headline'
     fillchar = '#'
 
     with patch('logging.info') as mock_info:
@@ -313,7 +311,7 @@ def test_log_msg_start() -> None:
 
     with patch('logging.info') as mock_info:
         fillchar = '¤'
-        log_msg_start()
+        xlog_msg_start()
         # Assert that the mock_info was called 3 times with the expected arguments
         # mock_info.assert_has_calls([
         mock_info.assert_has_calls(

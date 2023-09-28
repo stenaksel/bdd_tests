@@ -1,16 +1,15 @@
 import logging
 from logging import INFO
 
-from tests.common.bdd_logger import BddLogger
-from tests.common.log_glue_incl import (  # log_msg_end,
+from tests.common.log_glue_incl import (  # log_msg_end,; TEST_CONTEXT,
     GLUE_LOGGER,
     KEY_LOG_GLUE,
     KEY_LOGGER,
-    TEST_CONTEXT,
     assert_messages,
-    old_log_msg,
-    ret_dict_info,
+    old_ret_dict_info,
 )
+from tests.common.pytest_bdd_logger import PytestBddLogger
+from tests.common.pytest_bdd_logger_interface import TEST_CONTEXT, xret_func_name
 
 from pytest_bdd import parsers, given, when, then  # isort:skip
 
@@ -29,31 +28,47 @@ from pytest_bdd import parsers, given, when, then  # isort:skip
 #         print(f"The {item} is present in the context")
 
 
-# from pytest_bdd.parsers import parse
+def _expect_present(expected_present: bool, context_name: str, key: str, context: dict) -> bool:
+    assert expected_present is not None
+    assert context_name is not None
+    assert key is not None
 
-# @given('the {str} item {str} is (not present|present)'
-@given(parsers.parse('the "{context_name}" item "{item}" is {presence}'))
-def given_context_item_present(context_name: str, item: str, presence: str, context: dict) -> bool:
+    # Check wich logger in question (assign to ctx)
+    the_context = TEST_CONTEXT if context_name == 'TEST_CONTEXT' else context
+    assert the_context is not None
+
+    print(f"==> The presence is: '{expected_present}'")
+    the_value = the_context.get(key, None)
+    print(f"==> expected_present = {expected_present} (the_value: '{the_value}')")
+
+    if expected_present:
+        assert the_value is not None, f'Expected "{key}" to be present!'
+    else:
+        assert the_value is None, f'Expected "{key}" to not be present! (value: "{the_value}")'
+
+    return True   # All asserts passed!
+
+
+# @given('xthe {str} item {str} is (not present|present)'
+@given(parsers.parse('xthe "{context_name}" item "{item}" {is_present} present'))
+def given_context_item_present(context_name: str, item: str, is_present: str, context: dict) -> bool:
     assert context is not None
     assert context_name == 'TEST_CONTEXT'
     # assert item == KEY_LOGGER
-    assert presence == 'not present' or presence == 'present', f'Unknown "presence" ("{presence}")!'
+    assert is_present == 'is not' or is_present == 'is', f'Unknown "is_present" ("{is_present}")!'
 
-    print(f'==> Given the "{context_name}" item "{item}" is {presence} <==')
+    print(f'==> Given the "{context_name}" item "{item}" is {is_present} <==')
 
-    ctx = None
-    # Check wich logger in question (assign to ctx)
-    if context_name == 'TEST_CONTEXT':
-        ctx = TEST_CONTEXT
-    else:
-        assert context_name == 'context'
-        ctx = context
-    assert ctx is not None
+    should_be_present = False if 'not' in is_present else True
 
-    print(f"==> The presence is: '{presence}'")
+    assert _expect_present(
+        should_be_present, context_name, item, context
+    ), f'Expected "{item}" to be present in "{context_name}"! (value: "{TEST_CONTEXT.get(item, None)}")'
+
+    print(f"==> The is_present is: '{is_present}'")
     # Check if we should have the item in the context (ctx)
-    should_be_present = False if 'not' in presence else True
-    the_value = ctx.get(item, None)
+    should_be_present = False if 'not' in is_present else True
+    the_value = TEST_CONTEXT.get(item, None)
     print(f"==> should_be_present = {should_be_present} (the_value: '{the_value}')")
 
     if should_be_present:
@@ -61,37 +76,116 @@ def given_context_item_present(context_name: str, item: str, presence: str, cont
     else:
         assert the_value is None, f'Expected "{item}" to not be present! (value: "{the_value}")'
 
-    ctx['context_checked'] = ctx
-    ctx['context_name'] = context_name
-    ctx['item_in_context'] = item
-    ctx['item_presence'] = should_be_present
+    if should_be_present:   # We might check its value so add it to the TEST_CONTEXT
+        TEST_CONTEXT['checked_context_name'] = context_name
+        TEST_CONTEXT['checked_context_item_name'] = item
+        TEST_CONTEXT['checked_context_item_value'] = the_value
+        # TODO should these be removed in after_scenario?
+        TEST_CONTEXT['remove_in_after_scenario'] = [
+            'checked_context_name',
+            'checked_context_item_name',
+            'checked_context_item_value',
+        ]
+    logging.info('TEST_CONTEXT: %s', TEST_CONTEXT)
 
     return True   # All asserts passed!
 
 
+# @then('xthe {str} item {str} should (not be|be) present'
+# @then(parsers.parse('xthe "{context_name}" item "{item}" should {is_present} present'))
+# def then_context_should_be_item_present(context: dict, context_name: str, item: str, is_present: str) -> bool:
+#     return then_context_item_present(context, context_name, item, is_present)
+
+
+# @then('the {str} item {str} should (not be|be) present'
+@then(parsers.parse('the "{context_name}" item "{item}" should {be_present} present'))
+def then_context_item_present(context: dict, context_name: str, item: str, be_present: str) -> bool:
+    assert context is not None
+    assert context_name == 'TEST_CONTEXT'
+    assert be_present == 'not be' or be_present == 'be', f'Unknown "be_present" ("{be_present}")!'
+    print(f'==> Given the "{context_name}" item "{item}" should {be_present} present in the log <==')
+    logging.info(
+        f'==> Given the "%s" item "%s" should %s present <==',
+        context_name,
+        item,
+        be_present,
+    )
+
+    should_be_present = False if 'not' in be_present else True
+
+    assert _expect_present(
+        should_be_present, context_name, item, context
+    ), f'Expected "{item}" to be present in "{context_name}"!'
+    # assert False, f'Stopping!! ("{be_present}")!'
+
+    if should_be_present:   # We might check its value so add it to the context in question
+        context['checked_context_name'] = context_name
+        context['checked_context_item_name'] = item
+        context['checked_context_item_value'] = TEST_CONTEXT.get(item, None)
+        # TODO should these be removed in after_scenario?
+        context['remove_in_after_scenario'] = [
+            'checked_context_name',
+            'checked_context_item_name',
+            'checked_context_item_value',
+        ]
+    assert False
+
+
+# @then('the value should be {str}.')
+@then(parsers.parse('the value should be "{expected_value}".'))
+def then_value_should_be(context: dict, expected_value: str) -> None:
+    assert context is not None
+    assert expected_value is not None
+    # 'checked_context_name',
+    # 'checked_context_item_name',
+    # 'checked_context_item_value'
+    # assert False, 'Stopping!!! then_value_should_be()'
+
+    ctx = TEST_CONTEXT
+    logging.info('TEST_CONTEXT: %s', ctx)
+    logging.info('context: %s', context)
+    # ctx = context   #TODO remove
+
+    if 'checked_context_name' in context and 'checked_context_name' == 'context':
+        ctx = context
+        logging.warning('Switch ctx from TEST_CONTEXT to context')
+
+    assert ctx is not None
+
+    if 'checked_context_item_value' in ctx:
+        actual_value = ctx.get('checked_context_item_value', None)
+        assert (
+            actual_value == expected_value
+        ), f'Expected "{expected_value}" but got "{actual_value}"'
+    else:
+        assert (
+            False
+        ), f'Expected "{expected_value}", but no knowledge of what to check against! {xret_func_name()}'
+
+
 # @given('the {str} item {str} is (not present|present) or value {str}'
-@given(parsers.parse('the "{context_name}" item "{item}" is {presence}present or value "{value}"'))
+@given(parsers.parse('the "{context_name}" item "{item}" is {is_present}present or value "{value}"'))
 def given_context_item_present_or(
-    context_name: str, item: str, presence: str, value: str, context: dict
+    context_name: str, item: str, is_present: str, value: str, context: dict
 ) -> None:
 
     assert context is not None
     assert context_name == 'TEST_CONTEXT'
     assert item == KEY_LOGGER
-    assert presence == 'is not ', f'Unknown "presence" ("{presence}")!'
-    assert 'not' in presence, f'Unknown "presence" ("{presence}")!'
+    assert is_present == 'is not ', f'Unknown "is_present" ("{is_present}")!' #TODO Needs fixing
+    assert 'not' in is_present, f'Unknown "is_present" ("{is_present}")!'
 
     # Calling other glue to assert the presence or not
-    assert given_context_item_present(context_name, item, presence, context)
+    assert given_context_item_present(context_name, item, is_present, context)
     assert context is not None
 
     ctx = context['context_checked']
 
     # Check if we should have the item in the context (ctx)
-    should_be_present = False if 'not' in presence else True
+    should_be_present = False if 'not' in is_present else True
     assert ctx['context_name'] == context_name
     assert ctx['item_in_context'] == item
-    assert ctx['item_presence'] == should_be_present
+    assert ctx['item_is_present'] == should_be_present
 
     if should_be_present:
         assert value == 'True'
@@ -154,14 +248,6 @@ def given_file_uses_hooks_calling_module(filename: str, module: str) -> None:
     GLUE_LOGGER.warning('*' * 50)
     assert filename == 'conftest.py', f'Uventet innhold i filename: "{filename}"'
     assert module == KEY_LOG_GLUE, f'Uventet innhold i module: "{module}"'
-
-
-# def given_file_uses_hooks_calling_module(context: dict, filename: str, module: str):
-def given_file_uses_hooks_calling_module(filename: str, module: str):
-    logging.warning('Given a Pytest-BDD test using the "%s" file', filename)
-    logging.warning('*' * 50)
-    assert filename == 'conftest.py', f'Uventet innhold i filename: "{filename}"'
-    assert module == 'log_glue', f'Uventet innhold i module: "{module}"'
 
 
 # Given I set "TEST_CONTEXT" item "logging" with valid value True
@@ -229,17 +315,17 @@ def given_context_item_not_present_or_is(context: dict, context_name: str, item:
     assert value == 'False'
     _just_show_test_context()
 
-    assert isinstance(actual, int)
-    assert isinstance(wanted, int)
+    # assert isinstance(actual, int)
+    # assert isinstance(wanted, int)
 
-    # Compare log_level (int) with wanted_log_level (str)
+    # # Compare log_level (int) with wanted_log_level (str)
 
-    assert (
-        actual >= wanted
-    ), f'Unexp. actual log_level={actual} >= Wanted={wanted} ({wanted_log_level})'
+    # assert (
+    #     actual >= wanted
+    # ), f'Unexp. actual log_level={actual} >= Wanted={wanted} ({wanted_log_level})'
 
 
-def _is_logging(logger, tf_caplog) -> bool:
+def x_is_logging(logger, tf_caplog) -> bool:
     """Display caplog capture text"""
     # log at all logging levels
     logger.debug('DEBUG: log entry captured')
@@ -285,7 +371,7 @@ def _is_logging(logger, tf_caplog) -> bool:
 
 # Given the run is configured with at least log_level = "INFO"
 @given(parsers.parse('the run is configured with at least log_level = "{wanted_log_level}"'))
-def given_run_is_configured_with_at_least_log_level(
+def given_run_is_configured_with_at_least_log_level2(
     caplog_fixture, context: dict, wanted_log_level: str
 ):
     logging.warning(f'Given the run is configured with at least log_level = "{wanted_log_level}"')
@@ -310,19 +396,20 @@ def when_the_scenario_is_run(caplog_fixture, context: dict) -> None:
     assert context is not None
 
     # Clear the captured log records and formatted log output
-    caplog_fixture.clear()
+    # caplog_fixture.clear()
 
+    # TODO move to another step def: Given the logger is empty
     # Assert that the log is cleared
-    assert not _is_logging(GLUE_LOGGER, caplog_fixture), 'caplog was not cleared!'
-    assert (
-        len(caplog_fixture.records) == 0
-    ), f'caplog was not cleared! Found {len(caplog_fixture.records)} records'
+    # assert not _is_logging(GLUE_LOGGER, caplog_fixture), 'caplog was not cleared!'
+    # assert (
+    #     len(caplog_fixture.records) == 0
+    # ), f'caplog was not cleared! Found {len(caplog_fixture.records)} records'
 
     GLUE_LOGGER.info('%s', '-' * 50)
-    logging.warning('This message will be reported when running')
-    logging.info('This message will be reported when running')
-    GLUE_LOGGER.warning('This message will not be reported when running')
-    GLUE_LOGGER.info('This message will not be reported when running')
+    logging.warning('This message will be reported when running (warning)')
+    logging.info('This message will be reported when running (info)')
+    GLUE_LOGGER.warning('This message will not be reported when running! (warning)')
+    GLUE_LOGGER.info('This message will not be reported when running! (info)')
     GLUE_LOGGER.info('%s', '-' * 50)
 
     assert _is_logging(GLUE_LOGGER, caplog_fixture)
@@ -334,8 +421,22 @@ def when_the_scenario_is_run(caplog_fixture, context: dict) -> None:
 
 
 # Then there should not be any logging from "log_glue" functions
+@then(parsers.parse('x-there should be logging from "{module}" functions'))
+def x_then_step_using_the_module(caplog_fixture, context: dict, module: str):
+    assert module == 'log_glue'
+    # assert False, 'Stop here!!! (given_step_using_the_module)'
+    context[KEY_DBG_LOG_GLUE] = True
+    context[KEY_DBG_LOGGING] = None
+
+    # Use the caplog_fixture to access the caplog object,
+    # and assert that the log is empty
+    num_logs = len(caplog_fixture.records)
+    assert num_logs == 0, f'caplog is not empty! Found {num_logs} logs'
+    assert caplog_fixture.text == '', f'caplog is not empty! Found text!'
+
+# Then there should not be any logging from "log_glue" functions
 @then(parsers.parse('there should {want}be logging from "{module}" functions'))
-def given_step_using_the_module(caplog_fixture, context: dict, want: str, module: str) -> None:
+def then_step_using_the_module(caplog_fixture, context: dict, want: str, module: str) -> None:
     # assert want in {'not ', 'not be any ', 'be '}, f'Unknown value for "want" (: "{want}")!'
     assert want == 'not ', f'Unknown value for "want" (: "{want}")!'
     assert module == KEY_LOG_GLUE
@@ -346,10 +447,10 @@ def given_step_using_the_module(caplog_fixture, context: dict, want: str, module
     logging.warning('\nwhen_the_scenario_is_run\n')
 
 
-# TODO Then there should not be any logging from "BDDLogger" functions
+# TODO Then there should not be any logging from "PytestBddLogger" functions
 @then(parsers.parse('there should not be any logging from "{module}" functions'))
 def given_step_using_the_module(caplog_fixture, context: dict, module: str):
-    assert module == 'log_glue'
+    assert module == 'log_glue'   # TODO Use real name: 'PytestBddLogger'
     # assert False, 'Stop here!!! (given_step_using_the_module)'
     context[KEY_DBG_LOG_GLUE] = True
     context[KEY_DBG_LOGGING] = None
@@ -371,21 +472,5 @@ def given_step_using_the_module(caplog_fixture, context: dict, module: str):
 
     else:
         assert len(want) == 0, f'Unknown value for "want" (: "{want}")!'
-    assert num_logs == 0, f'caplog is not empty! Found {num_logs} logs'
-    assert caplog_fixture.text == '', f'caplog is not empty! Found text!'
-
-
-# Then there should not be any logging from "log_glue" functions
-@then(parsers.parse('there should be logging from "{module}" functions'))
-def given_step_using_the_module(caplog_fixture, context: dict, module: str):
-    assert module == 'log_glue'
-    # assert False, 'Stop here!!! (given_step_using_the_module)'
-    context[KEY_DBG_LOG_GLUE] = True
-    context[KEY_DBG_LOGGING] = None
-
-    # Use the caplog_fixture to access the caplog object,
-    # and assert that the log is empty
-    # assert 'HUMBUG' in caplog_fixture.text, f'caplog is not empty! Found text: HUMBUG!'
-    num_logs = len(caplog_fixture.records)
     assert num_logs == 0, f'caplog is not empty! Found {num_logs} logs'
     assert caplog_fixture.text == '', f'caplog is not empty! Found text!'

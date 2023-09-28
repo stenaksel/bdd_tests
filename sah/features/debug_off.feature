@@ -32,7 +32,7 @@ Feature: Debug Off
 
   @todo #TODO work-in-progress
   Scenario: Just testing
-    Given a Pytest-BDD test using the "log_glue" module
+    Given a Pytest-BDD test using the "PytestBddLogger" module
     Given the "TEST_CONTEXT" item "Current feature" is present
   # Given the "TEST_CONTEXT" item "Current scenario" is present
   # Given the "TEST_CONTEXT" item "logger" is present
@@ -40,11 +40,13 @@ Feature: Debug Off
   # But the item value is "False"
   # Given the "TEST_CONTEXT" item "logger" is not present or value "False"
 
+  @wipz
   Scenario: Current feature should be logged
-    Given a Pytest-BDD test using the "log_glue" module
+    Given a Pytest-BDD test using the "PytestBddLogger" module
     When the scenario is run
-
-    Given the "TEST_CONTEXT" item "Current feature" is present
+    Then the "TEST_CONTEXT" item "Current feature" should be present
+    Then the value should be "Debug Off".
+    # And the value of the "TEST_CONTEXT" item "Current feature" should be equal to "Debug Off" (ie. the feature name)
 
   @todo #TODO work-in-progress
   Scenario: No logging from log_glue functions
@@ -59,4 +61,4 @@ Feature: Debug Off
   Scenario: Set logging to on
     Given I set "TEST_CONTEXT" item "logger" with value "True"
     When Pytest-BDD is run
-    Then there should not be any logging from "log_glue" functions
+    Then there should not be any logging from "PytestBddLogger" functions
