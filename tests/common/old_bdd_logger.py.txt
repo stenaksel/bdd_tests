@@ -6,7 +6,7 @@ from pytest import Config, FixtureRequest
 from pytest_bdd.parser import Feature, Scenario, ScenarioTemplate, Step
 from pytest_bdd_logger_interface import PytestBddLoggerInterface
 
-from tests.common.log_glue_incl import old_log_msg  # TODO remove
+from tests.common.log_glue_incl import xlog_msg  # TODO remove
 from tests.common.log_glue_incl import (  # log_func_name,; log_func_call_info,; ret_before_or_after,; ret_sorted,; log_dict,; log_msg_start,
     KEY_CURR_GLUE,
     TEST_CONTEXT,
@@ -14,8 +14,8 @@ from tests.common.log_glue_incl import (  # log_func_name,; log_func_call_info,;
     log_func_name,
     log_msg_end,
     log_step,
-    old_log_feature,
-    old_log_scenario,
+    xlog_feature,
+    xlog_scenario,
     old_ret_dict_info,
     ret_func_name,
 )
@@ -92,9 +92,9 @@ class PytestBddLogger(PytestBddLoggerInterface):   # rename to PytestBddLogger
         assert feature is not None and feature.name != '', 'No named feature!'
         self._assert_before_feature_params(_request, feature)
         self.log('x Found feature: ' + feature.name)
-        old_log_msg(ret_func_name(1), show_caller=True)
+        xlog_msg(ret_func_name(1), show_caller=True)
         log_msg_start()
-        old_log_feature(feature)
+        xlog_feature(feature)
         log_msg_end()
         logging.warning('before_feature <-------------------------------------------')
         TEST_CONTEXT[KEY_CURR_FEATURE] = feature.name
@@ -139,7 +139,7 @@ class PytestBddLogger(PytestBddLoggerInterface):   # rename to PytestBddLogger
         self.log('-' * 55)
 
         logging.info('|%s', '_' * 65)
-        old_log_scenario(scenario)
+        xlog_scenario(scenario)
         # assert False, 'Stopping in func: before_scenario'
 
         logging.debug('| Feature: %s', scenario.feature.name)
@@ -180,7 +180,7 @@ class PytestBddLogger(PytestBddLoggerInterface):   # rename to PytestBddLogger
         self.log(old_ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT2'))
         self.log('| TEST_CONTEXT _: |')
 
-        old_log_scenario(scenario)
+        xlog_scenario(scenario)
         # Inform if the Scenario is created from a Scenario Outline or not
         gherkin_scenario = scenario.feature.scenarios.get(scenario.name)
         assert isinstance(gherkin_scenario, ScenarioTemplate)

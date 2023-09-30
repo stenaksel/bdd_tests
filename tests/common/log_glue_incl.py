@@ -71,8 +71,8 @@ def log_headline(
 
     caller = xret_func_name(1 + prev)
     if inRow:
-        old_log_msg(msg, show_caller=True)
-        old_log_msg('', show_caller=True)
+        xlog_msg(msg, show_caller=True)
+        xlog_msg('', show_caller=True)
     else:
         name_info = f'  {msg}  '
         # TODO debug:
@@ -84,7 +84,7 @@ def log_headline(
         logging.info('\t%s', fillchar * 75)
 
 
-def log_func_name(prev: int = 0, inRow: bool = True, fillchar: str = '#') -> None:  # tested
+def xlog_func_name(prev: int = 0, inRow: bool = True, fillchar: str = '#') -> None:  # tested
     assert fillchar != None, f'No fillchar! (Got: None)'
     assert fillchar and len(fillchar) != 0, f"No fillchar! (Got '{fillchar}' <- empty)"
     assert fillchar and len(fillchar) == 1, f"No fillchar! (Got string '{fillchar}')"
@@ -112,11 +112,11 @@ def xlog_msg_start(log_level: int = logging.INFO) -> None:
     GLUE_LOGGER.warning('***xlog_msg_start*** - %s', __name__)
     GLUE_LOGGER.log(log_level, '***xlog_msg_start*** - %s', __name__)
     TEST_CONTEXT[KEY_DBG_FUNC_NAME] = xret_func_name()   # TODO remove line
-    # old_log_msg(xret_func_name() + ' -> ' + TEST_CONTEXT)
-    old_log_msg(xret_func_name(1), show_caller=True)
+    # xlog_msg(xret_func_name() + ' -> ' + TEST_CONTEXT)
+    xlog_msg(xret_func_name(1), show_caller=True)
     # GLUE_LOGGER.log(log_level, 'Heisann!')
 
-    # old_log_msg(TEST_CONTEXT)
+    # xlog_msg(TEST_CONTEXT)
     # log_dict(TEST_CONTEXT, 'TEST_CONTEXT', False)
     # log_func_call_info(log_level, 1, 'INFO')
     logging.warning('<< ***xlog_msg_start***')
@@ -136,7 +136,7 @@ def log_func_call_info(
     # TODO info -> msg? and first param?
     # GLUE_LOGGER.info(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT'))
     caller = xret_func_name(1 + prev)
-    # old_log_msg(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT', caller + '--> log_func_call_info---->'))
+    # xlog_msg(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT', caller + '--> log_func_call_info---->'))
     its_caller = xret_func_name(2 + prev)
 
     if caller.startswith('pytest_bdd_'):
@@ -162,7 +162,7 @@ def log_func_call_info(
             log_level, '|%s%-19s %s%s| %s', COL_CONTEXT, its_caller, info, X_COL_RESET, caller
         )
         TEST_CONTEXT['dbg:TEST_CONTEXT'] = True
-        old_log_msg('dbg:TEST_CONTEXT = True')
+        xlog_msg('dbg:TEST_CONTEXT = True')
     elif '--' in info:   # a hook
         GLUE_LOGGER.log(log_level, '|%s%-25s %s| %s', COL_CONTEXT, its_caller, info, caller)
     else:
@@ -171,22 +171,22 @@ def log_func_call_info(
         )
 
 
-def old_log_msg(
+def xlog_msg(
     msg: str, log_level: int = logging.INFO, pre: str = '', show_caller: bool = False
 ) -> None:
     caller = xret_func_name(1)
-    # logging.info('-> old_log_msg -> ' + msg)
-    logging.info('old_log:|%s %s  %s(<< %s)', pre, msg, COL_CONTEXT, caller)
-    # print('-> old_log_msg <- ' + caller)
+    # logging.info('-> xlog_msg -> ' + msg)
+    logging.info('xlog:|%s %s  %s(<< %s)', pre, msg, COL_CONTEXT, caller)
+    # print('-> xlog_msg <- ' + caller)
 
-    GLUE_LOGGER.debug('>> old_log_msg')
+    GLUE_LOGGER.debug('>> xlog_msg')
     if len(msg) == 0:   # only show_caller in first column
         caller = xret_func_name(2)
         msg = f'{pre}{caller}'
         GLUE_LOGGER.log(log_level, '|%s%30s%s|', X_COL_SCENARIO, '─' * 30, X_COL_RESET)
         GLUE_LOGGER.log(
             log_level,
-            '|%s%30s%s|%s << old_log_msg',
+            '|%s%30s%s|%s << xlog_msg',
             X_COL_SCENARIO,
             msg.center(30),
             X_COL_RESET,
@@ -196,23 +196,23 @@ def old_log_msg(
     elif show_caller:
         caller = xret_func_name(1)
         GLUE_LOGGER.log(
-            log_level, '|%s%21s old_log_msg:| %s  (<< %s)', COL_CONTEXT, pre, msg, caller
+            log_level, '|%s%21s xlog_msg:| %s  (<< %s)', COL_CONTEXT, pre, msg, caller
         )
     else:
-        GLUE_LOGGER.log(log_level, '%s|%21s old_log_msg:| %s  ', COL_CONTEXT, pre, msg)
+        GLUE_LOGGER.log(log_level, '%s|%21s xlog_msg:| %s  ', COL_CONTEXT, pre, msg)
 
     if len(msg) == 0 and 'dbg:TEST_CONTEXT' in TEST_CONTEXT:
         GLUE_LOGGER.info(
-            'dbg:TEST_CONTEXT was found in old_log_msg. Reporting TEST_CONTEXT:'
+            'dbg:TEST_CONTEXT was found in xlog_msg. Reporting TEST_CONTEXT:'
         )  # TODO: debug
         GLUE_LOGGER.info(old_ret_dict_info(TEST_CONTEXT, '* => TEST_CONTEXT'))
         # log_dict(TEST_CONTEXT, 'TEST_CONTEXT')
         del TEST_CONTEXT['dbg:TEST_CONTEXT']
 
-    GLUE_LOGGER.debug('<< old_log_msg')
+    GLUE_LOGGER.debug('<< xlog_msg')
 
 
-def ret_sorted(obj) -> Any:    # tested
+def xret_sorted(obj) -> Any:    # tested
     ret = obj
     if isinstance(obj, dict):
         ret = dict(sorted(obj.items()))
@@ -291,13 +291,13 @@ def old_ret_dict_info(the_dict: dict, name: str, prefix: str = '') -> str:  # te
         ret += ret_item_info('____key____', '____value____', '_item_') + '\n'
         inum = 1
 
-    for key, value in ret_sorted(the_dict).items():
+    for key, value in xret_sorted(the_dict).items():
         # ret += ret_item_info(key, value, prefix) + '\n'
         ret += ret_item_info(key, value, f'i {inum}') + '\n'
         inum = inum + 1
 
-    old_log_msg(msg=ret, show_caller=False)
-    # old_log_msg('ret_dict_info() : ', INFO, ret)
+    xlog_msg(msg=ret, show_caller=False)
+    # xlog_msg('ret_dict_info() : ', INFO, ret)
     GLUE_LOGGER.info('ret_dict_info() >> %s ', ret)
     logging.warning('%sret_dict_info() >> %s ', COL_CONTEXT, ret)
 
@@ -359,7 +359,7 @@ def assert_object(obj, msg: str) -> None:
         assert False, f'No check in assert_object for message {msg}'
 
 
-def old_log_feature(feature: Feature) -> None:
+def xlog_feature(feature: Feature) -> None:
     xlog_msg_start()
     log_func_call_info(WARN, -1, 'HUMBUG')
     # log_func_call_info(info='HUMBUG2')
@@ -376,19 +376,19 @@ def old_log_feature(feature: Feature) -> None:
     log_msg_end()
 
 
-def old_log_scenario(scenario: Scenario) -> None:
+def xlog_scenario(scenario: Scenario) -> None:
     caller: str = xret_func_name(1)
     GLUE_LOGGER.info('|%s', '-' * 55)
-    old_log_msg('-' * 55)
+    xlog_msg('-' * 55)
     xlog_msg_start()
-    old_log_msg('-' * 55)
+    xlog_msg('-' * 55)
     GLUE_LOGGER.info('|%s', '"' * 55)
 
-    GLUE_LOGGER.debug('=> old_log_scenario(scenario) (<< "%s") ', caller)
+    GLUE_LOGGER.debug('=> xlog_scenario(scenario) (<< "%s") ', caller)
     GLUE_LOGGER.info('|%s', '-' * 75)
     GLUE_LOGGER.debug('| Feature: %s', scenario.feature.name)
     GLUE_LOGGER.info(
-        '|%s%30s:|%s Scenario: %s%s (in Feature: "%s") (<< old_log_scenario)',  # TODO -> debug
+        '|%s%30s:|%s Scenario: %s%s (in Feature: "%s") (<< xlog_scenario)',  # TODO -> debug
         COL_CONTEXT,
         ret_before_or_after(caller),
         X_COL_SCENARIO,

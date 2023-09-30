@@ -149,7 +149,7 @@ def author_name() -> str:
 # """
 #     print(f'=> request: (param request)\n\t{request}\n')
 #     context = request.getfixturevalue('context')
-#     assert context is not None
+#     assert context is not None, 'context must be provided!'
 #     print(f'=> context: {context}\n')
 #  """
 # # You can perform any additional actions you need to on the scenario object here

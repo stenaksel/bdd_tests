@@ -1,7 +1,7 @@
 # Configuration of code formatting
 [tool.blue]
 line-length = 100
-target-version = ['py311']
+target-version = ['py310']
 extend-exclude = 'migrations'
 
 [tool.isort]
@@ -17,12 +17,12 @@ enable = [
   'useless-suppression', # helpful to remove dead lint ignore comments
 ]
 
-disable = [
+disable = [ #TODO: Add more
   # 'wildcard-import',            #
-  # 'missing-docstring',          # C0111 missing docstrings are ok
-  # 'missing-function-docstring', # C0116 missing docstrings are ok
-  # 'missing-module-docstring',   # C0114 missing docstrings are ok
-  # 'missing-class-docstring',    # C0115 missing docstrings are ok
+  'missing-docstring',          # C0111 missing docstrings are ok
+  'missing-module-docstring',   # C0114 missing docstrings are ok
+  'missing-function-docstring', # C0116 missing docstrings are ok
+  'missing-class-docstring',    # C0115 missing docstrings are ok
   'too-few-public-methods',     # R0903 allow simple data/entity classes etc.
   # 'unused-wildcard-import',     #
 ]
@@ -43,8 +43,9 @@ log_format = "%(levelname)8s %(message)s"
 markers = [
   "wip: marks tests as work-in-progress (deselect with '-m \"not wip\"')",
   "wipz: marks tests as unfinished work-in-progesz (deselect with '-m \"not wipz\"')",
-  "todo: marks tests as unfinished (deselect with '-m \"not todo\"')",
+  "todo: marks tests as unfinished",
   "ok: marks tests as tested ok (deselect with '-m \"not ok\"')",
+  "okz: marks tests as old-ok test",
   "order: marks ordering for tests (example)",
 ]
 # testpaths = ['tests', 'article', 'conftest_glue', 'eat', 'sah']

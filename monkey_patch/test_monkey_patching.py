@@ -1,7 +1,7 @@
 import inspect
 import pytest
 from pytest_bdd import given
-from tests.common.pytest_bdd_logger_interface import ret_dict_info, ret_item_info
+from tests.common.pytest_bdd_logger_interface import _ret_dict_info, _ret_item_info
 
 
 
@@ -54,7 +54,7 @@ def test_my_monkeypatch(monkeypatch: pytest.MonkeyPatch) -> None:
 
     def replacement_function(*args, **kwargs):
         for key, value in kwargs.items():
-            print(ret_item_info(key, value))
+            print(_ret_item_info(key, value))
 
         return 'Patched glue code'
 
@@ -81,7 +81,7 @@ def test_my_monkeypatch(monkeypatch: pytest.MonkeyPatch) -> None:
     # Get the signature of the original function
     # sig = inspect.signature(the_path)
 
-    print(ret_dict_info(params, 'params'))
+    print(_ret_dict_info(params, 'params'))
 
     print('Calling original function again: ')
     # Test code that calls the glue code function

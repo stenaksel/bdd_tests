@@ -6,10 +6,10 @@ from tests.common.log_glue_incl import (  # log_msg_end,; TEST_CONTEXT,
     KEY_LOG_GLUE,
     KEY_LOGGER,
     assert_messages,
-    old_ret_dict_info,
 )
-from tests.common.pytest_bdd_logger import PytestBddLogger
-from tests.common.pytest_bdd_logger_interface import TEST_CONTEXT, xret_func_name
+
+# from tests.common.pytest_bdd_logger import PytestBddLogger
+from tests.common.pytest_bdd_logger_interface import TEST_CONTEXT, _ret_func_name
 
 from pytest_bdd import parsers, given, when, then  # isort:skip
 
@@ -29,13 +29,13 @@ from pytest_bdd import parsers, given, when, then  # isort:skip
 
 
 def _expect_present(expected_present: bool, context_name: str, key: str, context: dict) -> bool:
-    assert expected_present is not None
-    assert context_name is not None
-    assert key is not None
+    assert expected_present is not None, f'Expected "expected_present" to be present!'
+    assert context_name is not None, f'Expected "context_name" to be present!'
+    assert key is not None,       f'Expected "key" to be present!'
 
     # Check wich logger in question (assign to ctx)
     the_context = TEST_CONTEXT if context_name == 'TEST_CONTEXT' else context
-    assert the_context is not None
+    assert the_context is not None, 'context must be provided'
 
     print(f"==> The presence is: '{expected_present}'")
     the_value = the_context.get(key, None)
@@ -51,8 +51,10 @@ def _expect_present(expected_present: bool, context_name: str, key: str, context
 
 # @given('xthe {str} item {str} is (not present|present)'
 @given(parsers.parse('xthe "{context_name}" item "{item}" {is_present} present'))
-def given_context_item_present(context_name: str, item: str, is_present: str, context: dict) -> bool:
-    assert context is not None
+def given_context_item_present(
+    context_name: str, item: str, is_present: str, context: dict
+) -> bool:
+    assert context is not None, 'context must be provided'
     assert context_name == 'TEST_CONTEXT'
     # assert item == KEY_LOGGER
     assert is_present == 'is not' or is_present == 'is', f'Unknown "is_present" ("{is_present}")!'
@@ -63,7 +65,8 @@ def given_context_item_present(context_name: str, item: str, is_present: str, co
 
     assert _expect_present(
         should_be_present, context_name, item, context
-    ), f'Expected "{item}" to be present in "{context_name}"! (value: "{TEST_CONTEXT.get(item, None)}")'
+    ), f'Expected "{item}" to be present in "{context_name}"! \
+        (value: "{TEST_CONTEXT.get(item, None)}")'
 
     print(f"==> The is_present is: '{is_present}'")
     # Check if we should have the item in the context (ctx)
@@ -93,19 +96,19 @@ def given_context_item_present(context_name: str, item: str, is_present: str, co
 
 # @then('xthe {str} item {str} should (not be|be) present'
 # @then(parsers.parse('xthe "{context_name}" item "{item}" should {is_present} present'))
-# def then_context_should_be_item_present(context: dict, context_name: str, item: str, is_present: str) -> bool:
+# def then_context_should_be_item_present(\
+# context: dict, context_name: str, item: str, is_present: str) -> bool:
 #     return then_context_item_present(context, context_name, item, is_present)
 
 
 # @then('the {str} item {str} should (not be|be) present'
 @then(parsers.parse('the "{context_name}" item "{item}" should {be_present} present'))
 def then_context_item_present(context: dict, context_name: str, item: str, be_present: str) -> bool:
-    assert context is not None
+    assert context is not None, 'context must be provided'
     assert context_name == 'TEST_CONTEXT'
     assert be_present == 'not be' or be_present == 'be', f'Unknown "be_present" ("{be_present}")!'
-    print(f'==> Given the "{context_name}" item "{item}" should {be_present} present in the log <==')
     logging.info(
-        f'==> Given the "%s" item "%s" should %s present <==',
+        '==> Given the "%s" item "%s" should %s present <==',
         context_name,
         item,
         be_present,
@@ -134,8 +137,8 @@ def then_context_item_present(context: dict, context_name: str, item: str, be_pr
 # @then('the value should be {str}.')
 @then(parsers.parse('the value should be "{expected_value}".'))
 def then_value_should_be(context: dict, expected_value: str) -> None:
-    assert context is not None
-    assert expected_value is not None
+    assert context is not None, 'context must be provided'
+    assert expected_value is not None, f'Expected "expected_value" to be present!'
     # 'checked_context_name',
     # 'checked_context_item_name',
     # 'checked_context_item_value'
@@ -150,7 +153,7 @@ def then_value_should_be(context: dict, expected_value: str) -> None:
         ctx = context
         logging.warning('Switch ctx from TEST_CONTEXT to context')
 
-    assert ctx is not None
+    assert ctx is not None, f'Expected "ctx" to be present!'
 
     if 'checked_context_item_value' in ctx:
         actual_value = ctx.get('checked_context_item_value', None)
@@ -160,24 +163,27 @@ def then_value_should_be(context: dict, expected_value: str) -> None:
     else:
         assert (
             False
-        ), f'Expected "{expected_value}", but no knowledge of what to check against! {xret_func_name()}'
+        ), f'Expected "{expected_value}", \
+            but no knowledge of what to check against! {_ret_func_name()}'
 
 
 # @given('the {str} item {str} is (not present|present) or value {str}'
-@given(parsers.parse('the "{context_name}" item "{item}" is {is_present}present or value "{value}"'))
+@given(
+    parsers.parse('the "{context_name}" item "{item}" is {is_present}present or value "{value}"')
+)
 def given_context_item_present_or(
     context_name: str, item: str, is_present: str, value: str, context: dict
 ) -> None:
 
-    assert context is not None
+    assert context is not None, 'context must be provided'
     assert context_name == 'TEST_CONTEXT'
     assert item == KEY_LOGGER
-    assert is_present == 'is not ', f'Unknown "is_present" ("{is_present}")!' #TODO Needs fixing
+    assert is_present == 'is not ', f'Unknown "is_present" ("{is_present}")!'   # TODO Needs fixing
     assert 'not' in is_present, f'Unknown "is_present" ("{is_present}")!'
 
     # Calling other glue to assert the presence or not
     assert given_context_item_present(context_name, item, is_present, context)
-    assert context is not None
+    assert context is not None, 'context must be provided'
 
     ctx = context['context_checked']
 
@@ -212,7 +218,7 @@ def given_context_item_present_or(
         # Iterate over the handlers
         for handler in the_logger.handlers:
             # Check if handler is a null handler
-            found_it = isinstance(logging.NullHandler, False)  # Null handler found
+            found_it = isinstance(handler, logging.NullHandler)  # Null handler found
 
         assert found_it, 'No Null Handler found'
         if found_it:
@@ -265,14 +271,12 @@ def given_context_item_is(context: dict, context_name: str, item: str, value: st
     the_context[item] = the_val
 
 
-@given(parsers.parse('the run is configured with at least log_level = "{wanted_log_level}"'))
+@given(parsers.parse('the run is configured with at least log_level = "{wanted_level}"'))
 def given_run_is_configured_with_at_least_log_level(
-    caplog_fixture, context: dict, wanted_log_level: str
+    caplog_fixture, context: dict, wanted_level: str
 ) -> None:
-    GLUE_LOGGER.warning(
-        f'Given the run is configured with at least log_level = "{wanted_log_level}"'
-    )
-    assert wanted_log_level == 'DEBUG', f'Unexpected log_level: "{wanted_log_level}"'
+    GLUE_LOGGER.warning('Given the run is configured with at least log_level = "%s"', wanted_level)
+    assert wanted_level == 'DEBUG', f'Unexpected log_level: "{wanted_level}"'
     # TODO Implement scenario "Given the run is configured with at least log_level = "INFO""
     # Get logger used for logging
     glue_logger = logging.getLogger(KEY_LOG_GLUE)
@@ -282,17 +286,18 @@ def given_run_is_configured_with_at_least_log_level(
 
     # Get the log level in use
     actual = glue_logger.getEffectiveLevel()
-    # Get wanted_log_level as int
+    # Get wanted_level as int
     assert isinstance(glue_logger, logging.Logger)
     # From string to int for log level:
-    wanted = logging.getLevelName(wanted_log_level)
+    wanted = logging.getLevelName(wanted_level)
+    assert actual == wanted, f'Unexpected log_level: "{actual}"! wanted: "{wanted}"'
 
 
 # # Given I set "TEST_CONTEXT" item "logging" with valid value "True"
 # @given(parsers.parse('I set {context_name}" item "{item}" with value "{value}"'))
 # # But the "TEST_CONTEXT" item "logging" is not present or is False
 # def given_context_item_not_present_or_is(context: dict, context_name: str, item: str, value: str):
-#     assert context is not None
+#     assert context is not None, 'context must be provided'
 #     assert context_name == 'TEST_CONTEXT'
 #     assert item == 'dbg_logging'
 #     assert value == 'False'
@@ -309,7 +314,7 @@ def _just_show_test_context():
 @given(parsers.parse('the "{context_name}" item "{item}" is not present or is "{value}"'))
 # But the "TEST_CONTEXT" item "logging" is not present or is False
 def given_context_item_not_present_or_is(context: dict, context_name: str, item: str, value: str):
-    assert context is not None
+    assert context is not None, 'context must be provided'
     assert context_name == 'TEST_CONTEXT'
     assert item == 'dbg_logging'
     assert value == 'False'
@@ -318,11 +323,11 @@ def given_context_item_not_present_or_is(context: dict, context_name: str, item:
     # assert isinstance(actual, int)
     # assert isinstance(wanted, int)
 
-    # # Compare log_level (int) with wanted_log_level (str)
+    # # Compare log_level (int) with wanted_level (str)
 
     # assert (
     #     actual >= wanted
-    # ), f'Unexp. actual log_level={actual} >= Wanted={wanted} ({wanted_log_level})'
+    # ), f'Unexp. actual log_level={actual} >= Wanted={wanted} ({wanted_level})'
 
 
 def x_is_logging(logger, tf_caplog) -> bool:
@@ -370,12 +375,12 @@ def _is_logging(logger, tf_caplog) -> bool:
 
 
 # Given the run is configured with at least log_level = "INFO"
-@given(parsers.parse('the run is configured with at least log_level = "{wanted_log_level}"'))
+@given(parsers.parse('the run is configured with at least log_level = "{wanted_level}"'))
 def given_run_is_configured_with_at_least_log_level2(
-    caplog_fixture, context: dict, wanted_log_level: str
+    caplog_fixture, context: dict, wanted_level: str
 ):
-    logging.warning(f'Given the run is configured with at least log_level = "{wanted_log_level}"')
-    assert wanted_log_level == 'INFO', f'Unexpected log_level: "{wanted_log_level}"'
+    logging.warning('Given the run is configured with at least log_level = "%s"', wanted_level)
+    assert wanted_level == 'INFO', f'Unexpected log_level: "{wanted_level}"'
     # TODO Implement scenario "Given the run is configured with at least log_level = "INFO""
     # Get logger used for logging
     logger = logging.getLogger()
@@ -384,16 +389,16 @@ def given_run_is_configured_with_at_least_log_level2(
     # Get the log level in use
     log_level = logger.getEffectiveLevel()
 
-    wanted_log_level_int = logging.getLevelNamesMapping().get(wanted_log_level)
+    wanted_level_int = logging.getLevelNamesMapping().get(wanted_level)
     assert (
-        log_level >= wanted_log_level_int
+        log_level >= wanted_level_int
     ), f'Unexpected log_level: "{logging.getLevelName(log_level)}" {log_level})'
 
 
 @when('Pytest-BDD is run')
 @when('the scenario is run')
 def when_the_scenario_is_run(caplog_fixture, context: dict) -> None:
-    assert context is not None
+    assert context is not None, 'context must be provided'
 
     # Clear the captured log records and formatted log output
     # caplog_fixture.clear()
@@ -434,6 +439,7 @@ def x_then_step_using_the_module(caplog_fixture, context: dict, module: str):
     assert num_logs == 0, f'caplog is not empty! Found {num_logs} logs'
     assert caplog_fixture.text == '', f'caplog is not empty! Found text!'
 
+
 # Then there should not be any logging from "log_glue" functions
 @then(parsers.parse('there should {want}be logging from "{module}" functions'))
 def then_step_using_the_module(caplog_fixture, context: dict, want: str, module: str) -> None:
@@ -448,8 +454,9 @@ def then_step_using_the_module(caplog_fixture, context: dict, want: str, module:
 
 
 # TODO Then there should not be any logging from "PytestBddLogger" functions
-@then(parsers.parse('there should not be any logging from "{module}" functions'))
-def given_step_using_the_module(caplog_fixture, context: dict, module: str):
+@then(parsers.parse('there should {want} logging from "{module}" functions'))
+def given_step_using_the_module(caplog_fixture, context: dict, want: str, module: str):
+    assert want in ['not be any', 'be'], f'Unknown value for "want" (: "{want}")!'
     assert module == 'log_glue'   # TODO Use real name: 'PytestBddLogger'
     # assert False, 'Stop here!!! (given_step_using_the_module)'
     context[KEY_DBG_LOG_GLUE] = True
@@ -470,7 +477,5 @@ def given_step_using_the_module(caplog_fixture, context: dict, module: str):
         assert num_logs == 0, f'caplog is not empty! Found {num_logs} logs'
         assert caplog_fixture.text == '', f'caplog is not empty! Found text!\n{caplog_fixture.text}'
 
-    else:
-        assert len(want) == 0, f'Unknown value for "want" (: "{want}")!'
     assert num_logs == 0, f'caplog is not empty! Found {num_logs} logs'
     assert caplog_fixture.text == '', f'caplog is not empty! Found text!'

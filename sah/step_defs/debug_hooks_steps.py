@@ -1,21 +1,21 @@
 import logging
 
+from pytest_bdd import parsers, given, when, then  # isort:skip
 # from tests.common.log_glue import *
 from tests.common.log_glue_incl import (  # log_msg, log_msg_end,
-    KEY_LOG_GLUE,
+    # KEY_LOG_GLUE,
     TEST_CONTEXT,
     get_logger,
     old_ret_dict_info,
 )
 # from tests.common.pytest_bdd_logger import PytestBddTracer
-from tests.common.pytest_bdd_logger_interface import KEY_HOOKS
+from tests.common.pytest_bdd_logger_interface import KEY_HOOKS, _log_dict_now
 
 # logger = logging.getLogger(__name__)
 
 # from logging import DEBUG, INFO, WARNING
 
 
-from pytest_bdd import parsers, given, when, then  # isort:skip
 
 # from pytest_bdd.parsers import parse
 
@@ -32,8 +32,15 @@ EXPECTED_NUM_PARAMS = None  # TODO Implement scenario "Then" step for checking?
 def given_this_scenario_is_tagged_with_wip(tag: str) -> None:
     assert tag == 'wip'
 
+@given(parsers.parse('a "{func_name}" Pytest-BDD hook function'))
+def pytest_bdd_hook_function(context: dict, func_name: str) -> None:
+    assert context is not None, 'context must be provided'
+    assert func_name == 'pytest_bdd_before_scenario', f'assert - [{func_name}]'
+    # assert False, f'assert - ! {func_name}'
+
+
 # pytest.hook function in conftest.py
-@given(parsers.parse('a "{func_name}" Pytest-BDD hook function in conftest.py'))
+@given(parsers.parse('a "{func_name}" hook function'))
 def pytest_bdd_hook_function_in_conftest_py(context, func_name: str) -> None:
     print('pytest_bdd_hook_function_in_conftest_py context: %s', context)
     logger = get_logger()
@@ -52,6 +59,11 @@ def pytest_bdd_hook_function_in_conftest_py(context, func_name: str) -> None:
     # TODO assert func_name in called_functions
     # xlog_glue_end(context)
 
+@when('the scenario is run')
+def when_the_scenario_is_run(context: dict) -> None:
+    assert context is not None, 'context must be provided'
+    _log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT')
+
 @when('the step definition is run')
 def when_glue_is_run(context: dict) -> None:
     context['dbg_log_glue'] = True
@@ -62,14 +74,12 @@ def when_glue_is_run(context: dict) -> None:
 @then('I have the hook function "{hook_function}" declared')
 def then_hook_function_declared(context, hook_function) -> None:
     print("then_hook_function_declared: '%s' - context: %s", hook_function, context)
-    pass
 
 
 @then('it calls the function {str}')
 @then('it calls the function "{func_name}"')
 def then_function_called(context: dict, func_name: str) -> None:
     print("then_function_called: '%s' - context: %s", func_name, context)
-    pass
 
 
 @given('a glue function without any parameters')
@@ -83,6 +93,7 @@ def given_a_glue_function_no_params() -> None:
 # @given('a step definition using the {str} fixture')
 @given(parsers.parse('a step definition using the "{fixture_name}" fixture'))
 def given_step_definiton_using_fixture(context: dict, fixture_name: str) -> None:
+    assert context is not None, 'context must be provided'
     assert fixture_name == 'context'
     # xlog_glue(context=context, fixture_name=fixture_name)
     # xlog_glue_end(context)
@@ -97,10 +108,13 @@ def given_step_definiton_using_fixture(context: dict, fixture_name: str) -> None
 #     # xlog_glue_end(context)
 
 
-@given('the variable "{variable}" is set to "{val}"')
-def given_scenario_step_variable(context: dict, variable: str, val: bool) -> None:
-    pass
-    # global DO_INCL_CURR_INFO   # pylint: disable=global-statement
+@given('the variable "{variable}" is set to "{value}"')
+def given_scenario_step_variable(context: dict, variable: str, value: bool) -> None:
+    assert context is not None, 'context must be provided!'
+    assert variable is not None, 'variable must be provided!'
+    assert value is not None, 'value must be provided!'
+    assert False #TODO
+    # global DO_INCL_CURR_INFO   # py-lint: disable=global-statement
     # # xlog_glue(context=context, variable=variable, val=val)
     # assert variable == 'DO_INCL_CURR_INFO'
     # assert val in ['True', 'False']
@@ -124,13 +138,12 @@ def given_i_have_a_step_def_with_context_param(context: dict, pstr: str) -> None
     logging.info('Given I have step definition given a context parameter')
     assert context is not None, 'context must be provided'
     assert pstr == 'context'
-    # xlog_glue(context=context, pstr=pstr)
     stored_context = context
-    # xlog_glue_end(context)
 
 
 @given('I have a glue function "{func}" without parameters')
 def given_i_have_a_glue_func_no_params(context: dict, func: str) -> None:
+    assert context is not None, 'context must be provided'
     assert func == 'glue_func_no_params', 'For this test the function name was wrong'
     glue_func_no_params_exist = True
     assert glue_func_no_params_exist
@@ -140,22 +153,26 @@ def given_i_have_a_glue_func_no_params(context: dict, func: str) -> None:
 
 @when('I run "pytest -rA -m wip"')
 def when_pytest_is_run_wip(context: dict) -> None:
-    pass   # TODO
+    assert context is not None, 'context must be provided'
+    # TODO
 
 
 @then('pytest will execute the tests tagged "@wip"')
 def then_pytest_will_execute_the_tests_tagged_wip(context) -> None:
-    pass   # TODO
+    assert context is not None, 'context must be provided'
+    # TODO
 
 
 @then('provide a detailed summary report')
 def then_provide_a_detailed_summary_report(context) -> None:
-    pass   # TODO
+    assert context is not None, 'context must be provided'
+    # TODO
 
 
 @then('the "log_glue" functions will also display informative texts for the run')
 def then_the_log_glue_function_will_also_display_informative_texts(context) -> None:
-    pass   # TODO
+    assert context is not None, 'context must be provided'
+    # TODO
 
 
 @when('"glue_func_no_params" is called by Pytest-BDD')
@@ -172,10 +189,8 @@ def glue_func_no_params() -> None:
 
 @then('information about the called function should be logged')
 def then_information_about_the_called_function_should_be_logged(context) -> None:
-    # xlog_glue(context=context)
+    assert context is not None, 'context must be provided'
     assert _the_when_func_was_called, 'The "glue_func_no_params" was not called!'
-    # assert False
-    # xlog_glue_end(context)
 
 
 @then('hook {str} function execution should be logged')

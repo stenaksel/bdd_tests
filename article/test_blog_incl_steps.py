@@ -20,7 +20,7 @@ def given_there_is_an_article() -> None:
     ret_article = Article('art.title', 'art.author')
     assert ret_article.name == 'art.title'
     assert ret_article.title == 'art.title'
-    assert ret_article.author is not None
+    assert ret_article.author is not None, 'art.author is None'
     assert ret_article.author == 'art.author'
     print(f"\t<== returning target_fixture: 'article': \n\t  {ret_article}")
     return ret_article
@@ -30,7 +30,7 @@ def given_there_is_an_article() -> None:
 def when_i_request_the_deletion_of_the_article(article: Article) -> Result:
     print("==> when_i_request_the_deletion_of_the_article  (<- target_fixture='request_result')")
     print(f'\tReceived fixture param: {article}')
-    assert article is not None
+    assert article is not None, 'article must be provided!'
     # article.deleted()
     # return Result()
     ret = Result(200)

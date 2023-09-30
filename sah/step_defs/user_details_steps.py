@@ -7,11 +7,11 @@ from pytest_bdd import given, when, then   # isort:skip
 
 @given('I have the following user details:')
 def step_given_user_details(context, step) -> None:
-    assert step is not None
-    assert step.text is not None
+    assert step is not None, 'No step found!'
+    assert step.text is not None, 'No step text found!'
     body = step.text
-    assert isinstance(body, str)
-    assert len(body) != 0
+    assert isinstance(body, str), 'Step text is not a string!'
+    assert len(body) != 0, 'Step text is empty!'
     user_details = json.loads(step.text)
     context['user_details'] = user_details
 

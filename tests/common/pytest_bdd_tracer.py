@@ -10,7 +10,7 @@ from pytest_bdd.parser import Feature, Scenario, ScenarioTemplate, Step
 # from tests.common.bdd_logger import PytestBddLogger
 # from tests.common.log_glue_incl import ret_func_name  # TODO Move to interface?
 from tests.common.log_glue_incl import TEST_CONTEXT
-from tests.common.pytest_bdd_logger_interface import PytestBddLoggerInterface
+from tests.common.pytest_bdd_logger_interface import PytestBddLoggerInterface, _log_dict_now
 
 # BbbLogger related constants:
 
@@ -85,7 +85,7 @@ class PytestBddTracer(PytestBddLoggerInterface):
     # @abstractmethod #TODO
     def log_scenario(self, scenario: Scenario) -> None:
         self.log_func_name(msg=scenario.name, fillchar='_')
-        self.log(f'\t {self.COL_MSG}Scenario: "{scenario.name}"')
+        self.log(f'\t {self.COL_SCENARIO}Scenario: "{scenario.name}"')
 
 
 
@@ -102,16 +102,23 @@ class PytestBddTracer(PytestBddLoggerInterface):
         Returns:
             None
         """
+        self._before_feature_assert_params(_request, feature)
+        self.log_func_name(msg=feature.name, fillchar='_')
         # self.log(f'Feature_: "{feature.name}"')
         # self.log_func_name(fillchar=' _:')
 
-        self._before_feature_assert_params(_request, feature)
         TEST_CONTEXT[self.KEY_CURR_FEATURE] = feature.name
 
+        caller = self.ret_func_name(1)
+        logging.warning(caller)
+        print(caller)
+
+        assert 'pytest_bdd_before_' in caller, 'Unknown caller: ' + caller
+        self.log_hook('pytest_bdd_before_feature')
         self.log_func_name(msg=feature.name)
         self.log_feature(feature)
 
-        self.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT')
+        _log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT')
 
     def before_scenario(
         self, _request: FixtureRequest, feature: Feature, scenario: Scenario
@@ -129,6 +136,7 @@ class PytestBddTracer(PytestBddLoggerInterface):
         step: Step,
         step_func: Callable,
     ) -> None:
+        logging.info(' -------------------------------------> before_step')
         self.log_func_name(fillchar='h:\t->\t ', msg=step.name)
 
         # assert False, 'Not supposed to pass this point! pytest_bdd_tracer.py - before_step'
@@ -141,7 +149,7 @@ class PytestBddTracer(PytestBddLoggerInterface):
         # logging.warning('after_scenario <--- %s', __file__)
         super().after_scenario(request, feature, scenario)
         logging.info(' <------------------------------------- after_scenario')
-        self.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT')
+        _log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT')
         logging.info(' <------------------------------------- after_scenario')
         # assert False, 'Not supposed to pass this point! pytest_bdd_tracer.py - after scenario'
 
@@ -156,7 +164,6 @@ class PytestBddTracer(PytestBddLoggerInterface):
     ) -> None:
         self.log_func_name(fillchar='\t<-')
         logging.info(' <------------------------------------- after_step')
-        # assert False, 'Not supposed to pass this point! pytest_bdd_tracer.py - after step'
 
 
     def ret_context_info(self, prev: int = 1) -> str:
@@ -168,10 +175,10 @@ class PytestBddTracer(PytestBddLoggerInterface):
     def log(
         self, msg: str, log_level: int = logging.INFO, pre: str = '', show_caller: bool = False
     ) -> None:
-        # logging.info('%s\t%s%s%s', self.COL_MSG, msg, self.COL_CONTEXT, self.ret_context_info(2))
+        logging.info('%s\t%s%s%s', self.COL_MSG, msg, self.COL_CONTEXT, self.ret_context_info(2))
 
-        # logging.info('%s%s%s_1 log: %s', self.COL_MSG, msg, self.COL_CONTEXT, self.ret_context_info(1))
-        # logging.info('%s%s%s__ %s', self.COL_MSG, msg, self.COL_CONTEXT, self.ret_context_info())
+        logging.info('%s%s%s_1 log: %s', self.COL_MSG, msg, self.COL_CONTEXT, self.ret_context_info(1))
+        logging.info('%s%s%s__ %s', self.COL_MSG, msg, self.COL_CONTEXT, self.ret_context_info())
 
         # context_info = (
         #     ''
@@ -191,6 +198,7 @@ class PytestBddTracer(PytestBddLoggerInterface):
         pass
 
     def log_hook(self, msg: str = '') -> None:
+        self.log_func_name(msg=msg)
         self.log_func_name(prev=1, fillchar='H:', msg='æ:'+msg)
         self.log_func_name(prev=0, fillchar='', msg='ø:'+msg)
         self.log_func_name(prev=0, msg='å:'+msg)
@@ -212,12 +220,12 @@ class PytestBddTracer(PytestBddLoggerInterface):
         # assert fillchar == ":"
         context_info = (
             '' if not self.show_context
-            else self.ret_context_info(2)
+            else self.ret_context_info(1 + prev)
             # else f"(<-by {self._ret_func_name(prev)}() in {self.ret_classname()} (it's caller: {self._ret_func_name(prev + 2)}() ))"
         )
         # logging.warning('Called by %s', self._ret_func_name(1 + prev))
         if fillchar == "H:":
-            context_info += 'SAH'
+            context_info += ' <- with H!'
 
         logging.info(
             '%s%s%s %s%s %s %s',

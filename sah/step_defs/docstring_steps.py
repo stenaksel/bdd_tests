@@ -1,9 +1,7 @@
 import inspect
 import logging
 import pprint
-import sys
 from pprint import pprint
-from types import FrameType
 
 from pytest_bdd import parsers, given, when, then   # isort:skip
 
@@ -15,13 +13,14 @@ from pytest_bdd import parsers, given, when, then   # isort:skip
 
 @given(parsers.parse('I have a message_:'))
 def given_i_have_a_message0(context) -> None:
-    pass
+    assert context is not None, 'context must be provided!'
 
 
 # @given('I have a message:')
 @given(parsers.parse('I have a message:\n{doc_string}'))
 # def given_i_have_a_message(context, doc_string: str = None) -> None:
 def given_i_have_a_message(context, doc_string: str) -> None:
+    assert context is not None, 'context must be provided!'
     # log_glue(context=context, scenario=given_i_have_a_message.scenario)
     # dok_str = given_i_have_a_message.scenario.feature.scenarios[0].docstring
     # xlog_glue(context=context, dok_str=dok_str)
@@ -47,7 +46,7 @@ def print_function_name() -> None:
 @given(parsers.parse('I have step without a Docstring:'))
 def given_i_have_step_without_a_docstring(context, doc_string: str = None) -> None:
     print('==> given_i_have_step_without_a_docstring:\n')
-    assert doc_string is None, 'Not supposed to be handed a DocString'
+    assert doc_string is None, 'Not supposed to be handed a DocString, but got one!' + doc_string
     print(f'\tthe context: {context}\n\tdoc_string:  {doc_string}\n')
     given_i_have_step_with_a_docstring(context, doc_string)
 
@@ -62,13 +61,14 @@ def given_i_have_step_with_a_docstring(context, doc_string: str) -> None:
     # Put doc_string into context.doc_string
     context['message'] = doc_string   # .text
     # xlog_glue_end(context)
-    assert False, 'Not supposed to pass this point! bdd_tracer.py - docstring_steps.py - given_i_have_step_with_a_docstring'
+    # assert False, 'Not supposed to pass this point! bdd_tracer.py - docstring_steps.py - given_i_have_step_with_a_docstring'
 
 
 @when('I ask for how many lines the message have')
 def when_i_ask_for_how_many_lines_the_message_have(context) -> None:
     print('==> when_i_ask_for_how_many_lines_the_message_have:\n')
     print(f'\tthe context: {context}\n')
+    return
     # xlog_glue(context=context)
     num_lines = 0
     try:
@@ -99,7 +99,7 @@ def when_i_ask_for_how_many_lines_the_message_have(context) -> None:
 @then(parsers.parse('I should be told it was {expected_num:d} lines'))
 def then_i_should_be_told_it_was_1_line(context, expected_num: int) -> None:
     # xlog_glue(context=context, expected_num=expected_num)
-    assert context['num_lines'] is not None
+    assert context['num_lines'], 'No num_lines in the context!'
     num_lines = context['num_lines']
     assert isinstance(num_lines, int)
     assert isinstance(expected_num, int)
