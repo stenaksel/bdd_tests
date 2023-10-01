@@ -1,9 +1,9 @@
 import logging
 from typing import List
 
-#from logging import DEBUG, INFO, WARN, LogRecord
-#from typing import Callable, Generator, List
-#from unittest import mock
+# from logging import DEBUG, INFO, WARN, LogRecord
+# from typing import Callable, Generator, List
+# from unittest import mock
 from unittest.mock import call, patch
 
 import pytest
@@ -12,9 +12,15 @@ from pytest_bdd.parser import Feature  # , Scenario, ScenarioTemplate, Step
 # from tests.common.log_glue_incl import xret_sorted  # tested
 # from tests.common.log_glue_incl import xlog_msg, xlog_msg_start
 from tests.common.pytest_bdd_logger import PytestBddLogger
-from tests.common.pytest_bdd_logger_interface import TEST_CONTEXT, KEY_LOG_GLUE, _log_dict_now, _log_func_name, _ret_func_name
+from tests.common.pytest_bdd_logger_interface import (
+    TEST_CONTEXT,
+    KEY_LOG_GLUE,
+    _log_dict_now,
+    _log_func_name,
+    _ret_func_name,
+)
 
-#from pytest_mock import MockerFixture
+# from pytest_mock import MockerFixture
 
 
 # Configure the logger you want to capture log messages from
@@ -160,10 +166,11 @@ def test_log_msg_start() -> None:
 #     mock_service.get_data.return_value = 'Mocked data'
 #     return mock_service
 
+
 @pytest.mark.ok
 def test_before_feature_params() -> None:
     _log_func_name()
-    #Given:
+    # Given:
     bdd_logger = PytestBddLogger()
     # assert isinstance(bdd_logger, PytestBddLogger)
 
@@ -198,7 +205,7 @@ def test_before_feature() -> None:
     with (
         patch(f'{module}.log_msg_start') as mock_log_msg_start,
         patch(f'{module}.log_feature') as mock_log_feature,
-        patch(f'{module}.log_msg_end') as mock_log_msg_end
+        patch(f'{module}.log_msg_end') as mock_log_msg_end,
     ):
         # When I call
         logging.info('When I call: before_feature(None, feature)')
@@ -210,6 +217,7 @@ def test_before_feature() -> None:
         mock_log_msg_start.assert_called_once()
         mock_log_feature.assert_called_once()
         mock_log_msg_end.assert_called_once()
+
 
 @pytest.mark.wipz
 def test_before_feature_2() -> None:
@@ -251,6 +259,7 @@ def test_before_feature_2() -> None:
             logging.info('  %s', func)
         # mock_log_msg_end.assert_has_calls(expected_calls)
 
+
 @pytest.mark.todo
 def test_before_feature_do_update_context() -> None:
     _log_func_name()
@@ -264,7 +273,7 @@ def test_before_feature_do_update_context() -> None:
     module = 'tests.common.pytest_bdd_logger'
     with (
         patch(module + '.log_func_name') as mock_log_func_name,
-        patch(module + '.log_feature') as mock_log_feature
+        patch(module + '.log_feature') as mock_log_feature,
     ):
         # When I call
         logging.info('When I call: before_feature(None, feature)')
@@ -276,8 +285,6 @@ def test_before_feature_do_update_context() -> None:
         logging.info('Then assert that the mocked functions were called')
         mock_log_func_name.assert_called_once()
         mock_log_feature.assert_called_once()
-
-
 
 
 @pytest.mark.skip   # TODO Not working yet

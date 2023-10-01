@@ -43,10 +43,6 @@ from tests.common.log_glue_incl import (
 )
 
 
-def _the_caller0() -> str:
-    return _ret_func_name()
-
-
 def _the_caller(prev: int = 0) -> str:
     return _ret_func_name(prev)
 
@@ -72,17 +68,17 @@ def test_just_show_test_context() -> None:
     logging.info('<== test_just_show_test_context')
 
 
-@pytest.mark.wipz
+@pytest.mark.ok
 def test_ret_func_name() -> None:
 
-    logging.info('==> test__ret_func_name')
+    # logging.info('==> test__ret_func_name')
 
     assert _ret_func_name() == 'test_ret_func_name'
+
     # The different _func have a default "prev" param
     # that will be passed on to _the_caller and should return themself
     # _the_caller is the only function calling _ret_func_name function.
 
-    assert _the_caller0() == '_the_caller0'   # a caller of the _ret_func_name()
     assert _the_caller() == '_the_caller'   # _the_caller of _ret_func_name
     assert _func1() == '_func1'             # will only call _the_caller
     assert _func2() == '_func2'             # will only call _func1
@@ -92,8 +88,7 @@ def test_ret_func_name() -> None:
     assert _func3(1) == '_func1'            # will only call _func2(prev=1)
     assert _func3(0) == '_the_caller'       # will only call _func2(prev=0)
 
-    # log_msg_end()
-    logging.info('<== test__ret_func_name')
+    # logging.info('<== test__ret_func_name')
 
 
 @pytest.mark.skip
@@ -181,13 +176,14 @@ def _clear_caplog(caplog) -> None:
 #     return True
 
 
-def remove_ansi_escape_sequences(text:str):
+def remove_ansi_escape_sequences(text: str):
     # print('------------> remove_ansi_escape_sequences from:')
     # print(text) # There might be ANSI escape sequences in the text
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
     ret = ansi_escape.sub('', text)
     # print(ret) # No more ANSI escape sequences in the text
     return ret
+
 
 def assert_logged(
     caplog, level, expected: List, in_sequence: bool = False
@@ -237,7 +233,7 @@ def assert_logged(
         print('#### messages_found messages before:')
         print(messages_found)
         rest = [message for message in rest if message not in messages_found]
-        print("#### found messages:")
+        print('#### found messages:')
         print(messages_found)
         print('#### rest messages after:')
         print('\n#### '.join(rest))
@@ -245,7 +241,7 @@ def assert_logged(
 
     # if bool(rest):
     if len(rest) == 0:
-        print("#### rest messages (in end):")
+        print('#### rest messages (in end):')
         print('\n'.join(rest))
         # assert len(rest) == 0, f"Couldn't find all lines! {len(rest)} lines left: {rest}"
         level_name = logging.getLevelName(level)

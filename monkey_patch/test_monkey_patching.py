@@ -4,7 +4,6 @@ from pytest_bdd import given
 from tests.common.pytest_bdd_logger_interface import _ret_dict_info, _ret_item_info
 
 
-
 # def _ret_dict_info(the_dict: dict, name: str, prefix: str = '::') -> str:
 #     """
 #     Function ret_dict_info returns a string with info

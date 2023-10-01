@@ -1,6 +1,7 @@
 {
     "recommendations": [
-        "siarheikuchuk.gherkin-beautifier-vs-code-plugin",
+        "alexkrechik.cucumberautocomplete",
+        "vscode.json-language-features", 
         "tamasfe.even-better-toml"
     ]
 }
