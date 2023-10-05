@@ -15,8 +15,6 @@ import logging
 # from ansi2html import strip_ansi
 import re
 
-from tests.common.log_helper import LogHelper
-
 # from logging import DEBUG, INFO, WARN, LogRecord
 from logging import INFO
 from typing import List
@@ -25,32 +23,21 @@ from unittest.mock import call, patch
 
 import pytest
 
-# from pytest_bdd.parser import Feature, Scenario, ScenarioTemplate, Step
-from tests.common.log_helper import (
-    TEST_CONTEXT,
-    COL_CONTEXT,
-    COL_MSG,
-    COL_RESET,
-    # _ret_dict_info,
-    # log_func_name,
-)
-from tests.common.pytest_bdd_logger_interface import (
-    log_headline,
-    # ret_keys,
-    # _log_dict_now,  # TODO Make test
-    # _log_func_name,
-    # ret_classname,
-)
+from tests.common.log_helper import LogHelper, TEST_CONTEXT, COL_RESET
+# (
+#     # ret_keys,
+#     log_dict_now,  # TODO Make test
+#     log_func_name,
+#     log_headline,
+#     # ret_classname,
+#     ret_dict_info,
+#     ret_func_name,
+#     log_func_call,
+#     log_func_name,
+# )
 
 from tests.common.pytest_bdd_tracer import PytestBddTracer
 from tests.common.pytest_bdd_logger import PytestBddLogger
-
-from tests.common.log_helper import (
-    LogHelper,
-    # ret_before_or_after,  # TODO Move to interface
-    # ret_keys,  # TODO Move to interface
-    # xret_sorted,  # TODO Move to interface
-)
 
 
 def _the_caller(prev: int = 0) -> str:
@@ -77,20 +64,25 @@ def test_just_show_test_context() -> None:
     logging.info(TEST_CONTEXT)
     logging.info('<== test_just_show_test_context')
 
-################################################################################
+@pytest.mark.ok
+def test_ret_classname() -> None:
+    bdd_logger = PytestBddLogger()
+    assert bdd_logger.ret_classname() == 'PytestBddLogger'
+    # bdd_logger = PytestBddTracer()
+    # assert bdd_logger.ret_classname() == 'PytestBddTracer'
 
 @pytest.mark.ok
-def test_ret_func_name() -> None:
+def test_log_func_name() -> None:
 
-    # logging.info('==> test__ret_func_name')
+    # logging.info('==> test_log_func_name')
 
-    assert LogHelper.ret_func_name() == 'test_ret_func_name'
+    assert LogHelper.ret_func_name() == 'test_log_func_name'
 
     # The different _func have a default "prev" param
     # that will be passed on to _the_caller and should return themself
-    # _the_caller is the only function calling _ret_func_name function.
+    # _the_caller is the only function calling LogHelper.log_func_name function.
 
-    assert _the_caller() == '_the_caller'   # _the_caller of _ret_func_name
+    assert _the_caller() == '_the_caller'   # _the_caller of LogHelper.log_func_name
     assert _func1() == '_func1'             # will only call _the_caller
     assert _func2() == '_func2'             # will only call _func1
     assert _func3() == '_func3'             # will only call _func2
@@ -99,18 +91,18 @@ def test_ret_func_name() -> None:
     assert _func3(1) == '_func1'            # will only call _func2(prev=1)
     assert _func3(0) == '_the_caller'       # will only call _func2(prev=0)
 
-    # logging.info('<== test__ret_func_name')
+    # logging.info('<== test__log_func_name')
 
 
 @pytest.mark.skip
-def test__ret_func_name2() -> None:
+def test_log_func_name2() -> None:
     this_func = '?'
     print(__file__)
     with mock.patch('tests.common.log_glue_incl.logging') as mock_logger:
-        this_func = LogHelper.ret_func_name()
-        mock_logger.debug.assert_called_once_with('>> _ret_func_name')
+        this_func = LogHelper.log_func_name()
+        mock_logger.debug.assert_called_once_with('>> log_func_name')
 
-    assert this_func == 'test__ret_func_name'
+    assert this_func == 'test__log_func_name'
 
 
 @pytest.mark.ok
@@ -141,7 +133,32 @@ def test_ret_dict_info() -> None:
     assert '-prefix- the name' in ret
     assert 'the name       : [dict] (#=3)' in ret
     assert '-prefix- the name       : [dict] (#=3)' in ret
+    #TODO assert False, 'Implementation not finished yet'
 
+
+@pytest.mark.ok
+def test_ret_before_or_after() -> None:
+
+    with pytest.raises(AssertionError) as excinfo:
+        LogHelper.ret_before_or_after(None)
+    assert str(excinfo.value) == 'No param "func_name"'
+    with pytest.raises(AssertionError) as excinfo:
+        LogHelper.ret_before_or_after('')
+    assert str(excinfo.value) == 'No param "func_name"'
+    # with pytest.raises(AssertionError) as excinfo:
+    #     LogHelper.ret_before_or_after('before-or-after')
+    # assert str(excinfo.value) == 'No _ char found in "func_name". (Expects _)'
+
+    assert 'Before' == LogHelper.ret_before_or_after('before_')
+    assert 'Before' == LogHelper.ret_before_or_after('beforehand')
+    assert 'Before' == LogHelper.ret_before_or_after('before_some_text')
+    assert 'Before' == LogHelper.ret_before_or_after('beforesometext')
+    assert 'Before' == LogHelper.ret_before_or_after('some_text_before')
+    assert 'Before' == LogHelper.ret_before_or_after('sometextbefore')
+    assert 'After' == LogHelper.ret_before_or_after('after')
+    assert 'After' == LogHelper.ret_before_or_after('after_some_text')
+    assert 'After' == LogHelper.ret_before_or_after('some_text_after')
+    assert 'After' == LogHelper.ret_before_or_after('hereafterlife')
 
 
 def _clear_caplog(caplog) -> None:
@@ -237,7 +254,6 @@ def assert_logged(
 
 @pytest.mark.ok
 def test_log_func_name_xxx(caplog) -> None:
-    LogHelper.log_func_name()
 
     _clear_caplog(caplog)
     LogHelper.log_func_name()
@@ -258,7 +274,7 @@ def test_log_func_name_caplog(caplog) -> None:
     #####################################
     lines_expeced = [
         '#' * 75,
-        f'  {LogHelper.ret_func_name()}  '.center(75, '#'),
+        f'  {LogHelper.log_func_name()}  '.center(75, '#'),
         '#' * 75,
     ]
 
@@ -270,58 +286,29 @@ def test_log_func_name_caplog(caplog) -> None:
     # Then I will see that the log uses that fillchar instead of the default
     LogHelper.log_func_name()
     # Then I will see that the log uses the wanted fillchar ('+')
-    lines_expeced = [f'  {LogHelper.ret_func_name()}  '.center(75, plus)]
+    lines_expeced = [f'  {LogHelper.log_func_name()}  '.center(75, plus)]
     assert_logged(caplog, level=INFO, expected=lines_expeced)
 
 
 @pytest.mark.ok
-def test_log_headline() -> None:
-    assert LogHelper.ret_func_name() == 'test_log_headline'
-    default_fillchar = '#'
+def test_log_func_call():
+    assert LogHelper.ret_func_name() == 'test_log_func_call'
+
+    def inner_func_for_testing_log_func_call(param1:str, param2:str, param3:int):
+        LogHelper.log_func_call()
 
     with patch('logging.info') as mock_info:
-        log_headline('test_log_headline') # Using default fillchar
-
-        # Assert that the mock_info was called 3 times with the expected arguments
-        # mock_info.assert_has_calls([
-        mock_info.assert_has_calls(
-            [
-                call('\t%s', default_fillchar * 75),
-                call('\t%s', '  test_log_headline  '.center(75, default_fillchar)),
-                call('\t%s', default_fillchar * 75),
-            ]
-        )
+        inner_func_for_testing_log_func_call('val1', 'val2', 3)
+    # Accessing the mock_calls attribute to see the logged messages
+    for call in mock_info.mock_calls:
+        print(call)
+    # Assert that the mock_info was called with the expected arguments
+    mock_info.assert_has_calls(
+        [
+            call("-> inner_func_for_testing_log_func_call(param1='val1', param2='val2', param3=3)"),
+        ]
+    )
     #
-
-
-@pytest.mark.ok
-def test_log_headline_with_fillchar() -> None:
-    assert LogHelper.ret_func_name() == 'test_log_headline_with_fillchar'
-    fillchar = '#'
-
-    # #### Assert functions called
-    module = 'tests.common.pytest_bdd_logger'
-    # with (
-    #     # patch(f'{module}.log_func_name') as mock_log_func_name,
-    #     patch(f'{module}.log_hook') as mock_log_hook, #TODO should log_hook be called?
-    #     # patch(f'{module}.log_feature') as mock_log_feature,
-    # ):
-
-    log_headline(msg='Just testing', fillchar=fillchar)
-
-    with patch('logging.info') as mock_info:
-        log_headline(msg='Some Headline we want', fillchar=fillchar)
-        # Assert that the mock_info was called 3 times with the expected arguments
-        # mock_info.assert_has_calls([
-        mock_info.assert_has_calls(
-            [
-                call('\t%s', fillchar * 75),
-                call('\t%s', '  Some Headline we want  '.center(75, fillchar)),
-                call('\t%s', fillchar * 75),
-            ]
-        )
-    #
-
 
 
 # @pytest.fixture
@@ -336,3 +323,19 @@ def test_log_headline_with_fillchar() -> None:
 # @mock.patch('tests.common.log_glue_incl.log_msg_start')
 # @mock.patch('tests.common.log_glue_incl.log_msg')
 # @mock.patch('tests.common.log_glue_incl.log_msg_end')
+
+@pytest.mark.skip   # TODO Not working yet
+def test_log_msg() -> None:
+    LogHelper.log_func_name()
+
+    with patch('logging.info') as mock_info:
+        LogHelper.log_msg('Testing')
+
+        # Assert that the mock_info was called times with the expected arguments
+        mock_info.assert_has_calls(
+            [
+                call('%s', '#' * 75),
+                call('%s', '  test_log_func_name  '.center(75, '#')),
+                call('%s', '#' * 75),
+            ]
+        )

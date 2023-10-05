@@ -1,20 +1,21 @@
+Feature: Doc Strings
 
-Feature: doc strings
+  Doc Strings are useful when you have plenty of text to enter in multiple lines.
+  For example, to represent the exact content of an email message, you could use a Doc String.
+  DocString should be written within pair of triple quotes (or alernatively three backticks)
 
-  @wip
+  @ok
   Scenario: Assign string value without a doc string
-    Given I have step without a doc string:
-      """
-      1
-      """
+    Given I have a step without a doc string:
     When I ask for how many lines the doc string have
     Then I should be told it was no lines (because the doc string was missing)
 
   @ok
   Scenario: Assign string value from doc string with no lines
-    Given I have step with a doc string:
+    Given I have a step with a doc string:
       """
       """
+    But the doc string don't contain any lines
     When I ask for how many lines the message have
     Then I should be told it was 0 lines
 
@@ -26,6 +27,23 @@ Feature: doc strings
       """
     When I ask for how many lines the message have
     Then I should be told it was 1 line
+
+  #TODO Handle multiple docstrings in same scenario
+  @skip @todo
+  Scenario: Assign string values from multiple one-liner doc strings
+    Given I have a message:
+      """
+      This is a test message.
+      """
+    And I have another message:
+      """
+      This is another
+      test message.
+      """
+    When I ask for information about message(s) and number of line(s)
+    Then I should be informed it was 2 doc strings
+    And informed that 1. had 1 line
+    And informed that 2. had 2 lines
 
   @ok
   Scenario: Assign string value from doc string with two lines
@@ -39,7 +57,7 @@ Feature: doc strings
 
   @ok
   Scenario: Assign string value from doc string with multiple lines
-    Given I have step with a doc string:
+    Given I have a step with a doc string:
       """
         This is a test message.
         This is a second message.
@@ -47,41 +65,10 @@ Feature: doc strings
       """
     When I ask for how many lines the message have
     Then I should be told it was 3 lines
-
-#TODO Handle multiple docstrings in same scenario
-  Scenario: Scenario with multiple doc strings
-    Given I have step with a doc string:
-      """
-        This is a test message.
-        This is a second message.
-        This is the third test message.
-      """
-    When I ask for how many lines the message have
-    Then I should be told it was 3 lines
-
-  #    When eg. ask for how many lines the doc string is
-  #    Then I should be told it was 3 lines long
-
-  #    Then the message should be delivered successfull
-
-  # Scenario: Send an email
-  #   Given I have an email address "john@example.com"
-  #     And I have a message:
-  #         """
-  #         This is a test message.
-  #         """
-  #    When I send the message to the email address
-  #    Then the message should be delivered successfull
-
-
-  # Scenario: Create a new user
-  #   Given I have the following user details:
-  #    When I send a POST request to the /users endpoint
-  #    Then the response status code should be 201
 
   @ok
-  Scenario: Formatting the docstring based on content type: xml
-    Given I have step with a doc string:
+  Scenario: Using a docstring with xml content (type specified)
+    Given I have a step with a doc string:
       """xml
       <xml>
         <tag>Content: This is a test message.</tag>
@@ -90,16 +77,20 @@ Feature: doc strings
     When I ask for how many lines the message have
     Then I should be told it was 3 lines
 
-  @wip
+  @ok
+  Scenario: Using a docstring with xml content
   Scenario: Formatting the docstring based on content type: xml 1 line
-    Given I have step with a doc string:
-      """ <xml><tag>Content: This is a test message.</tag></xml> """
-       When I ask for how many lines the message have
-       Then I should be told it was 1 lines
+    Given I have a step with a doc string:
+      """
+      <xml><tag>Content: This is a test message.</tag></xml>
+      """
+    When I ask for how many lines the message have
+    Then I should be told it was 1 lines
 
-  @todo
-  Scenario: Formatting the docstring based on content type: xml 1 line
-      Given I have step with a doc string:
+
+  @ok
+  Scenario: Using a docstring with xml content (weird - not preffered format)
+    Given I have a step with a doc string:
       """<xml><tag>Content: This is a test message.</tag></xml>"""
     When I ask for how many lines the message have
     Then I should be told it was 2 lines  #Q: Why 2 lines?

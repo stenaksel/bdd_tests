@@ -18,17 +18,16 @@ enable = [
 ]
 
 disable = [ #TODO: Add more
-  # 'wildcard-import',            #
   'missing-docstring',          # C0111 missing docstrings are ok
   'missing-module-docstring',   # C0114 missing docstrings are ok
   'missing-function-docstring', # C0116 missing docstrings are ok
   'missing-class-docstring',    # C0115 missing docstrings are ok
   'too-few-public-methods',     # R0903 allow simple data/entity classes etc.
-  # 'unused-wildcard-import',     #
+  'unused-wildcard-import',     #
+  'wildcard-import',            # W0611 unused import
 ]
 
 ignore = 'migrations' # Do not enforce naming rules for generated files.
-
 
 [tool.pytest.ini_options]
 log_cli = true

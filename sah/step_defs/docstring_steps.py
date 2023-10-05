@@ -3,6 +3,8 @@ import logging
 import pprint
 from pprint import pprint
 
+from pytest_bdd.utils import dump_obj
+
 from pytest_bdd import parsers, given, when, then   # isort:skip
 
 
@@ -11,7 +13,7 @@ from pytest_bdd import parsers, given, when, then   # isort:skip
 # TODO Investigate pytestbdd fixtures: pytestbdd_stepdef_given_trace, ++
 
 
-@given(parsers.parse('I have a message_:'))
+@given(parsers.parse('I have no message:'))
 def given_i_have_a_message0(context) -> None:
     assert context is not None, 'context must be provided!'
 
@@ -41,15 +43,20 @@ def print_function_name() -> None:
     print(inspect.currentframe().f_code.co_name)
 
 
-@given('I have a step without a message')
-@given('I have step with no doc string')
-@given('I have step without a doc string:')
-def given_i_have_step_without_a_docstring(context, doc_string: str = None) -> None:
-    print('==> given_i_have_step_without_a_docstring:\n')
+@given('I have a step without a doc string:')
+def given_i_have_step_without_a_doc_string(context, doc_string: str = None) -> None:
+
+    print('==> given_i_have_step_without_a_doc_string:\n')
+    logging.info('given_i_have_step_without_a_doc_string:\n\t context:')
+    logging.info('----------')
+    dump_obj(doc_string)
+    logging.info('----------')
     assert doc_string is None, 'Not supposed to be handed a DocString, but got one!' + doc_string
     print(f'\tthe context: {context}\n\tdoc_string:  {doc_string}\n')
 
-@given(parsers.parse('I have step with a doc string:\n{doc_string}'))
+
+# @given('I have a step with a doc string:')
+@given(parsers.parse('I have a step with a doc string:\n{doc_string}'))
 def given_i_have_step_with_a_docstring(context, doc_string: str) -> None:
     print('==> given_i_have_step_with_a_docstring:\n')
     assert doc_string is not None, 'doc_string must be provided!'
@@ -61,6 +68,10 @@ def given_i_have_step_with_a_docstring(context, doc_string: str) -> None:
     context['message'] = doc_string   # .text
     # xlog_glue_end(context)
     # assert False, 'Not supposed to pass this point! bdd_tracer.py - docstring_steps.py - given_i_have_step_with_a_docstring'
+
+@given('the doc string don\'t contain any lines')
+def the_doc_string_dont_contain_any_lines(context) -> None:
+    pass
 
 
 @when('I ask for how many lines the doc string have')
@@ -100,6 +111,8 @@ def when_i_ask_for_how_many_lines_the_message_have(context) -> None:
 @then(parsers.parse('I should be told it was {expected_num:d} lines'))
 def then_i_should_be_told_it_was_n_lines(context, expected_num: int = -1) -> None:
     num_lines = context.get('num_lines', -1)
+    logging.info('expected_num: %s (%s)', expected_num, type(expected_num).__name__)
+    logging.info('num_lines: %s', num_lines)
     assert num_lines is not None, 'No num_lines in the context!'
     assert isinstance(num_lines, int)
     assert isinstance(expected_num, int)

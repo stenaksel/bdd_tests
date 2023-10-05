@@ -1,4 +1,3 @@
-import inspect
 import logging
 from abc import ABC, abstractmethod
 from collections import OrderedDict
@@ -8,176 +7,48 @@ from pytest import Config, FixtureRequest, Function, Item
 from pytest_bdd.parser import Feature, Scenario, Step
 
 from src.ansi_colors import ANSIColor
-
-# COL_GLUE = '\033[1;36m'
-COL_INFO = ANSIColor.BLUE.value
-COL_MSG = ANSIColor.CYAN.value
-COL_RESET = ANSIColor.RESET.value
-COL_SCENARIO = ANSIColor.YELLOW.value
-COL_STEP = ANSIColor.GREEN.value
-COL_CONTEXT = ANSIColor.GRAY.value
-
-# TEST_CONTEXT = {'name': 'TEST_CONTEXT'}
-TEST_CONTEXT = OrderedDict({'name': 'TEST_CONTEXT'})
-# Constants used for items in TEST_CONTEXT:
-KEY_CURR_FEATURE = 'Current feature'
-KEY_CURR_GLUE = 'Current glue'
-KEY_CURR_SCENARIO = 'Current scenario'
-KEY_CURR_STEP = 'Current step'
-KEY_LOG_GLUE = 'log_glue'    # TODO: Values:False, True, Hooks (=True), Feature, Scenario, Step
-KEY_LOGGER = 'logger'    # TODO: Values: False,  True
+from tests.common.log_helper import (
+    LogHelper,
+    TEST_CONTEXT,
+    COL_CONTEXT,
+    # KEY_CURR_FEATURE,
+    # KEY_CURR_GLUE,
+    # KEY_CURR_SCENARIO,
+    # KEY_CURR_STEP,
+    # KEY_STEP_COUNTER,
+    # KEY_LOG_GLUE,
+    # KEY_LOGGER,
+    # KEY_FUNC,
+    # KEY_HOOKS,
+)
 
 
-KEY_FUNC = '|Func'      # TODO Should add all glue functions that gets called
-KEY_HOOKS = '|Hooks'    # TODO Should add all hooks that gets called
-
-
-def _log_dict_now(the_dict: dict, name: str = None, prefix: str = '\t\t') -> None:
-
-    assert isinstance(the_dict, dict), 'A dict was not given!'
-    assert prefix is not None, 'Prefix was not given!'
-
-    logging.info(' -------------------------------------> _log_dict_now Begin')
-    _log_func_name()
-    # _log_func_name()
-
-    # logging.info(
-    #     '%s%s%s: --> %s %s',
-    #     COL_CONTEXT,
-    #     prefix,
-    #     name if name else 'dict',
-    #     # ret_func_name(),
-    #     the_dict,
-    #     self._ret_provider_info()
-    # )
-
-    the_length = len(the_dict) if the_dict else '--EMPTY!'
-    # logging.info('\t%s%s #%s: %s %s', \
-        # COL_CONTEXT, name, the_length, the_dict, self._ret_provider_info())
-
-    logging.info(_ret_dict_info(the_dict, name, 'x'))
-    # logging.info(ret_dict_info(the_dict, name, prefix))
-    # log_items(the_dict, prefix)
-    logging.info(' <------------------------------------- _log_dict_now End')
-
-
-def _log_func_name(prev: int = 0, informative=True) -> None:  # tested
-    caller = _ret_func_name(prev + 2)
-    logging.info(
-        '%s->%s  %s(prev=%s)',
-        COL_INFO if not informative else COL_CONTEXT,
-        _ret_func_name(1),
-        COL_MSG,
+def log_headline(
+    msg: str, prev: int = 0, fillchar: str = '#'
+) -> None:  # tested
+    assert msg != None, 'No message! (Got: None)'
+    assert fillchar != None, 'No fillchar! (Got: None)'
+    assert fillchar and len(fillchar) == 1, f"No fillchar (len 1)! (Got: '{fillchar}')"
+    caller = LogHelper.ret_func_name(1)
+    logging.debug(
+        "log_headline(msg='%s', prev=%s, fillchar='%s') << %s",
+        msg,
         prev,
-
+        fillchar,
+        caller,
     )
-    # logging.info(
-    #     '%s->%s  %s(prev=%s) << %s %s',
-    #     COL_INFO if not informative else COL_CONTEXT,
-    #     _ret_func_name(1),
-    #     COL_MSG,
-    #     prev,
-    #     caller,
-    #     _ret_provider_info(),
-    # )
-    # logging.info(
-    #     '\t%s->%s  %s(prev=%s) << %s %s',
-    #     COL_INFO if not informative else COL_CONTEXT,
-    #     _ret_func_name(1),
-    #     COL_MSG,
-    #     prev,
-    #     caller,
-    #     _ret_provider_info(),
-    # )
     logging.debug('(using prev %s)', 1 + prev)
 
-    # caller = xret_func_name(1 + prev)
-    # log_headline(caller, prev, inRow, fillchar)
+    caller = LogHelper.ret_func_name(1 + prev)
+    name_info = f'  {msg}  '
+    # TODO debug:
+    logging.debug('Found "%s" (Used prev %s)', name_info, 1 + prev)
+    ###########################################################################
+    ###########################################################################
+    logging.info('\t%s', fillchar * 75)
+    logging.info('\t%s', name_info.center(75, fillchar))
+    logging.info('\t%s', fillchar * 75)
 
-
-def _ret_provider_info() -> str:
-    ret = f'(<- by {_ret_func_name(1)}() with caller {_ret_func_name(2)}())'
-    return ret
-
-
-def _ret_func_name(prev: int = 0) -> str:
-    """
-    Usage:
-    * _ret_func_name() - will return it's own func_name ("the caller of ret_func_name()")
-    * _ret_func_name(1) - will return the func_name of the caller
-    * _ret_func_name(2) - will return the func_name of the callers caller
-    """
-    # logging.info('ret_func_name(prev=%s)', prev)
-    return inspect.stack()[1 + prev][3]
-
-
-def _ret_dict_info(the_dict: dict, name: str, prefix: str = '::') -> str:
-    """
-    Function ret_dict_info returns a string with info
-    about the named dictionary and its content
-        Param 1: name: str
-        Param 2: it: dict
-    """
-    assert isinstance(the_dict, dict), 'A dict was not given!'
-    the_length = '--EMPTY!'
-    if the_dict:
-        the_length = len(the_dict)
-    caller: str = inspect.stack()[1][3]
-
-    ret = f'{prefix} {name:<15}: [dict] (#={the_length}) (<< "{caller}") {TEST_CONTEXT} \n\n'
-
-    ret += _ret_item_info('____key____', '____value____', prefix + '____') + '\n'
-    # for key, value in ret_sorted(the_dict).items():   # Sorted by key
-    for key, value in the_dict.items():
-        ret += _ret_item_info(key, value, prefix + ' i:') + '\n'
-
-    return '\x1b[90m' + ret + '\x1b[0m'
-
-    # def _ret_dict_info(self, the_dict: dict, name: str, prefix: str = '') -> str:
-    #     """
-    #     Function ret_dict_info returns a string with info
-    #     about the named dictionary and its content
-    #         Param 1: it: dict
-    #         Param 2: name: str
-    #         Param 3: prefix: str (optional)
-    #     """
-    #     assert isinstance(the_dict, dict), 'A dict was not given!'
-
-    #     the_length = '--EMPTY!' if not the_dict else len(the_dict)
-
-    #     ret = f'{prefix} {name:<15}: [dict] (#={the_length})\n'
-    #     # the_dict['temp'] = 'hallo'
-    #     show_items = True
-    #     if show_items and the_dict and the_length != 0:   # Include the items in the_dict
-    #         ret += ret_item_info('____key____', '____value____', '_item_') + '\n'
-    #         inum = 1
-
-    #     for key, value in ret_sorted(the_dict).items():
-    #             # ret += ret_item_info(key, value, prefix) + '\n'
-    #             ret += ret_item_info(key, value, f'i {inum}') + '\n'
-    #             inum = inum + 1
-
-    #     xlog_msg(msg=ret, show_caller=False)
-    #     # xlog_msg('ret_dict_info() : ', INFO, ret)
-    #     GLUE_LOGGER.info('ret_dict_info() >> %s ', ret)
-    #     logging.warning('%sret_dict_info() >> %s ', COL_CONTEXT, ret)
-
-    #     # return ret
-    #     return str(COL_INFO) + ret + str(COL_RESET)
-
-
-def _ret_item_info(name: str, item, prefix: str = 'i') -> str:
-    """
-    Function ret_item_info returns a string with info
-    about the named item, its type and its content
-        Param 1: name: str
-        Param 2: item
-    """
-    item_type = f'[{type(item).__name__}]' if not '_key_' in name else '_type_'
-    key_info = (
-        '{name:<20}' if prefix and prefix[0] == 'p' else f'{name.rjust(20, " ")}'
-    )   # TODO needed: len(prefix) > 0?
-    return f'\t{prefix}\t{key_info} : {item_type:>10} : {item}'
 
 
 # def _log_dict_now(the_dict: dict, name: str = None, prefix: str = '\t\t') -> None:
@@ -200,21 +71,14 @@ def _ret_item_info(name: str, item, prefix: str = 'i') -> str:
 
 #     the_length = len(the_dict) if the_dict else '--EMPTY!'
 #     # logging.info('\t%s%s #%s: %s %s', \
-            # COL_CONTEXT, name, the_length, the_dict, self._ret_provider_info())
+# COL_CONTEXT, name, the_length, the_dict, self._ret_provider_info())
 
 #     # TODO Finish method: log_dict_now
-#     logging.info(_ret_dict_info(the_dict, name, 'x'))
-#     # logging.info(ret_dict_info(the_dict, name, prefix))
+#     logging.info(LogHelper.ret_dict_info(the_dict, name, 'x'))
+#     # logging.info(LogHelper.ret_dict_info(the_dict, name, prefix))
 #     logging.info(' <------------------------------------- log_dict_now E')
 
 #     # log_items(the_dict, prefix)
-
-
-def ret_sorted(obj) -> Any:    # tested
-    ret = obj
-    if isinstance(obj, dict):
-        ret = dict(sorted(obj.items()))
-    return ret
 
 
 class PytestBddLoggerInterface(ABC):
@@ -242,32 +106,40 @@ class PytestBddLoggerInterface(ABC):
 
     @classmethod
     def ret_classname(cls) -> str:
+        """
+        Return the name of the class.
+
+        :param cls: The class object.
+        :return: The name of the class as a string.
+        :rtype: str
+        """
         return cls.__name__
 
     def _m_ret_provider_info(self) -> str:
-        ret = f'(<- by {self.ret_classname()}.{self.ret_func_name(1)}() \
-            with caller {self.ret_func_name(2)}())'
+        ret = f'(<- by {self.ret_classname()}.{LogHelper.ret_func_name(1)}() \
+            with caller {LogHelper.ret_func_name(2)}())'
         return ret
 
-    def ret_func_name(self, prev: int = 0) -> str:
-        """
-        Usage:
-        * ret_func_name() - will return it's own func_name ("the caller of ret_func_name()")
-        * ret_func_name(1) - will return the func_name of the caller
-        * ret_func_name(2) - will return the func_name of the callers caller
-        """
-        return (
-            inspect.currentframe().f_back.f_code.co_name
-            if prev == 0
-            else inspect.stack()[1 + prev][3]
-        )
-        # using inspect.currentframe().f_back.f_code.co_name is generally more efficient
-        # and performs better in terms of performance when retrieving the function name
-        # (than the else alternative).
+    # def ret_func_name(self, prev: int = 0) -> str:
+    #     """
+    #     Usage:
+    #     * ret_func_name() - will return it's own func_name ("the caller of ret_func_name()")
+    #     * ret_func_name(1) - will return the func_name of the caller
+    #     * ret_func_name(2) - will return the func_name of the callers caller
+    #     """
+    #     return (
+    #         inspect.currentframe().f_back.f_code.co_name
+    #         if prev == 0
+    #         else inspect.stack()[1 + prev][3]
+    #     )
+    #     # using inspect.currentframe().f_back.f_code.co_name is generally more efficient
+    #     # and performs better in terms of performance when retrieving the function name
+    #     # (than the else alternative).
 
     @abstractmethod
-    def log_hook(self) -> None:
+    def log_hook(self) -> None: # TODO: skal alle log_-metodene legges her eller alle være i tracer?
         raise NotImplementedError()
+
 
     def log_dict(self, the_dict: dict, name: str, incl_items: bool = True) -> None:
         """
@@ -278,13 +150,14 @@ class PytestBddLoggerInterface(ABC):
             Param 3: incl_items: bool (default: True)
         """
         logging.info('%s', '_' * 100)
-        # logging.info('%s', '--1' * 25)
-        # temp = self.ret_dict_info(the_dict, name, 'log_dict:') #TODO ret_dict_info
+        logging.info('%s', '--1' * 25)
         temp = COL_CONTEXT + name   # TODO
-        # logging.info('%s', '--2' * 25)
+        logging.info('%s', '--2' * 25)
         temp += ' : ' + str(the_dict)
+        temp += LogHelper.ret_dict_info(the_dict, name)
         logging.info(temp)
         logging.info('%s', '_' * 100)
+        #
 
     def log_configuration(self) -> None:
         config: Config = TEST_CONTEXT.get('config', None)
@@ -319,7 +192,7 @@ class PytestBddLoggerInterface(ABC):
         """
         # print('configure() called by: ', self._ret_func_name(1)) #TODO Remove
 
-        self.log_func_name()
+        LogHelper.log_func_name()
 
         TEST_CONTEXT['config'] = config
         # log_configuration() will be called later to inform about config
@@ -334,14 +207,16 @@ class PytestBddLoggerInterface(ABC):
             item: Item: the test item being executed
             nextitem: Optional[Item]
         """
-        self.log_func_name(fillchar='h:', msg=f'(item.name: {item.name})')
+        assert 'pytest_runtest_protocol' == LogHelper.ret_func_name(1)
+        LogHelper.log_func_name_with_info(msg=f'(item.name: {item.name})', fillchar='h:')
 
         assert item is not None, '(pytest) runtest_protocol: item is None'
-        print('(pytest)runtest_protocol: item = ' + item.__class__.__name__)
+        # print('(pytest)runtest_protocol: item = ' + item.__class__.__name__)
         assert isinstance(item, Function), '(pytest) runtest_protocol: item is not a Function'
-        print('(pytest)runtest_protocol:     item = ' + str(item))
-        print('(pytest)runtest_protocol: nextitem = ' + str(nextitem))
-        logging.warning('(pytest)runtest_protocol: test = %s', str(item))
+        print('(pytest)runtest_protocol: item.name = ' + item.name)
+        # print('(pytest)runtest_protocol: nextitem = ' + str(nextitem))
+        logging.info('(pytest)runtest_protocol: test => %s', item.name)
+        # log_headline(msg=item.name)
 
         # xlog_msg_start()
         # # Check if the test is a Pytest-BDD step
@@ -358,26 +233,27 @@ class PytestBddLoggerInterface(ABC):
         #     item.obj = patched_step_func
         # log_msg_end()
 
-    def _before_feature_assert_params(self, _request: FixtureRequest, feature: Feature) -> None:
-        assert feature is not None, 'No feature param! (_before_feature_assert_params)'
-        assert feature.name is not None, 'Feature name is empty! (_before_feature_assert_params)'
+    def _assert_obj_named(self, named_obj: Any, name_min_length: int = 3) -> None:  #TODO Start using this
+        assert named_obj is not None, f'No named_obj param! (_assert_obj_named)'
+        assert named_obj.name is not None, f'{named_obj.__class__.__name__} name is empty! (_assert_obj_named: {named_obj})'
         assert (
-            len(feature.name) > 3
-        ), 'Feature name should be longer! (_before_feature_assert_params)'
-        logging.info('Feature name: %s', feature.name)
+            len(named_obj.name) > name_min_length # TODO is length check > 3 OK?
+        ), f'{named_obj.__class__.__name__} name should be longer! Was just: "{named_obj.name}" (_assert_obj_named)'
+        logging.info('Asserted scenario param: %s', named_obj.name)
+
 
     @abstractmethod
     def before_feature(self, _request: FixtureRequest, feature: Feature) -> None:
         raise NotImplementedError()
 
-    # @abstractmethod
-    # def log_dict_now(self, the_dict: dict, name: str, prefix: str = '¤') -> None:
-
     @abstractmethod
     def before_scenario(
         self, _request: FixtureRequest, feature: Feature, scenario: Scenario
     ) -> None:
-        self.log_func_name(fillchar='  ->', msg=scenario.name)
+        self._assert_obj_named(feature)
+        self._assert_obj_named(scenario)
+        LogHelper.log_func_name_with_info(scenario.name, fillchar='h:\t->\t ')
+        # LogHelper.log_func_name(fillchar='  ->', msg=scenario.name)
 
     @abstractmethod
     def before_step(
@@ -388,15 +264,15 @@ class PytestBddLoggerInterface(ABC):
         step: Step,
         step_func: Callable,
     ) -> None:
+        LogHelper.log_func_name_with_info(step.name, fillchar='    ->')
         assert False, 'Not passing before_step!'
-        self.log_func_name(fillchar='    ->', msg=step.name)
 
     # TODO ???:
     # def after_feature(request: FixtureRequest, feature: Feature) -> None:
 
     @abstractmethod
     def after_scenario(self, request: FixtureRequest, feature: Feature, scenario: Scenario) -> None:
-        self.log_func_name(fillchar='  <-', msg=scenario.name)
+        LogHelper.log_func_name_with_info(scenario.name, fillchar='  <-')
         # assert False, 'Not passing after_scenario!'
 
     @abstractmethod
@@ -409,15 +285,13 @@ class PytestBddLoggerInterface(ABC):
         _step_func: Callable,
         step_func_args: dict[str, Any],
     ) -> None:
-        self.log_func_name(fillchar='    <-', msg=step.name)
+        LogHelper.log_func_name_with_info(step.name, fillchar='    <-')
+        # LogHelper.log_dict_now
+        self.log_dict(step_func_args, 'step_func_args')
         # assert False, 'Not passing after_step!'
 
     @abstractmethod
     def log(
         self, msg: str, log_level: int = logging.INFO, pre: str = '', show_caller: bool = False
     ) -> None:
-        raise NotImplementedError()
-
-    @abstractmethod
-    def log_func_name(self, prev: int = 0, fillchar: str = None, msg: str = '') -> None:
         raise NotImplementedError()

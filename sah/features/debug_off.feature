@@ -18,18 +18,6 @@ Feature: Debug Off
   # Then the correct Step Definition (aka glue function) will be shown
 
 
-  # KEY_CURR_FEATURE = 'Current feature'
-  # KEY_CURR_GLUE = 'Current glue'
-  # KEY_CURR_SCENARIO = 'Current scenario'
-  # KEY_CURR_STEP = 'Current step'
-  # KEY_CONTEXT = 'context'
-  # KEY_DBG_FUNC_NAME = 'dbg:func_name'
-  # KEY_LOG_GLUE = 'log_glue'    # TODO: Values: None (=False), False,  True, Hooks (=True), Feature, Scenario, Step
-  # KEY_LOGGER = 'logger'    # TODO: Values: None (=False), False,  True
-  # KEY_STEP_COUNTER = 'step_counter'
-  # TEST_CONTEXT = {'name': 'TEST_CONTEXT'}
-  # GLUE_LOGGER = logging.getLogger(KEY_LOG_GLUE)
-
   @todo #TODO work-in-progress
   Scenario: Just testing
     Given a Pytest-BDD test using the "PytestBddLogger" module

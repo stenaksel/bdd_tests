@@ -1,10 +1,9 @@
 import logging
 
 # from tests.common.log_glue import *
-from tests.common.log_glue_incl import old_ret_dict_info
 
 from pytest_bdd import parsers, given, when, then   # isort:skip
-
+from tests.common.log_helper import LogHelper
 
 # pylint: disable=invalid-name ## ( => sah: using "it" )
 
@@ -43,7 +42,7 @@ def given_i_have_a_calculator(context) -> None:
 
 # @when('I add {int} and {int}')
 @when(parsers.parse('I add {num1:d} and {num2:d}'))
-def when_i_add_num1_and_num2(context, num1, num2) -> None:
+def when_i_add_num1_and_num2(context, num1: int, num2: int) -> None:
     # logging.info('0. case: when_i_add_num1_and_num2 => %s & %s', num1, num2)
     # xlog_glue(context=context, num1=num1, num2=num2)
     context['sum'] = num1 + num2
@@ -53,7 +52,7 @@ def when_i_add_num1_and_num2(context, num1, num2) -> None:
 # @then('the result should be {int}')
 @then(parsers.parse('the result should be {total:d}'))
 def then_result_should_be(context, total: int) -> None:
-    logging.debug(old_ret_dict_info(context, 'context', '----'))
+    logging.debug(LogHelper.log_dict_now, 'context')
 
     for it in context:
         logging.info('then_result_should_be\tit=%s, value=%s', it, context[it])

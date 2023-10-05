@@ -32,10 +32,8 @@
       "args": [
         "EXAMPLE_REPLACE: " + "${fileDirname}".replace("\\",
         "/")
-                // Executing task: blue 'EXAMPLE_REPLACE: ' C:\Users\StenAkselHeien\vscodeProjects\bdd_tests\tests\common
+        // Executing task: blue 'EXAMPLE_REPLACE: ' C:\Users\StenAkselHeien\vscodeProjects\bdd_tests\tests\common
         // "EXAMPLE_REPLACE: " + "${file}"
-        // Executing task: blue 'EXAMPLE_REPLACE: ' C:\Users\StenAkselHeien\vscodeProjects\bdd_tests\tests\common\log_glue_incl.py
-        // "EXAMPLE_REPLACE: " + "${file}".replace(/\\/g, "/")
       ],
       "options": {
         "cwd": "${workspaceFolder}"

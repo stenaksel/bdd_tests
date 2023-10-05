@@ -1,15 +1,21 @@
 import logging
 from logging import INFO
 
-from tests.common.log_glue_incl import (  # log_msg_end,; TEST_CONTEXT,
-    GLUE_LOGGER,
+from tests.common.log_helper import LogHelper
+
+from tests.common.log_helper import(  # log_msg_end,; TEST_CONTEXT,
+    # GLUE_LOGGER,
+    KEY_DBG_LOG_GLUE,
+    KEY_DBG_LOGGING,
     KEY_LOG_GLUE,
     KEY_LOGGER,
-    assert_messages,
+)
+from tests.common.log_glue_incl import (  # log_msg_end,; TEST_CONTEXT,
+    GLUE_LOGGER,
 )
 
 # from tests.common.pytest_bdd_logger import PytestBddLogger
-from tests.common.pytest_bdd_logger_interface import TEST_CONTEXT, _ret_func_name
+from tests.common.pytest_bdd_logger_interface import TEST_CONTEXT
 
 from pytest_bdd import parsers, given, when, then  # isort:skip
 
@@ -164,7 +170,7 @@ def then_value_should_be(context: dict, expected_value: str) -> None:
         assert (
             False
         ), f'Expected "{expected_value}", \
-            but no knowledge of what to check against! {_ret_func_name()}'
+            but no knowledge of what to check against! {LogHelper.ret_func_name()}'
 
 
 # @given('the {str} item {str} is (not present|present) or value {str}'
@@ -471,7 +477,7 @@ def given_step_using_the_module(caplog_fixture, context: dict, want: str, module
     num_logs = len(caplog_fixture.records)
     if 'not' in want:
 
-        assert_messages(caplog_fixture, level=INFO)
+        LogHelper.assert_messages(caplog_fixture, level=INFO, messages=caplog_fixture.records)
         # assert_messages(caplog_fixture, level=INFO, caplog_fixture.records)
 
         assert num_logs == 0, f'caplog is not empty! Found {num_logs} logs'
