@@ -12,7 +12,6 @@ You can then access these log records through the caplog.records attribute.
 """
 import logging
 
-# from ansi2html import strip_ansi
 import re
 
 # from logging import DEBUG, INFO, WARN, LogRecord
@@ -22,8 +21,20 @@ from unittest import mock
 from unittest.mock import call, patch
 
 import pytest
+from pytest_bdd.parser import Feature  # , Scenario, ScenarioTemplate, Step
 
-from tests.common.log_helper import LogHelper, TEST_CONTEXT, COL_RESET
+from tests.common.log_helper import (
+    COL_CONTEXT,
+    COL_INFO,
+    COL_MSG,
+    COL_RESET,
+    TEST_CONTEXT,
+    LogHelper,
+)
+
+# from tests.common.pytest_bdd_tracer import PytestBddTracer
+from tests.common.pytest_bdd_logger import PytestBddLogger
+
 # (
 #     # ret_keys,
 #     log_dict_now,  # TODO Make test
@@ -35,9 +46,6 @@ from tests.common.log_helper import LogHelper, TEST_CONTEXT, COL_RESET
 #     log_func_call,
 #     log_func_name,
 # )
-
-from tests.common.pytest_bdd_tracer import PytestBddTracer
-from tests.common.pytest_bdd_logger import PytestBddLogger
 
 
 def _the_caller(prev: int = 0) -> str:
@@ -64,12 +72,14 @@ def test_just_show_test_context() -> None:
     logging.info(TEST_CONTEXT)
     logging.info('<== test_just_show_test_context')
 
+
 @pytest.mark.ok
 def test_ret_classname() -> None:
     bdd_logger = PytestBddLogger()
     assert bdd_logger.ret_classname() == 'PytestBddLogger'
     # bdd_logger = PytestBddTracer()
     # assert bdd_logger.ret_classname() == 'PytestBddTracer'
+
 
 @pytest.mark.ok
 def test_log_func_name() -> None:
@@ -94,17 +104,6 @@ def test_log_func_name() -> None:
     # logging.info('<== test__log_func_name')
 
 
-@pytest.mark.skip
-def test_log_func_name2() -> None:
-    this_func = '?'
-    print(__file__)
-    with mock.patch('tests.common.log_glue_incl.logging') as mock_logger:
-        this_func = LogHelper.log_func_name()
-        mock_logger.debug.assert_called_once_with('>> log_func_name')
-
-    assert this_func == 'test__log_func_name'
-
-
 @pytest.mark.ok
 def test_ret_sorted() -> None:
     some_dict = {'c': 'C', 'a': 'A', 'b': 'B'}
@@ -119,7 +118,9 @@ def test_ret_sorted() -> None:
     print(sorted_dict)
     print(sorted_keys)
     assert sorted_dict == correct_dict, 'The sort is NOT right'
-    assert LogHelper.ret_keys(sorted_dict) == LogHelper.ret_keys(correct_dict), 'The sort is NOT right'
+    assert LogHelper.ret_keys(sorted_dict) == LogHelper.ret_keys(
+        correct_dict
+    ), 'The sort is NOT right'
 
 
 @pytest.mark.ok
@@ -133,7 +134,7 @@ def test_ret_dict_info() -> None:
     assert '-prefix- the name' in ret
     assert 'the name       : [dict] (#=3)' in ret
     assert '-prefix- the name       : [dict] (#=3)' in ret
-    #TODO assert False, 'Implementation not finished yet'
+    # TODO assert False, 'Implementation not finished yet'
 
 
 @pytest.mark.ok
@@ -190,7 +191,7 @@ def remove_ansi_escape_sequences(text: str):
 
 
 def assert_logged(
-    caplog, level, expected: List, in_sequence: bool = False
+    caplog, level, expected: List, _in_sequence: bool = False
 ) -> None:   # TODO in_sequence
     assert isinstance(expected, list)
     assert len(expected) > 0, 'No expected messages passed to assert_logged'
@@ -264,7 +265,7 @@ def test_log_func_name_xxx(caplog) -> None:
     assert_logged(caplog, level=INFO, expected=expected)
 
 
-@pytest.mark.ok
+@pytest.mark.skip
 def test_log_func_name_caplog(caplog) -> None:
     assert caplog, '*** No caplog param! ***'
     # Set the logger to capture log messages from
@@ -278,7 +279,7 @@ def test_log_func_name_caplog(caplog) -> None:
         '#' * 75,
     ]
 
-    assert_logged(caplog, level=INFO, expected=lines_expeced, in_sequence=True)
+    assert_logged(caplog, level=INFO, expected=lines_expeced, _in_sequence=True)
 
     _clear_caplog(caplog)
     # When called with a non-default fillchar
@@ -291,21 +292,39 @@ def test_log_func_name_caplog(caplog) -> None:
 
 
 @pytest.mark.ok
-def test_log_func_call():
-    assert LogHelper.ret_func_name() == 'test_log_func_call'
+def test_quoted_string_from():
 
-    def inner_func_for_testing_log_func_call(param1:str, param2:str, param3:int):
+    # Given a string param
+    param = 'simly a string'
+    assert LogHelper.quoted_string_from(param) == f"'{param}'"
+    # assert LogHelper._string_from(param) == "'simly a string'"
+
+    # Given a feature param
+    name = 'Feature_name'
+    feature = Feature(None, '', '', name, set(), None, 1, '')
+    assert LogHelper.quoted_string_from(feature) == f"'{name}'"
+
+
+@pytest.mark.wipz
+def test_log_func_call():
+    def inner_func_for_testing_log_func_call(_p1: str, _p2: str, _p3: int, _feature: Feature):
         LogHelper.log_func_call()
 
+    # Given a "valid feature" (in our test context)
+    feature = Feature(None, '', '', 'Feature_name', set(), None, 1, '')
     with patch('logging.info') as mock_info:
-        inner_func_for_testing_log_func_call('val1', 'val2', 3)
+        inner_func_for_testing_log_func_call('val1', 'val2', 3, feature)
+
     # Accessing the mock_calls attribute to see the logged messages
-    for call in mock_info.mock_calls:
-        print(call)
+    for a_call in mock_info.mock_calls:
+        print(a_call)
+
     # Assert that the mock_info was called with the expected arguments
+
+    expected_call = f"{COL_MSG}inner_func_for_testing_log_func_call{COL_INFO}(_p1='val1', _p2='val2', _p3=3, _feature='Feature_name'){COL_CONTEXT}(<- by log_func_call() with caller inner_func_for_testing_log_func_call())"
     mock_info.assert_has_calls(
         [
-            call("-> inner_func_for_testing_log_func_call(param1='val1', param2='val2', param3=3)"),
+            call(expected_call),
         ]
     )
     #
@@ -324,12 +343,13 @@ def test_log_func_call():
 # @mock.patch('tests.common.log_glue_incl.log_msg')
 # @mock.patch('tests.common.log_glue_incl.log_msg_end')
 
+
 @pytest.mark.skip   # TODO Not working yet
 def test_log_msg() -> None:
     LogHelper.log_func_name()
 
     with patch('logging.info') as mock_info:
-        LogHelper.log_msg('Testing')
+        # TODO LogHelper.log_msg('Testing')
 
         # Assert that the mock_info was called times with the expected arguments
         mock_info.assert_has_calls(

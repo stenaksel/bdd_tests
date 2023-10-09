@@ -32,6 +32,7 @@ from pytest_bdd import parsers, given, when, then  # isort:skip
 from tests.common.log_helper import (
     LogHelper,
     KEY_CURR_FEATURE,
+    KEY_FEATURES,
     KEY_HOOKS,
     KEY_LOG_GLUE,
     KEY_LOGGER,
@@ -41,7 +42,7 @@ from tests.common.pytest_bdd_logger import PytestBddLogger
 
 GLUE_LOGGER = logging.getLogger(KEY_LOG_GLUE)
 
-bdd_logger = PytestBddLogger()  # The wanted BDD PytestLogger
+bdd_logger = PytestBddLogger()  # The wanted logger for Pytest BDD
 
 ########################
 ##### Pytest hooks #####
@@ -58,16 +59,11 @@ def pytest_configure(config: pytest.Config) -> None:
     print('\n==> pytest_configure 0 ("root"/conftest.py)')
 
     logging.warning('\n==> pytest_configure 1("root"/conftest.py)')  # <- logged!
-    logging.info(
-        '\n==> pytest_configure 2("root"/conftest.py)'
-    )  # <- not logged! TODO Why ?
+    logging.info('\n==> pytest_configure 2("root"/conftest.py)')  # <- not logged! TODO Why ?
     # Configure the logging format
-    logging.basicConfig(format="%(message)s", level=logging.INFO)
+    logging.basicConfig(format='%(message)s', level=logging.WARNING)
 
-    bdd_logger.log_hook(
-        "pytest_configure"
-    )  # TODO Fjerne her. Dette kan bdd_logger.configure gjøre
-    bdd_logger.configure(config)  # TODO Copy content below to bdd_logger
+    bdd_logger.configure(config)  # TODO Copy content below to bdd_logger.configure ?
 
     # Set the log level for the root logger
     # logging.getLogger().disabled = True
@@ -80,18 +76,16 @@ def pytest_configure(config: pytest.Config) -> None:
     # Check if logging is configured
     # TEST_CONTEXT[KEY_LOGGER] = False
     logger_config = TEST_CONTEXT.get(KEY_LOGGER, None)
-    print("* * * * * * * * * * * > logger_config ==", logger_config)
+    print('* * * * * * * * * * * > logger_config ==', logger_config)
 
     print(f"Found value: [{logger_config}] in TEST_CONTEXT['logger'] ie. logger_config")
-    assert (
-        logger_config is None
-    ), f'Found value "{logger_config}" in TEST_CONTEXT logger_config'
+    assert logger_config is None, f'Found value "{logger_config}" in TEST_CONTEXT logger_config'
     assert logger_config is None or isinstance(
         logger_config, bool
-    ), "Found non-bool value in TEST_CONTEXT logger"
-    print(f"pytest_configure: {logger_config}")
-    logging.warning("pytest_configure: %s", logger_config)
-    GLUE_LOGGER.warning("pytest_configure: %s", logger_config)
+    ), 'Found non-bool value in TEST_CONTEXT logger'
+    print(f'pytest_configure: {logger_config}')
+    logging.warning('pytest_configure: %s', logger_config)
+    GLUE_LOGGER.warning('pytest_configure: %s', logger_config)
 
     # assert logger_config and isinstance(logger_config, bool), 'Found non-bool value:logger_config'
     # GLUE_LOGGER.warning('Found non-bool value: logger_config = %s', logger_config)
@@ -129,9 +123,7 @@ def pytest_configure(config: pytest.Config) -> None:
     # default_logger.warning(__name__)
     GLUE_LOGGER.warning(__name__)
     # logging.warning('This is a WARNING message from logging in "%s" module.', __name__)
-    GLUE_LOGGER.warning(
-        'This is a WARNING message from GLUE_LOGGER in "%s" module.', __name__
-    )
+    GLUE_LOGGER.warning('This is a WARNING message from GLUE_LOGGER in "%s" module.', __name__)
 
     # assert False, 'Stopping in func: pytest_configure!'
     # log_msg_end()
@@ -164,18 +156,12 @@ def pytest_runtest_protocol(item: Item, nextitem: Optional[Item]) -> bool:
     and perform additional actions before and after each test.
     """
     LogHelper.log_func_call()
-    bdd_logger.log_hook(
-        f"(item.name: {item.name})"
-    )  # TODO Fjerne her. Dette kan bdd_logger gjøre
-
-    # # bdd_logger.log('item type = ' + str(type(item)))
-    # print('pytest_runtest_protocol: item = ' + str(item))
-    # item_type = type(item)
-    # print('pytest_runtest_protocol: item_type = ' + str(item_type))
-
     # assert False, 'Stopping in func: pytest_runtest_protocol!'
     return bdd_logger.runtest_protocol(item, nextitem)
 
+def is_before_feature_needed(feature: Feature):
+    # True if not reported yet?
+    return feature.name not in TEST_CONTEXT.get(KEY_FEATURES, [])
 
 @pytest.hookimpl
 def pytest_bdd_before_scenario(
@@ -183,38 +169,26 @@ def pytest_bdd_before_scenario(
 ) -> None:
     """Called before scenario is executed."""
     # logging.info('%s', '--' * 50)
-    logging.info(LogHelper.ret_func_name())
-    LogHelper.log_func_name_with_info(feature.name, fillchar="H:")
     LogHelper.log_func_call()
-    bdd_logger.log_hook(feature.name)  # TODO Fjerne her. Dette kan bdd_logger gjøre
+    LogHelper.log_func_name_with_info(feature.name, fillchar='H>')
+    # assert False, 'Not supposed to pass this point! pytest_bdd_before_scenario'
 
-    # logging.info('%s', '1.' * 50)
-    # bdd_logger.log_dict_now(TEST_CONTEXT)
-    # bdd_logger.log_dict(TEST_CONTEXT, 'TEST_CONTEXT')
-    # logging.info('%s', '2.' * 50)
-    # temp = ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT')
-    # # # temp = ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT')
-    # # print(temp)
-    # # print(TEST_CONTEXT)
-    # # temp = ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT')
-    # logging.info('%s', '3.' * 50)
-    # logging.info('%s', '¤.' * 50)
-    # GLUE_LOGGER.warning(temp)
-    # # temp = ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT')
-    # xlog_msg(temp, show_caller=True)
-    # TEST_CONTEXT['dbg:func_name'] = ret_func_name()   # TODO remove line
-    # # GLUE_LOGGER.info(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT', 'start2'))
-    # bdd_logger.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT', 'end_c')
+    bdd_logger.maybe_log_configuration()
 
-    logging.info("%s", "1" * 50)
-    if KEY_CURR_FEATURE not in TEST_CONTEXT:
+    if is_before_feature_needed(feature):
+        logging.info('%s', '1' * 50)
         # logging.info('TEST_CONTEXT: %s', TEST_CONTEXT)
-        LogHelper.log_dict_now(TEST_CONTEXT, "TEST_CONTEXT1")
-        bdd_logger.log_configuration()
+        LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT1')
         bdd_logger.before_feature(request, feature)
-        LogHelper.log_dict_now(TEST_CONTEXT, "TEST_CONTEXT2")
-    logging.info("%s", "2" * 50)
+        LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT2')
+        logging.info('%s', '2' * 50)
 
+    current_feature = TEST_CONTEXT.get(KEY_CURR_FEATURE, '-feature not logged-')
+    assert (
+        current_feature == feature.name
+    ), f"Feature name don't match! {current_feature} != {feature.name}"
+    # assert False, 'Not supposed to pass this point! pytest_bdd_before_scenario'
+    print('bdd_logger.before_scenario called')
     bdd_logger.before_scenario(request, feature, scenario)
     # assert feature.name == 'Debug Off'
     # assert scenario.feature.name == 'Debug Off'
@@ -229,19 +203,21 @@ def pytest_bdd_after_scenario(
     request: FixtureRequest, feature: Feature, scenario: Scenario
 ) -> None:
     """Called after scenario is executed."""
+    #TODO: checkif def after_feature is needed
     LogHelper.log_func_call()
-    LogHelper.log_func_name_with_info(feature.name, fillchar="H:")
-    bdd_logger.log_hook(scenario.name)  # TODO Fjerne her. Dette kan bdd_logger gjøre
+    LogHelper.log_func_name_with_info(feature.name, fillchar='H:')
 
-    logging.info(" ----------> pytest_bdd_after_scenario")
-    LogHelper.log_dict_now(TEST_CONTEXT, "TEST_CONTEXT")
 
-    LogHelper.log_func_name_with_info(scenario.name, fillchar="H:")
+    logging.info(' ----------> pytest_bdd_after_scenario')
+    LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT')
+
+    LogHelper.log_func_name_with_info(scenario.name, fillchar='H:')
     bdd_logger.after_scenario(request, feature, scenario)
     # GLUE_LOGGER.info('hook <== %s', ret_func_name())
     # log_msg_end()
     # assert False, 'Not supposed to pass this point! conftest'
-    logging.info(" <---------- pytest_bdd_after_scenario")
+    logging.info(' <---------- pytest_bdd_after_scenario')
+    LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT')
 
 
 @pytest.hookimpl
@@ -254,8 +230,7 @@ def pytest_bdd_before_step(
 ) -> None:
     """Called before step function is set up."""
     LogHelper.log_func_call()
-    LogHelper.log_func_name_with_info(step.name, fillchar="->s:")
-    bdd_logger.log_hook(step.name)  # TODO Fjerne her. Dette kan bdd_logger gjøre
+    LogHelper.log_func_name_with_info(step.name, fillchar='->s:')
 
     # log_msg_start()   # TODO Move call into PytestBddLogger
     bdd_logger.before_step(request, feature, scenario, step, step_func)
@@ -281,10 +256,8 @@ def pytest_bdd_after_step(
 ) -> None:
     """Called after step function is successfully executed."""
     LogHelper.log_func_call()
-    LogHelper.log_func_name_with_info(step.name, fillchar="<-s:")
-    bdd_logger.log_hook(
-        step.name
-    )  # TODO Fjerne her. Dette kan bdd_logger.after_step gjøre
+    LogHelper.log_func_name_with_info(step.name, fillchar='<-s:')
+
     bdd_logger.after_step(request, feature, scenario, step, step_func, step_func_args)
 
 
@@ -304,8 +277,8 @@ def pytest_bdd_after_step(
 
 
 # Using name='cap_log' here instead of just function name "cap_log_fixture".
-@pytest.fixture(name="caplog_fixture")  # Using name='caplog_fixture'.
-def func_caplog_fixture(caplog) -> None:
+@pytest.fixture(name='caplog_fixture')  # Using name='caplog_fixture'.
+def func_caplog_fixture(caplog: pytest.LogCaptureFixture) -> None:
     LogHelper.log_func_name()
     logging.info('func_caplog_fixture aka. "caplog_fixture" called!')
     yield caplog
@@ -314,14 +287,14 @@ def func_caplog_fixture(caplog) -> None:
 
 # Using name='context' here instead of just function name "context".
 # Fixes glue warning: "Redefining name 'context' from outer scope".
-@pytest.fixture(name="context")
+@pytest.fixture(name='context')
 def func_context_fixture() -> dict:
     """
     context fixture (in "root" 'conftest.py')
     Returns an empty dictionary for use by glue code functions
     """
     # ret = {}   # TEST_CONTEXT.copy()
-    ret = OrderedDict({"name": "context"})
+    ret = OrderedDict({'name': 'context'})
     logging.info(
         '\t%screating and returning "context" in %s() ( caller: %s() )!',
         bdd_logger.COL_CONTEXT,
@@ -329,7 +302,7 @@ def func_context_fixture() -> dict:
         LogHelper.ret_func_name(1),
     )
     GLUE_LOGGER.debug('... returning the context fixture (in "root"/conftest.py):')
-    GLUE_LOGGER.debug(LogHelper.ret_dict_info(ret, "context", "<----"))
+    GLUE_LOGGER.debug(LogHelper.ret_dict_info(ret, 'context', '<----'))
     return ret
 
 
@@ -352,8 +325,7 @@ def func_context_fixture() -> dict:
 @given(parsers.parse('a Pytest-BDD test using the "{module}" module'))
 def given_step_using_the_module(context: dict, module: str) -> None:
     GLUE_LOGGER.warning('Given a Pytest-BDD test using the "%s" module', module)
-    return
-    assert module == KEY_LOG_GLUE
+    assert module == KEY_LOG_GLUE, f'Uventet innhold i module: "{module}"'
     logger = logging.getLogger(KEY_LOG_GLUE)
     context[KEY_LOGGER] = logger
 
@@ -368,9 +340,7 @@ def given_step_using_the_module(context: dict, module: str) -> None:
     # )
     # GLUE_LOGGER.warning("The logger name is:=  '%s' [get_logger().name]", get_logger().name)
     # GLUE_LOGGER.warning("The logger name is: KEY_LOG_GLUE = '%s' [logger.name]", logger_name)
-    assert (
-        logger_name == KEY_LOG_GLUE
-    ), f'The wanted logger is not in use! Using "{logger_name}"'
+    assert logger_name == KEY_LOG_GLUE, f'The wanted logger is not in use! Using "{logger_name}"'
     # assert False, 'Stopping in func: given_step_using_the_module'
 
 
@@ -382,11 +352,9 @@ def given_step_using_the_module(context: dict, module: str) -> None:
 def given_file_uses_hooks_that_calls_corresponding_module_func(
     context: dict, file_name: str
 ) -> None:
-    assert context is not None, "context must be provided!"
-    assert (
-        file_name is not None or len(file_name) > 0
-    ), 'A value for "file_name" was not supplied!'
-    assert file_name == "conftest.py"
+    assert context is not None, 'context must be provided!'
+    assert file_name is not None or len(file_name) > 0, 'A value for "file_name" was not supplied!'
+    assert file_name == 'conftest.py'
 
 
 # Then information in context "TEST_CONTEXT", will include "Current glue"
@@ -395,73 +363,65 @@ def given_file_uses_hooks_that_calls_corresponding_module_func(
 def then_information_about_context_will_include(
     context: dict, info_in: str, will: str, info: str
 ) -> None:
-    assert context is not None, "context must be provided!"
+    assert context is not None, 'context must be provided!'
     assert info_in is not None, 'A value for "info_in" was not supplied!'
     assert info_in in [
-        "context",
-        "TEST_CONTEXT",
+        'context',
+        'TEST_CONTEXT',
     ], f'Unknown value for "info_in": "{info_in}"'
     assert will is not None, f'"{will}" is not a valid value! (Only "will"/"will not")'
     assert will in [
-        "will",
-        "will not",
+        'will',
+        'will not',
     ], f'"{will}" is not a valid value! (Only "will"/"will not")'
     assert info is not None, f'"{info}" is not a valid value!'
-    logging.info(
-        "_______________________then_information_about_context_will_include _____________"
-    )
+    logging.info('_______________________then_information_about_context_will_include _____________')
     logging.info('information in %s, %sinclude "%s"  ', info_in, will, info)
     logging.warning('information in %s, %sinclude "%s"  ', info_in, will, info)
     # logging.warning('Stopping in func: then_information_about_context_will_include: will=' + will)
     # assert False, 'Stopping in func: then_information_about_context_will_include: will=' + will
 
     assert will in [
-        "will",
-        "will not",
+        'will',
+        'will not',
     ], f'"{will}" is not a valid value! (Only "will"/"will not")'
-    logging.info(
-        'information about context ["%s"] %s include "%s"', info_in, will, info
-    )
-    the_context = context if info_in == "context" else TEST_CONTEXT
+    logging.info('information about context ["%s"] %s include "%s"', info_in, will, info)
+    the_context = context if info_in == 'context' else TEST_CONTEXT
     LogHelper.log_dict_now(the_context, info_in)
-    logging.info(LogHelper.ret_dict_info(the_context, f"* =====> {info_in}", "*__*"))
+    logging.info(LogHelper.ret_dict_info(the_context, f'* =====> {info_in}', '*__*'))
     # assert context[info] is not None if will == 'will' else None  #TODO
 
 
 #
 
 
-@then(
-    parsers.parse('"{name}" should show that the {about} "{func_name}" have been run')
-)
-def then_shows_that_function_have_been_run(
-    name: str, about: str, func_name: str
-) -> None:
+@then(parsers.parse('"{name}" should show that the {about} "{func_name}" have been run'))
+def then_shows_that_function_have_been_run(name: str, about: str, func_name: str) -> None:
     assert about is not None, f'"{about}" is not a valid value!'
     assert len(about) > 0
     msg = f'*************> Then "{name}" should show that the {about} "{func_name}" have been run'
     logging.info(msg)
-    expected_abouts = ["hook-function", "function"]
+    expected_abouts = ['hook-function', 'function']
     assert about in expected_abouts, f'"{about}" is not a valid value!'
     logged_hooks = TEST_CONTEXT.get(KEY_HOOKS, [])
-    assert len(logged_hooks) > 0, "No hooks have beeen logged in TEST_CONTEXT!"
+    assert len(logged_hooks) > 0, 'No hooks have beeen logged in TEST_CONTEXT!'
     # if re.search('hook-func', about):
-    if "hook-function" in about:
+    if 'hook-function' in about:
         assert (
             KEY_HOOKS in logged_hooks
-        ), f'(if hoock-func) ... didn\'t find "{KEY_HOOKS}" in TEST_CONTEXT!'
-        assert False, "Function not finished yet! (if hock-func)"
-    elif "function" in about:
+        ), f'(if hock-func) ... didn\'t find "{KEY_HOOKS}" in TEST_CONTEXT!'
+        assert False, 'Function not finished yet! (if hock-func)'
+    elif 'function' in about:
         assert (
             KEY_HOOKS in logged_hooks
-        ), f'(if hoock-func) ... didn\'t find "{KEY_HOOKS}" in TEST_CONTEXT!'
+        ), f'(if hock-func) ... didn\'t find "{KEY_HOOKS}" in TEST_CONTEXT!'
         hooks = TEST_CONTEXT.get(KEY_HOOKS, [])
         assert (
-            hooks.count("function") > 0
+            hooks.count(func_name) > 0
         ), f"Didn't find '{func_name}' in key \"{KEY_HOOKS}\" in TEST_CONTEXT!"
-        assert False, "Function not finished yet! (if hoock-func)"
+        assert False, 'Function not finished yet! (if hoock-func)'
     else:
-        assert False, "Function not finished yet!"
+        assert False, 'Function not finished yet!'
 
 
 # @then(parsers.parse('{name} should show that the function {func_name} have been run'))

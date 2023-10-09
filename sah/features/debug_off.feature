@@ -18,10 +18,28 @@ Feature: Debug Off
   # Then the correct Step Definition (aka glue function) will be shown
 
 
-  @todo #TODO work-in-progress
-  Scenario: Just testing
-    Given a Pytest-BDD test using the "PytestBddLogger" module
+  # @todo #TODO work-in-progress
+  @wipz
+  Scenario: TODO: Just testing
+    Given a Pytest-BDD test using the "log_glue" module #TODO use PytestBddLogger
     Given the "TEST_CONTEXT" item "Current feature" is present
+    And the "TEST_CONTEXT" item "Current scenario" is present
+  # Given the "TEST_CONTEXT" item "logger" is present
+  # Given the "TEST_CONTEXT" item "logger" is present
+  # But the item value is "False"
+  # Given the "TEST_CONTEXT" item "logger" is not present or value "False"
+
+  # @todo #TODO work-in-progress
+  @ok
+  Scenario Outline: Just testing Outline
+    Given a Pytest-BDD test using the "log_glue" module #TODO use PytestBddLogger
+    # Given the "<context_name>" item "<item>" <presence> present
+
+    Examples:
+      | context_name | item             | presence |
+      # | TEST_CONTEXT | Current feature  | is          |
+      | TEST_CONTEXT | Current scenario |  is         |
+
   # Given the "TEST_CONTEXT" item "Current scenario" is present
   # Given the "TEST_CONTEXT" item "logger" is present
   # Given the "TEST_CONTEXT" item "logger" is present
@@ -34,7 +52,7 @@ Feature: Debug Off
     When the scenario is run
     Then the "TEST_CONTEXT" item "Current feature" should be present
     Then the value should be "Debug Off".
-    # And the value of the "TEST_CONTEXT" item "Current feature" should be equal to "Debug Off" (ie. the feature name)
+  # And the value of the "TEST_CONTEXT" item "Current feature" should be equal to "Debug Off" (ie. the feature name)
 
   @todo #TODO work-in-progress
   Scenario: No logging from log_glue functions

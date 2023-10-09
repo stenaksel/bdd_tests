@@ -1,13 +1,13 @@
 import logging
 from abc import abstractmethod
-from typing import Any, Callable
+from typing import Any, Callable, OrderedDict
 
 from pytest import FixtureRequest
 from pytest_bdd.parser import Feature, Scenario, Step
 
 from tests.common.log_glue_incl import TEST_CONTEXT
 from tests.common.pytest_bdd_logger_interface import PytestBddLoggerInterface
-from tests.common.log_helper import LogHelper
+from tests.common.log_helper import LogHelper, KEY_HOOKS, KEY_CURR_FEATURE
 
 # TODO: switch "log_glue" to "bdd_logger" (?? and "log_msg" to "log")
 
@@ -31,9 +31,14 @@ class PytestBddTracer(PytestBddLoggerInterface):
     # def get_test_context(self) -> dict:
     #     return TEST_CONTEXT
 
+    ############################################################################
+    ###########################   Abstract methods   ###########################
+    ############################################################################
+
+
     @abstractmethod
     def log_feature(self, feature: Feature) -> None:
-        LogHelper.log_func_name_with_info(feature.name, fillchar="h:\t->\t ")
+        LogHelper.log_func_name_with_info(feature.name, fillchar='h:\t2->\t ')
         self.log(f'\t {self.COL_MSG}Feature: "{feature.name}"')
         # logging.info(
         #     f'%sFeature: "%s" %s',
@@ -45,13 +50,16 @@ class PytestBddTracer(PytestBddLoggerInterface):
 
     @abstractmethod
     def log_scenario(self, scenario: Scenario) -> None:
-        LogHelper.log_func_name_with_info(scenario.name, fillchar="_")
+        LogHelper.log_func_name_with_info(scenario.name, fillchar='_')
         self.log(f'\t {self.COL_SCENARIO}Scenario: "{scenario.name}"')
 
     @abstractmethod
     def log_step(self, step: Step, scenario: Scenario) -> None:
-        LogHelper.log_func_name_with_info(step.name, fillchar=".")
-        pass
+        LogHelper.log_func_name_with_info(step.name, fillchar='.')
+
+    ############################################################################
+    ###   Implementaions of abstract methods from PytestBddLoggerInterface   ###
+    ############################################################################
 
     def before_feature(self, request: FixtureRequest, feature: Feature) -> None:
         """
@@ -66,41 +74,38 @@ class PytestBddTracer(PytestBddLoggerInterface):
         Returns:
             None
         """
-        caller = LogHelper.ret_func_name(1)
-        assert "pytest_bdd_before_scenario" == caller or caller.startswith("test_"), (
-            "Unknown caller: " + caller
-        )
+        LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT-BFe->')
+        self.log_hook('*** before_feature ***')
         self._assert_obj_named(feature)
         # self._before_feature_assert_params(request, feature)
-        logging.info(" -------------------------------------> before_feature")
+        logging.info(' -------------------------------------> before_feature')
         caller = LogHelper.ret_func_name(1)  # TODO make better name 2
-        logging.warning(caller)
-        LogHelper.log_func_name_with_info(feature.name, fillchar="h:\t->\t ")
+        logging.warning("func 'before_feature' caller '%s'", caller)
+        LogHelper.log_func_name_with_info(feature.name, fillchar='h:\t3->\t ')
         # LogHelper.log_func_name(msg=feature.name, fillchar='_')
         # self.log(f'Feature_: "{feature.name}"')
         # LogHelper.log_func_name(fillchar=' _:')
 
-        logging.info(request.node)
+        if request is not None:
+            logging.info(request.node)
+
         # TODO: maybe TEST_CONTEXT[self.KEY_TEST_ITEM] = request.node
-        TEST_CONTEXT[self.KEY_CURR_FEATURE] = feature.name
+        TEST_CONTEXT[KEY_CURR_FEATURE] = feature.name
 
         print(caller)
 
-        assert "pytest_bdd_before_" in caller or caller.startswith("test_"), (
-            "Unknown caller: " + caller
-        )
         self.log_hook("pytest_bdd_before_feature - don't exist!")
         LogHelper.log_func_name_with_info(feature.name)
         self.log_feature(feature)
 
-        LogHelper.log_dict_now(TEST_CONTEXT, "TEST_CONTEXT")
+        LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT-BFe<-')
 
     # @abstractmethod #TODO
     def before_scenario(
         self, _request: FixtureRequest, feature: Feature, scenario: Scenario
     ) -> None:
-        logging.info(" -------------------------------------> before_scenario")
-        LogHelper.log_func_name_with_info(scenario.name, fillchar="h:\t->\t ")
+        logging.info(' -------------------------------------> before_scenario4')
+        LogHelper.log_func_name_with_info(scenario.name, fillchar='h:\t4->\t ')
         # assert request
         # LogHelper.log_func_name(fillchar='\t :')
         # super().before_scenario(request, feature, scenario)
@@ -115,8 +120,10 @@ class PytestBddTracer(PytestBddLoggerInterface):
         step: Step,
         step_func: Callable,
     ) -> None:
-        logging.info(" -------------------------------------> before_step")
-        LogHelper.log_func_name_with_info(step.name, fillchar="h:\t->\t ")
+        logging.info(' -------------------------------------> before_step')
+        self.log_hook(step.name)
+
+        LogHelper.log_func_name_with_info(step.name, fillchar='h:\t->\t ')
 
         # assert False, 'Not supposed to pass this point! pytest_bdd_tracer.py - before_step'
 
@@ -124,14 +131,13 @@ class PytestBddTracer(PytestBddLoggerInterface):
     # def after_feature(request: FixtureRequest, feature: Feature) -> None:
     #     print('-> after_feature')
 
-    def after_scenario(
-        self, request: FixtureRequest, feature: Feature, scenario: Scenario
-    ) -> None:
+    def after_scenario(self, request: FixtureRequest, feature: Feature, scenario: Scenario) -> None:
         # logging.warning('after_scenario <--- %s', __file__)
-        super().after_scenario(request, feature, scenario)
-        logging.info(" <------------------------------------- after_scenario")
-        LogHelper.log_dict_now(TEST_CONTEXT, "TEST_CONTEXT")
-        logging.info(" <------------------------------------- after_scenario")
+        # super().after_scenario(request, feature, scenario)
+        logging.info(' <------------------------------------- after_scenario')
+        self.log_hook(scenario.name)
+        logging.info(' <------------------------------------- after_scenario')
+        LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT-AfSc')
         # assert False, 'Not supposed to pass this point! pytest_bdd_tracer.py - after scenario'
 
     def after_step(
@@ -143,36 +149,42 @@ class PytestBddTracer(PytestBddLoggerInterface):
         _step_func: Callable,
         _step_func_args: dict[str, Any],
     ) -> None:
-        LogHelper.log_func_name_with_info(step.name, fillchar="\t<-")
-        logging.info(" <------------------------------------- after_step")
+        self.log_hook(step.name)
+
+        LogHelper.log_func_name_with_info(step.name, fillchar='\t<-')
+        logging.info(' <------------------------------------- after_step')
         # logging.info(request._pyfuncitem)
+
+        # ctx = params.get(TXT_CONTEXT)
+
+        # if isinstance(ctx, dict):
+        #     if TXT_STEPDEFS in ctx:
+        #         ctx[TXT_STEPDEFS].append(glue_function)
+        #     else:
+        #         ctx[TXT_STEPDEFS] = [glue_function]
 
     def ret_context_info(self, prev: int = 1) -> str:
         if self.show_context:
-            return f" (<-by {LogHelper.ret_func_name(prev)}() in {self.ret_classname()})"
-        return ""
+            return f' (<-by {LogHelper.ret_func_name(prev)}() in {self.ret_classname()})'
+        return ''
 
     def log(
         self,
         msg: str,
         _log_level: int = logging.INFO,
-        _pre: str = "",
+        _pre: str = '',
         _show_caller: bool = False,
     ) -> None:
-        logging.info(
-            "%s\t%s%s%s", self.COL_MSG, msg, self.COL_CONTEXT, self.ret_context_info(2)
-        )
+        logging.info('%s\t%s%s%s', self.COL_MSG, msg, self.COL_CONTEXT, self.ret_context_info(2))
 
         logging.info(
-            "%s%s%s_1 log: %s",
+            '%s%s%s_1 log: %s',
             self.COL_MSG,
             msg,
             self.COL_CONTEXT,
             self.ret_context_info(1),
         )
-        logging.info(
-            "%s%s%s__ %s", self.COL_MSG, msg, self.COL_CONTEXT, self.ret_context_info()
-        )
+        logging.info('%s%s%s__ %s', self.COL_MSG, msg, self.COL_CONTEXT, self.ret_context_info())
 
         # context_info = (
         #     ''
@@ -190,13 +202,46 @@ class PytestBddTracer(PytestBddLoggerInterface):
         # super().log(msg, log_level, pre, show_caller)
         # logging.warning('log <--- %s', __file__)
 
-    def log_hook(self, msg: str = "") -> None:
+    def _allowed_method_relation(self, from_method: str, to_method: str):
+        # Implement the logic for checking if the caller is related to the hook_name
+        # You can use any necessary conditions or comparisons here
+        # Return True or False based on the result of the check
+
+        return (
+            (to_method in from_method)  # example: from 'pytest_bdd_before_step' to 'before_step'
+            or (from_method == 'pytest_bdd_before_scenario' and to_method == 'before_feature')
+            # because 'pytest_bdd_before_scenario' calls 'before_feature' when first scenario is run
+            or ('test_' in from_method) # we might tast stuff ...
+        )
+
+        return True  # Replace this with your actual implementation
+
+    def log_hook(self, msg: str = '') -> None:
         # LogHelper.log_func_name(msg=msg)
-        LogHelper.log_func_name_with_info(f"{msg}", prev=1, fillchar="H:")
+        # ? LogHelper.log_func_name_with_info(f"{msg}", prev=1, fillchar="H:")
         # LogHelper.log_func_name(prev=0, fillchar='', msg='ø:'+msg)
         # LogHelper.log_func_name(prev=0, msg='å:'+msg)
-        caller = LogHelper.ret_func_name(2)
-        logging.info("H: log_hook(): %s%s", self.COL_MSG, caller)
+        caller = LogHelper.ret_func_name(1)
+        hook_name = LogHelper.ret_func_name(2)
+        assert hook_name.startswith('pytest_') or hook_name.startswith('test_'), f'Unknown hook: {hook_name} with caller {caller}'
+        assert self._allowed_method_relation(
+            hook_name, caller
+        ), f'Caller: {caller} should be related to hook: {hook_name}!'
+
+        logging.info('H: log_hook(%s): %s%s', str, self.COL_MSG, caller)
+        # TEST_CONTEXT[KEY_HOOKS] = caller
+
+        ctx = TEST_CONTEXT
+        assert isinstance(ctx, OrderedDict), f'Unexpected type: {type(ctx)}'
+        if KEY_HOOKS in ctx:
+            logging.warning('ctx[KEY_HOOKS]: %s', ctx[KEY_HOOKS])
+            assert type(ctx[KEY_HOOKS]) == list, f'Expected KEY_HOOKS to be a list, not a {type(ctx[KEY_HOOKS]).__name__}'
+            # assert False, f'Not supposed to pass this point! pytest_bdd_tracer.py - log_hook (Caller: {caller})'
+            ctx[KEY_HOOKS].append(hook_name)
+            logging.warning('ctx[KEY_HOOKS]: %s', ctx[KEY_HOOKS])
+        else:
+            ctx[KEY_HOOKS] = [hook_name]
+
 
     # def log_func_name(self, prev: int = 0, fillchar: str = None, msg: str = '') -> None:
     #     caller = self.ret_func_name(1)

@@ -80,9 +80,6 @@ def xlog_msg_start(log_level: int = logging.INFO) -> None:
     xlog_msg(xret_func_name(1), show_caller=True)
     # GLUE_LOGGER.log(log_level, 'Heisann!')
 
-    # xlog_msg(TEST_CONTEXT)
-    # log_dict(TEST_CONTEXT, 'TEST_CONTEXT', False)
-    # log_func_call_info(log_level, 1, 'INFO')
     logging.warning("<< ***xlog_msg_start***")
 
 
@@ -129,7 +126,6 @@ def xlog_msg(
             "dbg:TEST_CONTEXT was found in xlog_msg. Reporting TEST_CONTEXT:"
         )  # TODO: debug
         GLUE_LOGGER.info(LogHelper.ret_dict_info(TEST_CONTEXT, "* => TEST_CONTEXT"))
-        # log_dict(TEST_CONTEXT, 'TEST_CONTEXT')
         del TEST_CONTEXT["dbg:TEST_CONTEXT"]
 
     GLUE_LOGGER.debug("<< xlog_msg")

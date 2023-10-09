@@ -1,14 +1,19 @@
 {
     "files.trimTrailingWhitespace": true,
-    "python.formatting.provider": "black", // We use blue, the plugin believes it is black.
-    "python.formatting.blackPath": "blue",
+    // "python.formatting.provider": "black", // We use blue, the plugin believes it is black.
+    // "python.formatting.provider": "none"
+    // "python.formatting.blackPath": "blue",
     "[python]": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "ms-python.black-formatter"
     },
-    "editor.defaultFormatter": "ms-python.python",
+    // "editor.defaultFormatter": "ms-python.python",
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
+    // "python.testing.pytestArgs": [
+    //     "--verbose",
+    //     "tests/",
+    // ],
     "[toml]": {
         "editor.defaultFormatter": "tamasfe.even-better-toml"
     },

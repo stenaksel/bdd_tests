@@ -16,6 +16,7 @@ from tests.common.log_helper import (
 )
 from tests.common.pytest_bdd_tracer import PytestBddTracer
 
+    ############################################################################
 
 class PytestBddLogger(PytestBddTracer):
     """
@@ -30,6 +31,9 @@ class PytestBddLogger(PytestBddTracer):
         super().__init__(show_context)  # This should be OK....?
         # TODO self.show_context = show_context
 
+    ############################################################################
+    ### Implementaions of abstract methods from PytestBddTracer
+    ############################################################################
     def xlog_feature(self, feature: Feature) -> None:
         LogHelper.log_func_name_with_info(feature.name, fillchar="@")
         super().log_feature(feature)  # TODO: don't use super()
@@ -48,7 +52,7 @@ class PytestBddLogger(PytestBddTracer):
 
     def log_feature(self, feature: Feature) -> None:
         LogHelper.log_func_name_with_info(feature.name, fillchar="F:")
-        super().log_feature(feature)  # TODO: don't use super()
+        super().log_feature(feature)  # TODO: don't use super() ?
         self._assert_obj_named(feature)
         self.log(f'\t {self.COL_MSG}Feature: "{feature.name}"')
         # logging.info(
@@ -114,7 +118,7 @@ class PytestBddLogger(PytestBddTracer):
         logging.info("\t- lines       : %s", step.lines)
         # logging.debug('\t- lines      : %s', step.lines[0])
         logging.warning("Step Background >>#######################################>>")
-        logging.warning(step.background)
+        #? logging.warning(step.background)
         logging.warning("Step Background <<#######################################<<")
         assert isinstance(TEST_CONTEXT, dict)
         LogHelper.log_dict_now(TEST_CONTEXT, "TEST_CONTEXT", "---->")

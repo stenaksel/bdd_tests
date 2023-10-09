@@ -67,7 +67,7 @@ Feature: Doc Strings
     Then I should be told it was 3 lines
 
   @ok
-  Scenario: Using a docstring with xml content (type specified)
+  Scenario: Using a docstring with xml content (normal format)
     Given I have a step with a doc string:
       """xml
       <xml>
@@ -78,8 +78,7 @@ Feature: Doc Strings
     Then I should be told it was 3 lines
 
   @ok
-  Scenario: Using a docstring with xml content
-  Scenario: Formatting the docstring based on content type: xml 1 line
+  Scenario: Using a docstring with xml content (strange format)
     Given I have a step with a doc string:
       """
       <xml><tag>Content: This is a test message.</tag></xml>
@@ -89,7 +88,7 @@ Feature: Doc Strings
 
 
   @ok
-  Scenario: Using a docstring with xml content (weird - not preffered format)
+  Scenario: Using a docstring with xml content (weird format)
     Given I have a step with a doc string:
       """<xml><tag>Content: This is a test message.</tag></xml>"""
     When I ask for how many lines the message have

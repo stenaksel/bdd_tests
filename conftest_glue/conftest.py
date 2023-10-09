@@ -133,24 +133,3 @@ def author_name() -> str:
 #     return Context()
 
 
-# # def pytest_bdd_before_scenario(request, scenario):
-# def pytest_bdd_before_scenario(feature, scenario):
-#     logging.info('==> pytest_bdd_before_scenario (hook in conftest_glue/conftest.py)')
-#     # _ = request  # _ indicates that the variable is intentionally unused
-#     # print(f'\nxxx==> {inspect.currentframe().f_code.co_name}:\n')
-#     if feature.name is not None:
-#         logging.debug(f'\t feature : {str(feature.name)}')
-#     if scenario.name is not None:
-#         logging.debug(f'\t scenario: {str(scenario.name)}')
-
-#     # # context = request.config.cache.get('context')
-
-
-# """
-#     print(f'=> request: (param request)\n\t{request}\n')
-#     context = request.getfixturevalue('context')
-#     assert context is not None, 'context must be provided!'
-#     print(f'=> context: {context}\n')
-#  """
-# # You can perform any additional actions you need to on the scenario object here
-# # context.scenario

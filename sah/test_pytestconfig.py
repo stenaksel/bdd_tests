@@ -1,6 +1,6 @@
 import pytest
 
-
+@pytest.mark.ok
 def test_example(pytestconfig):
     # Access command-line options
     if pytestconfig.getoption('verbose'):

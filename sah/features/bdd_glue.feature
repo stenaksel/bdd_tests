@@ -15,10 +15,10 @@ Feature: BDD Glue
     (Each "And" step will be the same kind of step as the one before it).
 
     Another normal thing to do is to have a shared "context" (usually a dictionary),
-    where the glue can store information.
+    where the glue code can store information.
     For instance, collecting needed info from "Given" glue before reaching the "When" glue.
     Or storing the result in a "When" glue and later checking it in the "Then" glue.
-    The "context" can be passed as a parameter to the glue code functions.
+    The "context" (a fixture) can be passed as a parameter to the glue code functions.
 
   # Background: Using log_glue
   #   Given a Pytest-BDD test using the "log_glue" module

@@ -1,5 +1,9 @@
 # Configuration of code formatting
+[tool.black]
+line-length = 100 # We need black config here as well for max line length, blue don't work
+
 [tool.blue]
+color = true
 line-length = 100
 target-version = ['py310']
 extend-exclude = 'migrations'
@@ -52,4 +56,6 @@ testpaths = ['tests', 'sah', 'conftest_glue', 'article']
 pythonpath = ['tests', 'sah', 'conftest_glue', 'article']
 # bdd_features_base_dir = 'sah'
 
-addopts = '--ignore=temp' # Don't look for py files in temp folder
+# addopts = '-vv --ignore=temp' # Don't look for py files in temp folder
+# addopts = '--maxfail=2 -rf'  # exit after 2 failures, report fail info
+addopts = '-rf'  # exit after 2 failures, report fail info

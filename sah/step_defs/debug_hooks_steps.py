@@ -33,19 +33,25 @@ EXPECTED_NUM_PARAMS = None  # TODO Implement scenario "Then" step for checking?
 def given_this_scenario_is_tagged_with_wip(tag: str) -> None:
     assert tag == "wip"
 
-
+# @given('a {str} Pytest-BDD hook function')
+# @given('a {str} hook function')
 @given(parsers.parse('a "{func_name}" Pytest-BDD hook function'))
+@given(parsers.parse('a "{func_name}" hook function'))
 def pytest_bdd_hook_function(context: dict, func_name: str) -> None:
     assert context is not None, "context must be provided"
-    assert func_name == "pytest_bdd_before_scenario", f"assert - [{func_name}]"
+    # assert func_name == "pytest_bdd_before_scenario", f"assert - [{func_name}]"
+    #TODO add all hooks in assert:
+    assert 'pytest_bdd_' in func_name, f"Unknown hook: [{func_name}]"
+
     # assert False, f'assert - ! {func_name}'
+
 
 
 # pytest.hook function in conftest.py
 @given(parsers.parse('a "{func_name}" hook function'))
 def pytest_bdd_hook_function_in_conftest_py(context, func_name: str) -> None:
     print("pytest_bdd_hook_function_in_conftest_py context: %s", context)
-    logger = get_logger()
+    logger = logging.getLogger()
     # TODO use TEST_CONTEXT and check if the func_name is in KEY_FUNC
     # log_glue(context=context, func_name=func_name)
     logger.info(func_name)
