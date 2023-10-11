@@ -15,10 +15,13 @@ Feature: Debug Hooks
   # When you asks to "Go to Definition" from the step in a feature file
   # Then the correct Step Definition (aka glue function) will be shown
 
-  @wip
-  Scenario: before_feature called once
+  @wipz
+  @ok
+  Scenario: try out
     Given this scenario is tagged with "wip"
+    When the scenario is run
 
+  @wipz
   Scenario: before_feature called once
     Given a "pytest_bdd_before_scenario" hook function
     # Given a "pytest_bdd_before_scenario" Pytest-BDD hook function in conftest.py

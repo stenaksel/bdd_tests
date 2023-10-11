@@ -6,8 +6,8 @@ from pytest import FixtureRequest
 from pytest_bdd.parser import Feature, Scenario, Step
 
 from tests.common.log_glue_incl import TEST_CONTEXT
+from tests.common.log_helper import KEY_CURR_FEATURE, KEY_PT_HOOKS, KEY_MY_HOOKS, LogHelper
 from tests.common.pytest_bdd_logger_interface import PytestBddLoggerInterface
-from tests.common.log_helper import LogHelper, KEY_HOOKS, KEY_CURR_FEATURE
 
 # TODO: switch "log_glue" to "bdd_logger" (?? and "log_msg" to "log")
 
@@ -34,7 +34,6 @@ class PytestBddTracer(PytestBddLoggerInterface):
     ############################################################################
     ###########################   Abstract methods   ###########################
     ############################################################################
-
 
     @abstractmethod
     def log_feature(self, feature: Feature) -> None:
@@ -202,7 +201,7 @@ class PytestBddTracer(PytestBddLoggerInterface):
         # super().log(msg, log_level, pre, show_caller)
         # logging.warning('log <--- %s', __file__)
 
-    def _allowed_method_relation(self, from_method: str, to_method: str):
+    def _allowed_hook_method_relation(self, from_method: str, to_method: str):
         # Implement the logic for checking if the caller is related to the hook_name
         # You can use any necessary conditions or comparisons here
         # Return True or False based on the result of the check
@@ -211,7 +210,7 @@ class PytestBddTracer(PytestBddLoggerInterface):
             (to_method in from_method)  # example: from 'pytest_bdd_before_step' to 'before_step'
             or (from_method == 'pytest_bdd_before_scenario' and to_method == 'before_feature')
             # because 'pytest_bdd_before_scenario' calls 'before_feature' when first scenario is run
-            or ('test_' in from_method) # we might tast stuff ...
+            or ('test_' in from_method)  # we might tast stuff ...
         )
 
         return True  # Replace this with your actual implementation
@@ -223,25 +222,40 @@ class PytestBddTracer(PytestBddLoggerInterface):
         # LogHelper.log_func_name(prev=0, msg='å:'+msg)
         caller = LogHelper.ret_func_name(1)
         hook_name = LogHelper.ret_func_name(2)
-        assert hook_name.startswith('pytest_') or hook_name.startswith('test_'), f'Unknown hook: {hook_name} with caller {caller}'
-        assert self._allowed_method_relation(
+        if caller.startswith('pytest_'):
+            # Expected "my" function make the call
+            assert False, 'log_hook called directly from a pytest_ hook!'
+
+        assert hook_name.startswith('pytest_') or hook_name.startswith(
+            'test_'
+        ), f'Unknown hook: {hook_name} with caller {caller}'
+        assert self._allowed_hook_method_relation(
             hook_name, caller
         ), f'Caller: {caller} should be related to hook: {hook_name}!'
 
         logging.info('H: log_hook(%s): %s%s', str, self.COL_MSG, caller)
-        # TEST_CONTEXT[KEY_HOOKS] = caller
 
         ctx = TEST_CONTEXT
         assert isinstance(ctx, OrderedDict), f'Unexpected type: {type(ctx)}'
-        if KEY_HOOKS in ctx:
-            logging.warning('ctx[KEY_HOOKS]: %s', ctx[KEY_HOOKS])
-            assert type(ctx[KEY_HOOKS]) == list, f'Expected KEY_HOOKS to be a list, not a {type(ctx[KEY_HOOKS]).__name__}'
-            # assert False, f'Not supposed to pass this point! pytest_bdd_tracer.py - log_hook (Caller: {caller})'
-            ctx[KEY_HOOKS].append(hook_name)
-            logging.warning('ctx[KEY_HOOKS]: %s', ctx[KEY_HOOKS])
-        else:
-            ctx[KEY_HOOKS] = [hook_name]
+        logging.warning('------------------>')
+        logging.warning('[KEY_PT_HOOKS]: %s', ctx.get(KEY_PT_HOOKS, []))
+        logging.warning('[KEY_MY_HOOKS]: %s', ctx.get(KEY_MY_HOOKS, []))
 
+        if KEY_PT_HOOKS in ctx:
+            assert (
+                type(ctx[KEY_PT_HOOKS]) == list
+            ), f'Expected KEY_HOOKS to be a list, not a {type(ctx[KEY_PT_HOOKS]).__name__}'
+            # assert False, f'Not supposed to pass this point! pytest_bdd_tracer.py - log_hook (Caller: {caller})'
+            ctx[KEY_PT_HOOKS].append(hook_name)
+            ctx[KEY_MY_HOOKS].append(caller)
+        else:
+            logging.warning('------------------>')
+            ctx[KEY_PT_HOOKS] = [hook_name]
+            ctx[KEY_MY_HOOKS] = [caller]
+
+        logging.warning('------------------>')
+        logging.warning('[KEY_PT_HOOKS]: %s', ctx.get(KEY_PT_HOOKS, []))
+        logging.warning('[KEY_MY_HOOKS]: %s', ctx.get(KEY_MY_HOOKS, []))
 
     # def log_func_name(self, prev: int = 0, fillchar: str = None, msg: str = '') -> None:
     #     caller = self.ret_func_name(1)

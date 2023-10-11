@@ -1,0 +1,21 @@
+#
+# Top-level test file to include all scenarios and all glue code.
+# This allows us to more easily share steps between feature files
+# without having to import explicitly everywhere.
+#
+
+import importlib
+from pathlib import Path
+
+from common_imports import *
+
+# Import all steps from glue code to this module's namespace
+steps = Path(__file__).parent / 'step_defs'
+for file in steps.glob('*_steps.py'):
+    module = importlib.import_module(f'steps.{file.stem}')
+    for step in dir(module):
+        if step.startswith('pytestbdd_stepdef_'):
+            globals()[step] = getattr(module, step)
+
+# Import all scenarios
+scenarios('.')

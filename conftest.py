@@ -28,17 +28,19 @@ from _pytest.fixtures import FixtureRequest
 from _pytest.nodes import Item
 from pytest_bdd.parser import Feature, Scenario, Step
 
-from pytest_bdd import parsers, given, when, then  # isort:skip
 from tests.common.log_helper import (
-    LogHelper,
     KEY_CURR_FEATURE,
     KEY_FEATURES,
-    KEY_HOOKS,
     KEY_LOG_GLUE,
     KEY_LOGGER,
+    KEY_PT_HOOKS,
+    KEY_MY_HOOKS,
     TEST_CONTEXT,
+    LogHelper,
 )
 from tests.common.pytest_bdd_logger import PytestBddLogger
+
+from pytest_bdd import parsers, given, when, then  # isort:skip
 
 GLUE_LOGGER = logging.getLogger(KEY_LOG_GLUE)
 
@@ -128,23 +130,6 @@ def pytest_configure(config: pytest.Config) -> None:
     # assert False, 'Stopping in func: pytest_configure!'
     # log_msg_end()
 
-
-# @pytest.hookimpl(tryfirst=True)
-# def pytest_before_test(test) -> None:
-#     print("Before test:", test)
-#     bdd_logger.log_hook(
-#         f"(test.name: {test})"
-#     )  # TODO Fjerne her. Dette kan bdd_logger.before_test gjøre
-
-
-# @pytest.hookimpl(trylast=True)
-# def pytest_after_test(test) -> None:
-#     print("After test:", test)
-#     bdd_logger.log_hook(
-#         f"(test.name: {test})"
-#     )  # TODO Fjerne her. Dette kan bdd_logger.after_test gjøre
-
-
 # TODO: Is it possible to "monkey patch" step_func and log it's parameters?
 @pytest.hookimpl(tryfirst=True)
 def pytest_runtest_protocol(item: Item, nextitem: Optional[Item]) -> bool:
@@ -156,12 +141,14 @@ def pytest_runtest_protocol(item: Item, nextitem: Optional[Item]) -> bool:
     and perform additional actions before and after each test.
     """
     LogHelper.log_func_call()
-    # assert False, 'Stopping in func: pytest_runtest_protocol!'
     return bdd_logger.runtest_protocol(item, nextitem)
+    assert False, 'Stopping in func: pytest_runtest_protocol!'
+
 
 def is_before_feature_needed(feature: Feature):
     # True if not reported yet?
     return feature.name not in TEST_CONTEXT.get(KEY_FEATURES, [])
+
 
 @pytest.hookimpl
 def pytest_bdd_before_scenario(
@@ -203,10 +190,9 @@ def pytest_bdd_after_scenario(
     request: FixtureRequest, feature: Feature, scenario: Scenario
 ) -> None:
     """Called after scenario is executed."""
-    #TODO: checkif def after_feature is needed
+    # TODO: checkif def after_feature is needed
     LogHelper.log_func_call()
     LogHelper.log_func_name_with_info(feature.name, fillchar='H:')
-
 
     logging.info(' ----------> pytest_bdd_after_scenario')
     LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT')
@@ -392,36 +378,80 @@ def then_information_about_context_will_include(
     # assert context[info] is not None if will == 'will' else None  #TODO
 
 
-#
+####################################################################################################
+
+def assert_hook_function(ctx_name: str, context: dict) -> None:
+    assert ctx_name in ['context', 'TEST_CONTEXT'], f'Unknown value for "ctx_name": "{ctx_name}"'
+    ctx = TEST_CONTEXT if ctx_name == 'TEST_CONTEXT' else context
+    logged_hooks = ctx.get(KEY_PT_HOOKS, [])
+    assert KEY_PT_HOOKS in logged_hooks, f'(assert_hook_function) ... didn\'t find "{KEY_PT_HOOKS}" in {ctx_name}!'
 
 
-@then(parsers.parse('"{name}" should show that the {about} "{func_name}" have been run'))
-def then_shows_that_function_have_been_run(name: str, about: str, func_name: str) -> None:
-    assert about is not None, f'"{about}" is not a valid value!'
-    assert len(about) > 0
-    msg = f'*************> Then "{name}" should show that the {about} "{func_name}" have been run'
+def assert_hook_function2() -> None:
+    assert KEY_PT_HOOKS in TEST_CONTEXT, f'(if hock-func) ... didn\'t find "{KEY_PT_HOOKS}" in TEST_CONTEXT**!'
+    hooks = TEST_CONTEXT.get(KEY_PT_HOOKS, [])
+    assert (hooks.count(func_name) > 0), f"Didn't find '{func_name}' in key \"{KEY_PT_HOOKS}\" in {TEST_CONTEXT[KEY_PT_HOOKS]}!"
+    assert False, 'Function not finished yet! (if hoock-func)'
+
+    logged_hooks = TEST_CONTEXT.get(KEY_PT_HOOKS, [])
+    assert KEY_PT_HOOKS in logged_hooks, f'(if hock-function) ... didn\'t find "{KEY_PT_HOOKS}" in TEST_CONTEXT!'
+
+    assert len(logged_hooks) > 0, 'No hooks have been logged in TEST_CONTEXT!'
+
+
+@then(parsers.parse('"{ctx_name}" should show that the {about} "{func_name}" have been run'))
+def then_shows_that_function_have_been_run(context: dict, ctx_name: str, about: str, func_name: str) -> None:
+    assert LogHelper.assert_string(about)
+    assert about in ['hook-function', 'function'], f'"{about}" is not a valid value!'
+    assert func_name is not None or len(func_name) > 0, f'"{func_name}" is not a valid value!'
+    assert len(func_name) > 0
+    msg = f'*************> Then "{ctx_name}" should show that the {about} "{func_name}" have been run'
     logging.info(msg)
+    logging.warning('[KEY_PT_HOOKS]: %s', TEST_CONTEXT.get(KEY_PT_HOOKS, []))
+    logging.warning('[KEY_MY_HOOKS]: %s', TEST_CONTEXT.get(KEY_MY_HOOKS, []))
     expected_abouts = ['hook-function', 'function']
     assert about in expected_abouts, f'"{about}" is not a valid value!'
-    logged_hooks = TEST_CONTEXT.get(KEY_HOOKS, [])
+    logged_hooks = TEST_CONTEXT.get(KEY_PT_HOOKS, [])
     assert len(logged_hooks) > 0, 'No hooks have beeen logged in TEST_CONTEXT!'
     # if re.search('hook-func', about):
+    # assert False, 'Stopping in func: ...function_have_been_run about=' + about.name
+
+    # cases = {
+    #     "hook-function": assert_hook_function(ctx_name, context),
+    #     # assert False, 'Function not finished yet! (if hock-func)',
+    #     "function": lambda: assert KEY_MY_HOOKS in logged_hooks, f'(if hock-func) ... didn\'t find "{KEY_PT_HOOKS}" in TEST_CONTEXT!'
+    #     # assert False, 'Function not finished yet! (if hock-func)',
+    # }
+    # default_case = lambda: process_default_case()
+
+    # # Get the function associated with the value or the default case
+    # selected_case = cases.get(value, default_case)
+
+    # # Call the selected case function
+    # selected_case()
+
+
     if 'hook-function' in about:
         assert (
-            KEY_HOOKS in logged_hooks
-        ), f'(if hock-func) ... didn\'t find "{KEY_HOOKS}" in TEST_CONTEXT!'
+            KEY_PT_HOOKS in logged_hooks
+        ), f'(if hock-function) ... didn\'t find "{KEY_PT_HOOKS}" in TEST_CONTEXT!'
+        assert False, 'Function_not_finished_yet! (if hook-function)'
+    elif 'function' in about:
+        assert (
+            KEY_MY_HOOKS in logged_hooks
+        ), f'(if hock-func) ... didn\'t find "{KEY_PT_HOOKS}" in TEST_CONTEXT!'
         assert False, 'Function not finished yet! (if hock-func)'
     elif 'function' in about:
         assert (
-            KEY_HOOKS in logged_hooks
-        ), f'(if hock-func) ... didn\'t find "{KEY_HOOKS}" in TEST_CONTEXT!'
-        hooks = TEST_CONTEXT.get(KEY_HOOKS, [])
+            KEY_PT_HOOKS in TEST_CONTEXT
+        ), f'(if hock-func) ... didn\'t find "{KEY_PT_HOOKS}" in TEST_CONTEXT**!'
+        hooks = TEST_CONTEXT.get(KEY_PT_HOOKS, [])
         assert (
             hooks.count(func_name) > 0
-        ), f"Didn't find '{func_name}' in key \"{KEY_HOOKS}\" in TEST_CONTEXT!"
+        ), f"Didn't find '{func_name}' in key \"{KEY_PT_HOOKS}\" in {TEST_CONTEXT[KEY_PT_HOOKS]}!"
         assert False, 'Function not finished yet! (if hoock-func)'
     else:
-        assert False, 'Function not finished yet!'
+        assert False, 'Function not finished yet! Unknown about: ' + about
 
 
 # @then(parsers.parse('{name} should show that the function {func_name} have been run'))

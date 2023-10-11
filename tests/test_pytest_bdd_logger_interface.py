@@ -77,7 +77,9 @@ def test_just_show_test_context() -> None:
     logging.info(TEST_CONTEXT)
     logging.info('<== test_just_show_test_context')
 
+
 ################################################################################
+
 
 @pytest.mark.ok
 def test_ret_func_name() -> None:
@@ -103,7 +105,7 @@ def test_ret_func_name() -> None:
 
 
 @pytest.mark.skip
-def test__ret_func_name2() -> None:
+def test_ret_func_name2() -> None:
     this_func = '?'
     print(__file__)
     with mock.patch('tests.common.log_glue_incl.logging') as mock_logger:
@@ -127,7 +129,9 @@ def test_ret_sorted() -> None:
     print(sorted_dict)
     print(sorted_keys)
     assert sorted_dict == correct_dict, 'The sort is NOT right'
-    assert LogHelper.ret_keys(sorted_dict) == LogHelper.ret_keys(correct_dict), 'The sort is NOT right'
+    assert LogHelper.ret_keys(sorted_dict) == LogHelper.ret_keys(
+        correct_dict
+    ), 'The sort is NOT right'
 
 
 @pytest.mark.ok
@@ -141,7 +145,6 @@ def test_ret_dict_info() -> None:
     assert '-prefix- the name' in ret
     assert 'the name       : [dict] (#=3)' in ret
     assert '-prefix- the name       : [dict] (#=3)' in ret
-
 
 
 def _clear_caplog(caplog) -> None:
@@ -274,20 +277,21 @@ def test_log_func_name_caplog(caplog) -> None:
     assert_logged(caplog, level=INFO, expected=lines_expeced)
 
 
+###########################################################################
 @pytest.mark.ok
-def test_log_headline() -> None:
-    assert LogHelper.ret_func_name() == 'test_log_headline'
+def test_log_headline_mock() -> None:
+    assert LogHelper.ret_func_name() == 'test_log_headline_mock'
     default_fillchar = '#'
 
     with patch('logging.info') as mock_info:
-        log_headline('test_log_headline') # Using default fillchar
+        log_headline(LogHelper.ret_func_name())   # Using default fillchar
 
         # Assert that the mock_info was called 3 times with the expected arguments
         # mock_info.assert_has_calls([
         mock_info.assert_has_calls(
             [
                 call('\t%s', default_fillchar * 75),
-                call('\t%s', '  test_log_headline  '.center(75, default_fillchar)),
+                call('\t%s', '  test_log_headline_mock  '.center(75, default_fillchar)),
                 call('\t%s', default_fillchar * 75),
             ]
         )
@@ -295,9 +299,27 @@ def test_log_headline() -> None:
 
 
 @pytest.mark.ok
+def test_log_headline_caplog(caplog) -> None:
+    assert LogHelper.ret_func_name() == 'test_log_headline_caplog'
+
+    default_fillchar = '#'
+    lines_expected = [
+        f'\t{default_fillchar * 75}',
+        f'  {LogHelper.log_func_name()}  '.center(75, default_fillchar),
+        f'\t{default_fillchar * 75}',
+    ]
+
+    _clear_caplog(caplog)
+
+    log_headline('test_log_headline_caplog')   # Using default fillchar
+
+    assert_logged(caplog, level=INFO, expected=lines_expected)
+
+
+@pytest.mark.ok
 def test_log_headline_with_fillchar() -> None:
     assert LogHelper.ret_func_name() == 'test_log_headline_with_fillchar'
-    fillchar = '#'
+    fillchar = 'o'
 
     # #### Assert functions called
     module = 'tests.common.pytest_bdd_logger'
@@ -321,7 +343,6 @@ def test_log_headline_with_fillchar() -> None:
             ]
         )
     #
-
 
 
 # @pytest.fixture

@@ -17,7 +17,6 @@ import re
 # from logging import DEBUG, INFO, WARN, LogRecord
 from logging import INFO
 from typing import List
-from unittest import mock
 from unittest.mock import call, patch
 
 import pytest
@@ -46,6 +45,35 @@ from tests.common.pytest_bdd_logger import PytestBddLogger
 #     log_func_call,
 #     log_func_name,
 # )
+
+
+def _some_assert_value_caller(
+    p1: str, p2: str, min_length1: int = None, min_length2: int = None
+) -> None:
+    logging.info('==> _some_assert_value_caller')
+    LogHelper.log_func_call()
+    if min_length1 is None and min_length2 is None:
+        logging.warning('\tLogHelper.assert_string(p1):%s', p1)
+        LogHelper.assert_string(p1)
+        logging.warning('\tLogHelper.assert_string(p2):%s', p2)
+        LogHelper.assert_string(p2)
+    elif min_length1 is not None and min_length2 is not None:
+        logging.warning('\tLogHelper.assert_string(p1, min_length1=%s):%s', min_length1, p1)
+        LogHelper.assert_string(p1, min_length1)
+        logging.warning('\tLogHelper.assert_string(p2, min_length2=%s):%s', min_length2, p2)
+        LogHelper.assert_string(p2, min_length2)
+    elif min_length1 is not None:
+        assert min_length2 is None
+        logging.warning('\tLogHelper.assert_string(p1, min_length1)')
+        LogHelper.assert_string(p1, min_length1)
+        logging.warning('\tLogHelper.assert_string(p2)')
+        LogHelper.assert_string(p2)
+    elif min_length2 is not None:
+        assert min_length1 is None
+        logging.warning('\tLogHelper.assert_string(p1)')
+        LogHelper.assert_string(p1)
+        logging.warning('\tLogHelper.assert_string(p2, min_length2)')
+        LogHelper.assert_string(p2, min_length2)
 
 
 def _the_caller(prev: int = 0) -> str:
@@ -121,6 +149,53 @@ def test_ret_sorted() -> None:
     assert LogHelper.ret_keys(sorted_dict) == LogHelper.ret_keys(
         correct_dict
     ), 'The sort is NOT right'
+
+
+@pytest.mark.ok
+def test_assert_string() -> None:
+
+    par_none = None
+    par_string_long = 'a legal string'
+    empty_string = ''
+    feature = Feature(None, '', '', 'name', set(), None, 1, '')
+
+    with pytest.raises(AssertionError) as info:
+        _some_assert_value_caller(feature, par_string_long)
+        logging.info("str(info.value): %s", str(info.value))
+        logging.info("info.value: %s", info.value)
+        assert "The string param 'p1' in function _some_assert_value_caller was no string" in info.value
+
+    with pytest.raises(AssertionError) as info:
+        # LogHelper.assert_string(none_param)
+        _some_assert_value_caller(par_none, par_string_long)
+        assert "The string param 'p1' in function _some_assert_value_caller was no string" in info.value
+        # assert False, '1Stopping here...'
+
+    with pytest.raises(AssertionError) as info:
+        _some_assert_value_caller(None, par_string_long)
+    # assert "The string param 'value_param' was not supplied a string " in str(info.value)
+    assert "The string param 'p1' in function _some_assert_value_caller was no string " in str(info.value)
+    # assert False, '2Stopping here...'
+
+    with pytest.raises(AssertionError) as info:
+        _some_assert_value_caller(par_string_long, par_none)
+    # assert "The string param 'value_param' was not supplied a string " in str(info.value)
+    assert "The string param 'p2' in function _some_assert_value_caller was no string " in str(info.value)
+    # assert "The string param 'p2' was empty!" in str(info.value)
+    # assert False, '3Stopping here...'
+
+    with pytest.raises(AssertionError) as info:
+        _some_assert_value_caller('', 'Param2')
+    assert "The string param 'p1' in function _some_assert_value_caller was too short" in str(info.value)
+
+    with pytest.raises(AssertionError) as info:
+        _some_assert_value_caller('12345', 'Param2', 6)
+    assert "The string param 'p1' in function _some_assert_value_caller was too short" in str(info.value)
+    # Just showing the full assert output:
+    assert (
+        str(info.value)
+        == "The string param 'p1' in function _some_assert_value_caller was too short: '12345' (reports assert_string())!"
+    )
 
 
 @pytest.mark.ok
@@ -260,7 +335,8 @@ def test_log_func_name_xxx(caplog) -> None:
     LogHelper.log_func_name()
     expected = [
         '->testing_log_func_name_xxx  (prev=0)'
-        # "A->test_log_func_name_xxx  (prev=0) << pytest_pyfunc_call (<- by _log_func_name() with caller test_log_func_name_xxx())"
+        # "A->test_log_func_name_xxx  (prev=0) << \
+        # pytest_pyfunc_call (<- by _log_func_name() with caller test_log_func_name_xxx())"
     ]
     assert_logged(caplog, level=INFO, expected=expected)
 
@@ -273,13 +349,13 @@ def test_log_func_name_caplog(caplog) -> None:
     # Given a function (that log messages):
     #  def: _log_func_name(prev: int = 0)
     #####################################
-    lines_expeced = [
+    lines_expected = [
         '#' * 75,
         f'  {LogHelper.log_func_name()}  '.center(75, '#'),
         '#' * 75,
     ]
 
-    assert_logged(caplog, level=INFO, expected=lines_expeced, _in_sequence=True)
+    assert_logged(caplog, level=INFO, expected=lines_expected, _in_sequence=True)
 
     _clear_caplog(caplog)
     # When called with a non-default fillchar
@@ -287,8 +363,8 @@ def test_log_func_name_caplog(caplog) -> None:
     # Then I will see that the log uses that fillchar instead of the default
     LogHelper.log_func_name()
     # Then I will see that the log uses the wanted fillchar ('+')
-    lines_expeced = [f'  {LogHelper.log_func_name()}  '.center(75, plus)]
-    assert_logged(caplog, level=INFO, expected=lines_expeced)
+    lines_expected = [f'  {LogHelper.log_func_name()}  '.center(75, plus)]
+    assert_logged(caplog, level=INFO, expected=lines_expected)
 
 
 @pytest.mark.ok
@@ -305,7 +381,7 @@ def test_quoted_string_from():
     assert LogHelper.quoted_string_from(feature) == f"'{name}'"
 
 
-@pytest.mark.wipz
+@pytest.mark.wip
 def test_log_func_call():
     def inner_func_for_testing_log_func_call(_p1: str, _p2: str, _p3: int, _feature: Feature):
         LogHelper.log_func_call()
@@ -321,7 +397,9 @@ def test_log_func_call():
 
     # Assert that the mock_info was called with the expected arguments
 
-    expected_call = f"{COL_MSG}inner_func_for_testing_log_func_call{COL_INFO}(_p1='val1', _p2='val2', _p3=3, _feature='Feature_name'){COL_CONTEXT}(<- by log_func_call() with caller inner_func_for_testing_log_func_call())"
+    expected_call = f"{COL_MSG}inner_func_for_testing_log_func_call{COL_INFO}\
+        (_p1='val1', _p2='val2', _p3=3, _feature='Feature_name'){COL_CONTEXT}\
+            (<- by log_func_call() with caller inner_func_for_testing_log_func_call())"
     mock_info.assert_has_calls(
         [
             call(expected_call),

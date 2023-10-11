@@ -14,15 +14,6 @@ from tests.common.log_helper import (
     KEY_LOG_CONFIG,
     KEY_CONFIG,
     COL_CONTEXT,
-    # KEY_CURR_FEATURE,
-    # KEY_CURR_GLUE,
-    # KEY_CURR_SCENARIO,
-    # KEY_CURR_STEP,
-    # KEY_STEP_COUNTER,
-    # KEY_LOG_GLUE,
-    # KEY_LOGGER,
-    # KEY_FUNC,
-    # KEY_HOOKS,
 )
 
 

@@ -27,7 +27,12 @@ DO_INCL_CURR_INFO = True
 
 # TEST_CONTEXT = {'name': 'TEST_CONTEXT'}
 TEST_CONTEXT = OrderedDict(
-    {'name': 'TEST_CONTEXT', 'LOG_CONFIG': False, '|Hooks': []}
+    {
+        'name': 'TEST_CONTEXT',
+        'LOG_CONFIG': False,
+        '|PT_Hooks': [],
+        '|Hooks': [],
+    }  # TODO Remove hooks
 )   # TODO "LOG_CONFIG": True
 # Constants used for items in TEST_CONTEXT:
 KEY_CURR_FEATURE = 'Current feature'
@@ -44,7 +49,9 @@ KEY_LOGGER = 'logger'  # TODO: Values: False,  True
 KEY_LOG_CONFIG = 'LOG_CONFIG'   # Boolean for calling log_configuration or not (default true)
 KEY_CONFIG = 'config'
 KEY_FUNC = '|Func'  # TODO Should add all glue functions that gets called
-KEY_HOOKS = '|Hooks'  # TODO Should add all hooks that gets called
+KEY_PT_HOOKS = '|PtHooks'  # TODO Should add all Pytest(-BDD) hooks that gets called
+KEY_MY_HOOKS = '|MyHooks'  # TODO Should add all my related functions that gets called by the hooks
+KEY_HOOKZ = '|Hooks'  # TODO Should add all hooks that gets called
 KEY_FEATURES = '|Features'  # TODO Should add features in play and reported (by before_feature)
 
 
@@ -78,6 +85,88 @@ def _ret_items(the_dict: dict, prefix: str = '::') -> str:
 
 
 class LogHelper:
+    @staticmethod
+    def assert_string(value_param: str, min_length: int = 1) -> None:
+        """
+        Function assert_string asserts that the string is not empty and have wanted min_length
+            Param 1: value_param: str
+            Param 2: min_length: int (default: 1)
+
+        """
+        me = LogHelper.ret_func_name()
+        caller = LogHelper.ret_func_name(1)
+        logging.info("*** caller: %s(), value_param: '%s' ***", caller, value_param)
+
+        frame = inspect.currentframe().f_back
+        caller_locals = frame.f_locals
+        # caller_locals = frame.f_trace
+
+        about = '-?-'
+        was_none = []
+
+        logging.info('for loop -> len: %s', len(caller_locals))
+
+        for item_name, item_value in caller_locals.items():
+            logging.info(f"about1a: '{about}'->'{item_name} [{type(item_value).__name__}]")
+
+            #####
+            logging.info(
+                "***** Caller: '%s()', item_name: '%s', item_value: '%s' *****",
+                caller,
+                item_name,
+                item_value,
+            )
+            if item_value is value_param:
+                logging.info(
+                    f"about2: '{about}'->'{item_name} breaking out of the loop because it is the same object'"
+                )
+                about = item_name
+                break
+            #####
+
+            about = item_name
+            if isinstance(item_value, str):
+                logging.info(f"about1b: '{about}'->'{item_name}")
+                about = item_name
+                # Process only if item_value is a string
+                logging.info(
+                    "**** item_name: '%s', item_value type: %s = '%s'",
+                    item_name,
+                    type(item_value).__name__,
+                    item_value,
+                )
+            elif item_value is not None:
+                logging.info("**** item_name: '%s', item_value was None", item_name)
+                logging.info(f"about3: '{about}'->'{item_name}")
+                break
+            #     about = item_name
+
+        # for
+        logging.info('for loop <- about=%s', about)
+
+        if about != '-?-':
+            logging.warning("Found param to check & Running the check... about = '%s'", about)
+            assert (
+                isinstance(value_param, str) and value_param is not None
+            ), f"The string param '{about}' in function {caller} was no string (reports {me}(), got: {type(value_param).__name__})!"
+            # assert (
+            #     len(value_param) != 0
+            # ), f"The string param '{about}' in function {caller} was empty (reports {me}())!"
+            assert (
+                len(value_param) >= min_length
+            ), f"The string param '{about}' in function {caller} was too short: '{value_param}' (reports {me}())!"
+            # assert False, 'HERE'
+        else:
+            assert isinstance(
+                value_param, str
+            ), f"4The string param 'value_param' was not supplied a string (reports {me}(), got: {type(value_param).__name__})!"
+            assert False, 'HERE2'
+            assert len(value_param) != 0, f"The string param 'value_param' was empty (in {me}())!"
+            assert (
+                len(value_param) >= min_length
+            ), f"The string param 'value_param' ('{value_param}') was too short (reports {me}())!"
+            # assert value_param is not None, f"The string param 'value_param' was not supplied (in {me}())!"
+
     @staticmethod
     def ret_dict_info(
         the_dict: dict, name: str, prefix: str = '::', incl_items: bool = True
@@ -170,7 +259,7 @@ class LogHelper:
         assert isinstance(the_dict, dict), 'A dict was not given!'
         assert prefix is not None, 'Prefix was not given!'
 
-        logging.warning(the_dict.get(KEY_HOOKS, 'N/A'))
+        logging.warning(the_dict.get(KEY_PT_HOOKS, 'N/A'))
         return
 
         logging.info(' -------------------------------------> log_dict_now Begin')
