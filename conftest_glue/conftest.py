@@ -131,5 +131,3 @@ def author_name() -> str:
 #         pass
 
 #     return Context()
-
-

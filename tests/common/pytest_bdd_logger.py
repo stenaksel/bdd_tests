@@ -16,7 +16,8 @@ from tests.common.log_helper import (
 )
 from tests.common.pytest_bdd_tracer import PytestBddTracer
 
-    ############################################################################
+############################################################################
+
 
 class PytestBddLogger(PytestBddTracer):
     """
@@ -35,25 +36,25 @@ class PytestBddLogger(PytestBddTracer):
     ### Implementaions of abstract methods from PytestBddTracer
     ############################################################################
     def xlog_feature(self, feature: Feature) -> None:
-        LogHelper.log_func_name_with_info(feature.name, fillchar="@")
+        LogHelper.log_func_name_with_info(feature.name, fillchar='@')
         super().log_feature(feature)  # TODO: don't use super()
-        self._assert_obj_named(feature)
+        LogHelper.assert_object_have_name(feature)
         # logging.info('|%s', '=' * 75)
         # logging.info('| Feature: %s', feature.name)
         # logging.info('|%s', '=' * 75)
-        feature_name = f"Feature: {feature.name}"
+        feature_name = f'Feature: {feature.name}'
         LogHelper.log_func_call_info(logging.WARNING, -1, feature_name)
-        logging.info("%s", "/" * 75)
-        logging.info("|%s|", " " * 73)
-        logging.info("|%s|", feature_name.center(73))
-        logging.info("|%s|", " " * 73)
-        logging.info("%s", "\\" * 75)
+        logging.info('%s', '/' * 75)
+        logging.info('|%s|', ' ' * 73)
+        logging.info('|%s|', feature_name.center(73))
+        logging.info('|%s|', ' ' * 73)
+        logging.info('%s', '\\' * 75)
         # log_msg_end()
 
     def log_feature(self, feature: Feature) -> None:
-        LogHelper.log_func_name_with_info(feature.name, fillchar="F:")
+        LogHelper.log_func_name_with_info(feature.name, fillchar='F:')
         super().log_feature(feature)  # TODO: don't use super() ?
-        self._assert_obj_named(feature)
+        LogHelper.assert_object_have_name(feature)
         self.log(f'\t {self.COL_MSG}Feature: "{feature.name}"')
         # logging.info(
         #     f'%sFeature: "%s" %s',
@@ -68,13 +69,13 @@ class PytestBddLogger(PytestBddTracer):
         # self._assert_obj_named(step)
 
     def log_scenario(self, scenario: Scenario) -> None:
-        LogHelper.log_func_name_with_info(scenario.name, fillchar="Sc:")
+        LogHelper.log_func_name_with_info(scenario.name, fillchar='Sc:')
         self.log(f'\t {self.COL_SCENARIO}Scenario: "{scenario.name}"')
 
     def log_step(self, step: Step, scenario: Scenario) -> None:
-        LogHelper.log_func_name_with_info(step.name, fillchar="St:")
-        self._assert_obj_named(step)
-        self._assert_obj_named(scenario)
+        LogHelper.log_func_name_with_info(step.name, fillchar='St:')
+        LogHelper.assert_object_have_name(step)
+        LogHelper.assert_object_have_name(scenario)
         caller: str = LogHelper.ret_func_name(1)
         logging.info('=> log_step(step, scenario) (<< "%s") ', caller)  # TODO debug
         logging.info(
@@ -86,7 +87,7 @@ class PytestBddLogger(PytestBddTracer):
             scenario.feature.name,
         )
         logging.info(
-            "\t%s%s Step: %s %s(<< log_step)",  # TODO -> debug
+            '\t%s%s Step: %s %s(<< log_step)',  # TODO -> debug
             LogHelper.ret_before_or_after(caller),
             COL_STEP,
             step.name,
@@ -96,67 +97,67 @@ class PytestBddLogger(PytestBddTracer):
         global TEST_CONTEXT  # pylint: disable=global-statement
 
         # logging.warning(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT5', '---->'))
-        logging.warning("log_step ------------------------------------------->")
-        LogHelper.log_dict_now(TEST_CONTEXT, "TEST_CONTEXT5", "---->")
+        logging.warning('log_step ------------------------------------------->')
+        LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT5', '---->')
 
         step_no = TEST_CONTEXT.get(KEY_STEP_COUNTER, 0)
         if step_no == 0:
-            logging.warning("\t- %s: %s", KEY_STEP_COUNTER, step_no)
+            logging.warning('\t- %s: %s', KEY_STEP_COUNTER, step_no)
 
         # logging.info('%sStep:\t"%s"', X_COL_STEP, step.name)
-        logging.info("\t- %s: %s", KEY_STEP_COUNTER, step_no)
-        logging.info("\t- step_no     : %s", step_no)
-        logging.info("\t- name        : %s", step.name)
-        logging.info("\t- type        : %s", step.type)
-        logging.info("\t- keyword     : %s", step.keyword)
+        logging.info('\t- %s: %s', KEY_STEP_COUNTER, step_no)
+        logging.info('\t- step_no     : %s', step_no)
+        logging.info('\t- name        : %s', step.name)
+        logging.info('\t- type        : %s', step.type)
+        logging.info('\t- keyword     : %s', step.keyword)
         if step.background:
             # logging.info('\t- background  : %s', step.background)
-            logging.info("\t- background  : -yes-")
+            logging.info('\t- background  : -yes-')
         else:
-            logging.info("\t- background  : -NO-")
-        logging.info("\t- line_number : %s", step.line_number)
-        logging.info("\t- lines       : %s", step.lines)
+            logging.info('\t- background  : -NO-')
+        logging.info('\t- line_number : %s', step.line_number)
+        logging.info('\t- lines       : %s', step.lines)
         # logging.debug('\t- lines      : %s', step.lines[0])
-        logging.warning("Step Background >>#######################################>>")
-        #? logging.warning(step.background)
-        logging.warning("Step Background <<#######################################<<")
+        logging.warning('Step Background >>#######################################>>')
+        # ? logging.warning(step.background)
+        logging.warning('Step Background <<#######################################<<')
         assert isinstance(TEST_CONTEXT, dict)
-        LogHelper.log_dict_now(TEST_CONTEXT, "TEST_CONTEXT", "---->")
+        LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT', '---->')
         step_no += 1
-        step_text = f"{step.keyword} {step.name}"
-        line = "-" * (20 + len(step_text))
+        step_text = f'{step.keyword} {step.name}'
+        line = '-' * (20 + len(step_text))
         logging.info(line)
         logging.info(LogHelper.ret_before_or_after(caller))
-        logging.warning("step_no=%s", step_no)
-        logging.info("step_no=%s", step_no)
-        logging.warning("step_no=%s", step_no)
-        logging.info("step_text=%s", step_text)
+        logging.warning('step_no=%s', step_no)
+        logging.info('step_no=%s', step_no)
+        logging.warning('step_no=%s', step_no)
+        logging.info('step_text=%s', step_text)
         # logging.info(TEST_CONTEXT[KEY_CURR_STEP])
         # Increment the step_counter
         TEST_CONTEXT[KEY_STEP_COUNTER] = step_no
         # Update the step text
         TEST_CONTEXT[KEY_CURR_STEP] = step_text
         TEST_CONTEXT = dict(sorted(TEST_CONTEXT.items()))
-        line = "-" * (20 + len(step_text))
+        line = '-' * (20 + len(step_text))
         logging.info(line)
-        logging.info("Starting on step %s: %s", step_no, step_text)
+        logging.info('Starting on step %s: %s', step_no, step_text)
         logging.info(line)
 
         logging.warning(
-            "\t%s) %s%s %s",
+            '\t%s) %s%s %s',
             step_no,
             COL_STEP,
             step_text,
-            f"{COL_INFO}(@{step.line_number})",
+            f'{COL_INFO}(@{step.line_number})',
         )
-        logging.info("DO_INCL_CURR_INFO=%s", DO_INCL_CURR_INFO)
+        logging.info('DO_INCL_CURR_INFO=%s', DO_INCL_CURR_INFO)
         if DO_INCL_CURR_INFO:
             assert isinstance(TEST_CONTEXT, dict)
             TEST_CONTEXT[KEY_CURR_STEP] = step_text
             TEST_CONTEXT = dict(sorted(TEST_CONTEXT.items()))
-            logging.info(LogHelper.ret_dict_info(TEST_CONTEXT, "< TEST_CONTEXT", ""))
+            logging.info(LogHelper.ret_dict_info(TEST_CONTEXT, '< TEST_CONTEXT', ''))
 
-        logging.warning("log_step <-------------------------------------------")
+        logging.warning('log_step <-------------------------------------------')
 
     # def after_step(request, feature, scenario, step, step_func, step_func_args) -> None:
     #     logging.warning('----> Entered after_step')

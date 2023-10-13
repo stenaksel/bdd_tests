@@ -5,9 +5,13 @@ from collections import OrderedDict
 from typing import Any, List
 
 from pytest import FixtureRequest
-from pytest_bdd.parser import Feature, Scenario, Step
 
-from src.ansi_colors import ANSIColor
+from tests.common.ansi_colors import ANSIColor
+
+# from tests.common.ansi_colors import ANSIColor
+
+# from pytest_bdd.parser import Feature, Scenario, Step
+
 
 # from tests.common.pytest_bdd_logger_interface import (
 #     TEST_CONTEXT
@@ -86,12 +90,39 @@ def _ret_items(the_dict: dict, prefix: str = '::') -> str:
 
 class LogHelper:
     @staticmethod
+    def assert_obj(value_param: Any) -> None:
+        """
+        Function assert_obj asserts that the object is not None
+            Param 1: value_param: Any
+        """
+        # me = LogHelper.ret_func_name()
+        caller = LogHelper.ret_func_name(1)
+        logging.info("*** caller: %s(), value_param: '%s' ***", caller, value_param)
+
+        frame = inspect.currentframe().f_back
+        caller_locals = frame.f_locals
+        # caller_locals = frame.f_trace
+
+        about = '-?-'
+
+        logging.info('for loop -> len: %s', len(caller_locals))
+
+        for item_name, item_value in caller_locals.items():
+            some_info = f"about1a: '{about}'->'{item_name} [{type(item_value).__name__}]"
+            logging.info(some_info)
+
+    @staticmethod
     def assert_string(value_param: str, min_length: int = 1) -> None:
         """
-        Function assert_string asserts that the string is not empty and have wanted min_length
+        Function assert_string asserts that the string is not None or empty,
+        and at least min_length long.
             Param 1: value_param: str
             Param 2: min_length: int (default: 1)
 
+        The assert message informs about the calling functions param name that was in conflict.
+        Eg. if a calling function "my_func" was called with param "my_string" that was too short,
+        then the assert message will inform about problem with "my_string" used in "my_func" like:
+            "The string param 'my_string' in function my_func was too short!"
         """
         me = LogHelper.ret_func_name()
         caller = LogHelper.ret_func_name(1)
@@ -102,12 +133,12 @@ class LogHelper:
         # caller_locals = frame.f_trace
 
         about = '-?-'
-        was_none = []
 
         logging.info('for loop -> len: %s', len(caller_locals))
 
         for item_name, item_value in caller_locals.items():
-            logging.info(f"about1a: '{about}'->'{item_name} [{type(item_value).__name__}]")
+            some_info = f"about1: '{about}'->'{item_name} [{type(item_value).__name__}]"
+            logging.info(some_info)
 
             #####
             logging.info(
@@ -117,16 +148,16 @@ class LogHelper:
                 item_value,
             )
             if item_value is value_param:
-                logging.info(
-                    f"about2: '{about}'->'{item_name} breaking out of the loop because it is the same object'"
-                )
+                some_info = f"about2: '{about}'->'{item_name} breaking out of the loop because it is the same object'"
+                logging.info(some_info)
                 about = item_name
                 break
             #####
 
             about = item_name
             if isinstance(item_value, str):
-                logging.info(f"about1b: '{about}'->'{item_name}")
+                some_info = f"about3: '{about}'->'{item_name} (str)"
+                logging.info(some_info)
                 about = item_name
                 # Process only if item_value is a string
                 logging.info(
@@ -137,18 +168,15 @@ class LogHelper:
                 )
             elif item_value is not None:
                 logging.info("**** item_name: '%s', item_value was None", item_name)
-                logging.info(f"about3: '{about}'->'{item_name}")
                 break
-            #     about = item_name
 
-        # for
         logging.info('for loop <- about=%s', about)
 
         if about != '-?-':
             logging.warning("Found param to check & Running the check... about = '%s'", about)
             assert (
                 isinstance(value_param, str) and value_param is not None
-            ), f"The string param '{about}' in function {caller} was no string (reports {me}(), got: {type(value_param).__name__})!"
+            ), f"The string param '{about}' in function {caller} was no string! (reports {me}(), got: {type(value_param).__name__})"
             # assert (
             #     len(value_param) != 0
             # ), f"The string param '{about}' in function {caller} was empty (reports {me}())!"
@@ -156,16 +184,19 @@ class LogHelper:
                 len(value_param) >= min_length
             ), f"The string param '{about}' in function {caller} was too short: '{value_param}' (reports {me}())!"
             # assert False, 'HERE'
-        else:
-            assert isinstance(
-                value_param, str
-            ), f"4The string param 'value_param' was not supplied a string (reports {me}(), got: {type(value_param).__name__})!"
-            assert False, 'HERE2'
-            assert len(value_param) != 0, f"The string param 'value_param' was empty (in {me}())!"
-            assert (
-                len(value_param) >= min_length
-            ), f"The string param 'value_param' ('{value_param}') was too short (reports {me}())!"
-            # assert value_param is not None, f"The string param 'value_param' was not supplied (in {me}())!"
+
+    @staticmethod
+    def assert_object_have_name(
+        named_obj: Any, name_min_length: int = 3
+    ) -> None:  # TODO Start using this
+        assert named_obj is not None, f'No named_obj param! (_assert_obj_named)'
+        assert (
+            named_obj.name is not None
+        ), f'{named_obj.__class__.__name__} name is empty! (_assert_obj_named: {named_obj})'
+        assert (
+            len(named_obj.name) > name_min_length  # TODO is length check > 3 OK?
+        ), f'{named_obj.__class__.__name__} name should be longer! Was just: "{named_obj.name}" (_assert_obj_named)'
+        logging.info('Asserted scenario param: %s', named_obj.name)
 
     @staticmethod
     def ret_dict_info(
@@ -223,14 +254,15 @@ class LogHelper:
         #     return str(COL_INFO) + ret + str(COL_RESET)
 
     @staticmethod
-    def ret_func_name(prev: int = 0) -> str:
+    def ret_func_name(prev: int = 0, with_test_logging: bool = False) -> str:
         """
         Usage:
         * _ret_func_name() - will return it's own func_name ("the caller of ret_func_name()")
         * _ret_func_name(1) - will return the func_name of the caller
         * _ret_func_name(2) - will return the func_name of the callers caller
         """
-        # LogHelper.log_func_call()
+        if with_test_logging:   #TODO maybe remove? Just used for testing a test
+            logging.debug('>> ret_func_name')
         return inspect.stack()[1 + prev][3]
 
     @staticmethod
@@ -252,6 +284,8 @@ class LogHelper:
         ret = obj
         if isinstance(obj, dict):
             ret = dict(sorted(obj.items()))
+        else:
+            assert False, f'Sorting for {type(obj).__name__} have not been implemented!'
         return ret
 
     @staticmethod
@@ -259,6 +293,7 @@ class LogHelper:
         assert isinstance(the_dict, dict), 'A dict was not given!'
         assert prefix is not None, 'Prefix was not given!'
 
+        logging.warning(f"{prefix} {name if not None else '_?_'}: " + str(the_dict))
         logging.warning(the_dict.get(KEY_PT_HOOKS, 'N/A'))
         return
 
@@ -285,7 +320,32 @@ class LogHelper:
         logging.info(LogHelper.ret_dict_info(the_dict, name, 'x'))
         # logging.info(ret_dict_info(the_dict, name, prefix))
         # log_items(the_dict, prefix)
-        logging.info(' <------------------------------------- _log_dict_now End')
+        logging.info(' <------------------------------------- log_dict_now End')
+
+    @staticmethod
+    def log_headline(msg: str, prev: int = 0, fillchar: str = '#') -> None:  # tested
+        assert msg != None, 'No message! (Got: None)'
+        assert fillchar != None, 'No fillchar! (Got: None)'
+        assert fillchar and len(fillchar) == 1, f"No fillchar (len 1)! (Got: '{fillchar}')"
+        caller = LogHelper.ret_func_name(1)
+        logging.debug(
+            "log_headline(msg='%s', prev=%s, fillchar='%s') << %s",
+            msg,
+            prev,
+            fillchar,
+            caller,
+        )
+        logging.debug('(using prev %s)', 1 + prev)
+
+        caller = LogHelper.ret_func_name(1 + prev)
+        name_info = f'  {msg}  '
+        # TODO debug:
+        logging.debug('Found "%s" (Used prev %s)', name_info, 1 + prev)
+        ###########################################################################
+        ###########################################################################
+        logging.info('\t%s', fillchar * 75)
+        logging.info('\t%s', name_info.center(75, fillchar))
+        logging.info('\t%s', fillchar * 75)
 
     @staticmethod
     def process_value(value):
@@ -442,7 +502,7 @@ class LogHelper:
         return ''
 
     @staticmethod
-    def assert_messages(caplog, level, messages: List, in_sequence: bool = False) -> None:
+    def assert_messages(caplog, level, messages: List) -> None:   # ? + in_sequence: bool = False
         print('#### messages:')
         for msg in messages:
             print(msg)

@@ -14,8 +14,14 @@ profile = 'black'                      # We use blue which is close enough to bl
 py_version = 310
 extend_skip_glob = ['**/migrations/*']
 
+[tool.pylint]
+py-version = '3.10'
+
 [tool.pylint.messages_control]
 max-line-length = 100
+good-names = ['k','v','f','i','j','x']
+max-branches = 25
+max-attributes = 12
 
 enable = [
   'useless-suppression', # helpful to remove dead lint ignore comments
@@ -27,8 +33,8 @@ disable = [ #TODO: Add more
   'missing-function-docstring', # C0116 missing docstrings are ok
   'missing-class-docstring',    # C0115 missing docstrings are ok
   'too-few-public-methods',     # R0903 allow simple data/entity classes etc.
-  'unused-wildcard-import',     #
-  'wildcard-import',            # W0611 unused import
+  # 'unused-wildcard-import',     #
+  # 'wildcard-import',            # W0611 unused import
 ]
 
 ignore = 'migrations' # Do not enforce naming rules for generated files.
@@ -58,4 +64,4 @@ pythonpath = ['tests', 'sah', 'conftest_glue', 'article']
 
 # addopts = '-vv --ignore=temp' # Don't look for py files in temp folder
 # addopts = '--maxfail=2 -rf'  # exit after 2 failures, report fail info
-addopts = '-rf'  # exit after 2 failures, report fail info
+addopts = '-rf --junit-xml=report.xml --cov=src/ --cov-report=xml --cov-report=term'

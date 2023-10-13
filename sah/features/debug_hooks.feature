@@ -1,8 +1,8 @@
 # content of debug_glue.feature
 Feature: Debug Hooks
 
-  # Background: Using log_glue
-  #   Given a Pytest-BDD test using the "log_glue" module
+  Background: Using log_glue
+    Given a Pytest-BDD test using the "log_glue" module
   #   And the "x" uses Pytest-BDD hooks that calls the corresponding "log_glue" functions
   # # eg. "pytest_bdd_before_step" calls "before_step"
 
@@ -21,12 +21,13 @@ Feature: Debug Hooks
     Given this scenario is tagged with "wip"
     When the scenario is run
 
-  @wipz
+  @wip
   Scenario: before_feature called once
     Given a "pytest_bdd_before_scenario" hook function
+    # And
     # Given a "pytest_bdd_before_scenario" Pytest-BDD hook function in conftest.py
     When the scenario is run
-    # Then information in context "TEST_CONTEXT", will include "Current glue"
+    # Then information in context "TEST_CONTEXT" will include "Current glue"
     Then "TEST_CONTEXT" should show that the function "before_scenario" have been run
 
   @wipz
@@ -36,12 +37,12 @@ Feature: Debug Hooks
     # Given a "pytest_bdd_before_scenario" Pytest-BDD hook function in conftest.py
     When the scenario is run
     Then at before each step the "before_step" function is called
-    # Then information in context "TEST_CONTEXT", will include "Current glue"
+    # Then information in context "TEST_CONTEXT" will include "Current glue"
     Then "TEST_CONTEXT" should show that the function "before_scenario" have been run
 
 
-  # Then information in context, will include "Current glue"
-  # And information in context "TEST_CONTEXT", will include:
+  # Then information in context will include "Current glue"
+  # And information in context "TEST_CONTEXT" will include:
   # "|Func" with value "before_scenario"
   # | key              | value
   # | Current feature  | Debug Hooks
@@ -49,16 +50,17 @@ Feature: Debug Hooks
   # | Current Step     | N/A or Then/And? "TEST_CONTEXT" should show that the function "before_scenario" have been run
   # | Current glue     | N/A
 
+  @ok
   Scenario: Current information added to TEST_CONTEXT when running
     # Given the variable "DO_INCL_CURR_INFO" is set to "True"
     When the step definition is run
-    Then information in TEST_CONTEXT will not include "Current glue"
+    Then information in TEST_CONTEXT will include "Current glue"
 
   @wipz
   Scenario: Add information in TEST_CONTEXT when running for pytest_bdd_before_scenario
-    Given a Pytest-BDD test using the "log_glue" module
-    # Given a "pytest_bdd_before_scenario" Pytest-BDD hook function in conftest.py
-    # Given a Pytest-BDD hook function <hook> in conftest.py
+    # Given a Pytest-BDD test using the "log_glue" module
+    # And a "pytest_bdd_before_scenario" Pytest-BDD hook function in conftest.py
+    # And a Pytest-BDD hook function <hook> in conftest.py
     When the step definition is run
     Then "TEST_CONTEXT" should show that the hook-function "before_scenario" have been run
 

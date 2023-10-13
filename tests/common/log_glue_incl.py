@@ -3,18 +3,13 @@ import inspect
 import logging
 from logging import Logger
 from typing import Any
-
 from pytest_bdd.parser import Feature, Scenario, ScenarioTemplate, Step
-
-from src.ansi_colors import ANSIColor
+from tests.common.ansi_colors import ANSIColor
 from tests.common.log_helper import (
     LogHelper,
     KEY_DBG_FUNC_NAME,
     KEY_LOG_GLUE,
     TEST_CONTEXT,
-)
-from tests.common.pytest_bdd_logger_interface import (
-    log_headline
 )
 
 # TODO: Create this as a template class
@@ -46,10 +41,8 @@ def get_logger(name=KEY_LOG_GLUE) -> Logger:  # TODO Is this needed
     return logging.getLogger(name)
 
 
-def xlog_func_name(
-    prev: int = 0, inRow: bool = True, fillchar: str = "#"
-) -> None:  # tested
-    assert fillchar != None, "No fillchar! (Got: None)"
+def xlog_func_name(prev: int = 0, inRow: bool = True, fillchar: str = '#') -> None:  # tested
+    assert fillchar != None, 'No fillchar! (Got: None)'
     assert fillchar and len(fillchar) != 0, f"No fillchar! (Got '{fillchar}' <- empty)"
     assert fillchar and len(fillchar) == 1, f"No fillchar! (Got string '{fillchar}')"
     caller = xret_func_name(1)
@@ -62,10 +55,10 @@ def xlog_func_name(
         COL_CONTEXT,
         caller,
     )
-    logging.debug("(using prev %s)", 1 + prev)
+    logging.debug('(using prev %s)', 1 + prev)
 
     caller = xret_func_name(1 + prev)
-    log_headline(caller, prev, fillchar)
+    LogHelper.log_headline(caller, prev, fillchar)
 
 
 def xlog_msg_start(log_level: int = logging.INFO) -> None:
@@ -73,14 +66,14 @@ def xlog_msg_start(log_level: int = logging.INFO) -> None:
     # print('***xlog_msg_start***')
     # print(__name__)
     # print('***xlog_msg_start***')
-    GLUE_LOGGER.warning("***xlog_msg_start*** - %s", __name__)
-    GLUE_LOGGER.log(log_level, "***xlog_msg_start*** - %s", __name__)
+    GLUE_LOGGER.warning('***xlog_msg_start*** - %s', __name__)
+    GLUE_LOGGER.log(log_level, '***xlog_msg_start*** - %s', __name__)
     TEST_CONTEXT[KEY_DBG_FUNC_NAME] = xret_func_name()  # TODO remove line
     # xlog_msg(xret_func_name() + ' -> ' + TEST_CONTEXT)
     xlog_msg(xret_func_name(1), show_caller=True)
     # GLUE_LOGGER.log(log_level, 'Heisann!')
 
-    logging.warning("<< ***xlog_msg_start***")
+    logging.warning('<< ***xlog_msg_start***')
 
 
 def log_msg_end(log_level: int = logging.INFO) -> None:
@@ -92,43 +85,41 @@ def log_msg_end(log_level: int = logging.INFO) -> None:
 
 
 def xlog_msg(
-    msg: str, log_level: int = logging.INFO, pre: str = "", show_caller: bool = False
+    msg: str, log_level: int = logging.INFO, pre: str = '', show_caller: bool = False
 ) -> None:
     caller = xret_func_name(1)
     # logging.info('-> xlog_msg -> ' + msg)
-    logging.info("xlog:|%s %s  %s(<< %s)", pre, msg, COL_CONTEXT, caller)
+    logging.info('xlog:|%s %s  %s(<< %s)', pre, msg, COL_CONTEXT, caller)
     # print('-> xlog_msg <- ' + caller)
 
-    GLUE_LOGGER.debug(">> xlog_msg")
+    GLUE_LOGGER.debug('>> xlog_msg')
     if len(msg) == 0:  # only show_caller in first column
         caller = xret_func_name(2)
-        msg = f"{pre}{caller}"
-        GLUE_LOGGER.log(log_level, "|%s%30s%s|", X_COL_SCENARIO, "─" * 30, X_COL_RESET)
+        msg = f'{pre}{caller}'
+        GLUE_LOGGER.log(log_level, '|%s%30s%s|', X_COL_SCENARIO, '─' * 30, X_COL_RESET)
         GLUE_LOGGER.log(
             log_level,
-            "|%s%30s%s|%s << xlog_msg",
+            '|%s%30s%s|%s << xlog_msg',
             X_COL_SCENARIO,
             msg.center(30),
             X_COL_RESET,
             COL_CONTEXT,
         )
-        GLUE_LOGGER.log(log_level, "|%s%30s%s|", X_COL_SCENARIO, "─" * 30, X_COL_RESET)
+        GLUE_LOGGER.log(log_level, '|%s%30s%s|', X_COL_SCENARIO, '─' * 30, X_COL_RESET)
     elif show_caller:
         caller = xret_func_name(1)
-        GLUE_LOGGER.log(
-            log_level, "|%s%21s xlog_msg:| %s  (<< %s)", COL_CONTEXT, pre, msg, caller
-        )
+        GLUE_LOGGER.log(log_level, '|%s%21s xlog_msg:| %s  (<< %s)', COL_CONTEXT, pre, msg, caller)
     else:
-        GLUE_LOGGER.log(log_level, "%s|%21s xlog_msg:| %s  ", COL_CONTEXT, pre, msg)
+        GLUE_LOGGER.log(log_level, '%s|%21s xlog_msg:| %s  ', COL_CONTEXT, pre, msg)
 
-    if len(msg) == 0 and "dbg:TEST_CONTEXT" in TEST_CONTEXT:
+    if len(msg) == 0 and 'dbg:TEST_CONTEXT' in TEST_CONTEXT:
         GLUE_LOGGER.info(
-            "dbg:TEST_CONTEXT was found in xlog_msg. Reporting TEST_CONTEXT:"
+            'dbg:TEST_CONTEXT was found in xlog_msg. Reporting TEST_CONTEXT:'
         )  # TODO: debug
-        GLUE_LOGGER.info(LogHelper.ret_dict_info(TEST_CONTEXT, "* => TEST_CONTEXT"))
-        del TEST_CONTEXT["dbg:TEST_CONTEXT"]
+        GLUE_LOGGER.info(LogHelper.ret_dict_info(TEST_CONTEXT, '* => TEST_CONTEXT'))
+        del TEST_CONTEXT['dbg:TEST_CONTEXT']
 
-    GLUE_LOGGER.debug("<< xlog_msg")
+    GLUE_LOGGER.debug('<< xlog_msg')
 
 
 def xret_sorted(obj) -> Any:  # tested
@@ -156,12 +147,12 @@ def xret_func_name(prev: int = 0) -> str:  # tested
     * xret_func_name(1) - will return the func_name of the caller
     * xret_func_name(2) - will return the func_name of the callers caller
     """
-    assert isinstance(prev, int), f"Not a valid prev! (Got: {prev})"
+    assert isinstance(prev, int), f'Not a valid prev! (Got: {prev})'
     # assert prev >= 0, f'Not a valid prev! (Got: {prev})'
     # assert prev < 2, f'Not a valid prev! (Got: {prev})' # TODO: fix this
     caller_frame = inspect.currentframe().f_back
     caller_name = caller_frame.f_code.co_name
-    assert isinstance(prev, int), f"Not a valid prev from {caller_name}! (Got: {prev})"
+    assert isinstance(prev, int), f'Not a valid prev from {caller_name}! (Got: {prev})'
     if prev == 0:
         return caller_name
 
@@ -173,23 +164,23 @@ def xret_func_name(prev: int = 0) -> str:  # tested
     return inspect.stack()[1 + prev][3]
 
 
-def ret_item_info(name: str, item, prefix: str = "i") -> str:  # tested
+def ret_item_info(name: str, item, prefix: str = 'i') -> str:  # tested
     """
     Function ret_item_info returns a string with info
     about the named item, its type and its content
         Param 1: name: str
         Param 2: item
     """
-    item_type = f"[{type(item).__name__}]"
-    if len(prefix) > 0 and prefix[0] == "p":  # p => param
-        return f"{prefix:>8}-{name:<20}-: {item_type:>10}: {item}"
+    item_type = f'[{type(item).__name__}]'
+    if len(prefix) > 0 and prefix[0] == 'p':  # p => param
+        return f'{prefix:>8}-{name:<20}-: {item_type:>10}: {item}'
     else:
         return f'{"." * 8}{prefix:>8}{name.rjust(25, " ")}_ : {item_type:>10}: {item}'
         # return f'{prefix}\t{name.rjust(20, " ")} : {item_type:>10}: {item}'
         # return f'{prefix}{name:>20} : {item_type:>10}: {item}'
 
 
-def old_ret_dict_info(the_dict: dict, name: str, prefix: str = "") -> str:  # tested
+def old_ret_dict_info(the_dict: dict, name: str, prefix: str = '') -> str:  # tested
     """
     Function ret_dict_info returns a string with info
     about the named dictionary and its content
@@ -197,22 +188,22 @@ def old_ret_dict_info(the_dict: dict, name: str, prefix: str = "") -> str:  # te
         Param 2: name: str
         Param 3: prefix: str (optional)
     """
-    assert isinstance(the_dict, dict), "A dict was not given!"
+    assert isinstance(the_dict, dict), 'A dict was not given!'
 
-    the_length = "--EMPTY!"
+    the_length = '--EMPTY!'
     if the_dict:  # Some items in the_dict
         the_length = len(the_dict)
 
-    ret = f"{prefix} {name:<15}: [dict] (#={the_length})\n"
+    ret = f'{prefix} {name:<15}: [dict] (#={the_length})\n'
     # the_dict['temp'] = 'hallo'
     show_items = True
     if show_items and the_dict and the_length != 0:  # Include the items in the_dict
-        ret += ret_item_info("____key____", "____value____", "_item_") + "\n"
+        ret += ret_item_info('____key____', '____value____', '_item_') + '\n'
         inum = 1
 
     for key, value in xret_sorted(the_dict).items():
         # ret += ret_item_info(key, value, prefix) + '\n'
-        ret += ret_item_info(key, value, f"i {inum}") + "\n"
+        ret += ret_item_info(key, value, f'i {inum}') + '\n'
         inum = inum + 1
 
     xlog_msg(msg=ret, show_caller=False)
@@ -241,39 +232,37 @@ def old_ret_dict_info(the_dict: dict, name: str, prefix: str = "") -> str:  # te
 def assert_object(obj, msg: str) -> None:
     assert obj, msg
     if not obj:
-        GLUE_LOGGER.warning(
-            "param was not given to assert_object func for msg: %s", msg
-        )
+        GLUE_LOGGER.warning('param was not given to assert_object func for msg: %s', msg)
         assert False, msg
-    GLUE_LOGGER.warning("assert_object func with obj: %s", obj)
-    GLUE_LOGGER.warning("assert_object func with msg: %s", msg)
-    if "name!" in msg:
-        if not isinstance(obj, str) and obj.hasattr("name"):
-            assert len(obj.hasattr("name")) > 0, "No 'name' provided!"
+    GLUE_LOGGER.warning('assert_object func with obj: %s', obj)
+    GLUE_LOGGER.warning('assert_object func with msg: %s', msg)
+    if 'name!' in msg:
+        if not isinstance(obj, str) and obj.hasattr('name'):
+            assert len(obj.hasattr('name')) > 0, "No 'name' provided!"
         else:
             if isinstance(obj, str) and len(obj) == 0:
                 GLUE_LOGGER.warning("%s (name = '%s')", msg, obj)
             assert isinstance(obj, str) and len(obj) > 0, msg
         #
-    elif "param!" in msg:
+    elif 'param!' in msg:
         GLUE_LOGGER.warning(msg)
         assert not obj, msg
     else:
-        GLUE_LOGGER.warning("No check in assert_object for message %s", msg)
-        assert False, f"No check in assert_object for message {msg}"
+        GLUE_LOGGER.warning('No check in assert_object for message %s', msg)
+        assert False, f'No check in assert_object for message {msg}'
 
 
 def xlog_scenario(scenario: Scenario) -> None:
     caller: str = xret_func_name(1)
-    GLUE_LOGGER.info("|%s", "-" * 55)
-    xlog_msg("-" * 55)
+    GLUE_LOGGER.info('|%s', '-' * 55)
+    xlog_msg('-' * 55)
     xlog_msg_start()
-    xlog_msg("-" * 55)
-    GLUE_LOGGER.info("|%s", '"' * 55)
+    xlog_msg('-' * 55)
+    GLUE_LOGGER.info('|%s', '"' * 55)
 
     GLUE_LOGGER.debug('=> xlog_scenario(scenario) (<< "%s") ', caller)
-    GLUE_LOGGER.info("|%s", "-" * 75)
-    GLUE_LOGGER.debug("| Feature: %s", scenario.feature.name)
+    GLUE_LOGGER.info('|%s', '-' * 75)
+    GLUE_LOGGER.debug('| Feature: %s', scenario.feature.name)
     GLUE_LOGGER.info(
         '|%s%30s:|%s Scenario: %s%s (in Feature: "%s") (<< xlog_scenario)',  # TODO -> debug
         COL_CONTEXT,
@@ -283,5 +272,5 @@ def xlog_scenario(scenario: Scenario) -> None:
         COL_CONTEXT,
         scenario.feature.name,
     )
-    GLUE_LOGGER.debug("-> scenario.feature.name: %s", scenario.feature.name)
-    GLUE_LOGGER.info("|%s", "-" * 75)
+    GLUE_LOGGER.debug('-> scenario.feature.name: %s', scenario.feature.name)
+    GLUE_LOGGER.info('|%s', '-' * 75)

@@ -43,12 +43,12 @@ classDiagram
         <<abstract>>
         Constants:
         KEY_CURR_FEATURE = 'Current feature'
-        COL_INFO = ANSIColor.BLUE
-        COL_MSG = ANSIColor.CYAN
-        COL_RESET = ANSIColor.RESET
-        COL_SCENARIO = ANSIColor.YELLOW
-        COL_STEP = ANSIColor.GREEN
-        COL_CONTEXT = ANSIColor.GRAY
+        COL_INFO = ANSIColor.BLUE.value
+        COL_MSG = ANSIColor.CYAN.value
+        COL_RESET = ANSIColor.RESET.value
+        COL_SCENARIO = ANSIColor.YELLOW.value
+        COL_STEP = ANSIColor.GREEN.value
+        COL_CONTEXT = ANSIColor.GRAY.value
 
         +log_hook()*
         +configure(config: Config)

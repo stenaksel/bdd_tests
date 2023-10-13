@@ -8,7 +8,7 @@ SKIPPED [1] ..\..\.virtualenvs\bdd_tests\Lib\site-packages\pytest_bdd\scenario.p
 SKIPPED [1] sah\test_fixture_order.py:36: unconditional skip
 SKIPPED [1] sah\test_fixture_order.py:41: unconditional skip
 SKIPPED [1] sah\test_pytestconfig.py:4: unconditional skip
-FAILED tests/test_log_helper.py::test_log_func_call - AssertionError: Calls not found.
+OK tests/test_log_helper.py::test_log_func_call - AssertionError: Calls not found.
 FAILED tests/test_pytest_bdd_logger.py::test_before_feature_do_update_context - AttributeError: <module 'tests.common.pytest_bdd_logger' from 'C:\\Users\\StenAkselHeien\\vscodeProjects\\bdd_tests\\tests\\common\\pytest_bdd_logger.py'> does not have the attribute 'l...
 FAILED sah/test_debug_hooks.py::test_before_feature_called_once - AssertionError: assert None
 FAILED sah/test_debug_hooks.py::test_inform_about_the_test_run - pytest_bdd.exceptions.StepDefinitionNotFoundError: Step definition is not found: Then "at before each step the "before_step" function is called". Line 38 in scenario "Inform about the t...

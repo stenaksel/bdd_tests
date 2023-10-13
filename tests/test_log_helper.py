@@ -11,12 +11,11 @@ pytest captures all log messages emitted by the code being tested.
 You can then access these log records through the caplog.records attribute.
 """
 import logging
-
 import re
 
 # from logging import DEBUG, INFO, WARN, LogRecord
 from logging import INFO
-from typing import List
+from typing import Any, List
 from unittest.mock import call, patch
 
 import pytest
@@ -45,35 +44,6 @@ from tests.common.pytest_bdd_logger import PytestBddLogger
 #     log_func_call,
 #     log_func_name,
 # )
-
-
-def _some_assert_value_caller(
-    p1: str, p2: str, min_length1: int = None, min_length2: int = None
-) -> None:
-    logging.info('==> _some_assert_value_caller')
-    LogHelper.log_func_call()
-    if min_length1 is None and min_length2 is None:
-        logging.warning('\tLogHelper.assert_string(p1):%s', p1)
-        LogHelper.assert_string(p1)
-        logging.warning('\tLogHelper.assert_string(p2):%s', p2)
-        LogHelper.assert_string(p2)
-    elif min_length1 is not None and min_length2 is not None:
-        logging.warning('\tLogHelper.assert_string(p1, min_length1=%s):%s', min_length1, p1)
-        LogHelper.assert_string(p1, min_length1)
-        logging.warning('\tLogHelper.assert_string(p2, min_length2=%s):%s', min_length2, p2)
-        LogHelper.assert_string(p2, min_length2)
-    elif min_length1 is not None:
-        assert min_length2 is None
-        logging.warning('\tLogHelper.assert_string(p1, min_length1)')
-        LogHelper.assert_string(p1, min_length1)
-        logging.warning('\tLogHelper.assert_string(p2)')
-        LogHelper.assert_string(p2)
-    elif min_length2 is not None:
-        assert min_length1 is None
-        logging.warning('\tLogHelper.assert_string(p1)')
-        LogHelper.assert_string(p1)
-        logging.warning('\tLogHelper.assert_string(p2, min_length2)')
-        LogHelper.assert_string(p2, min_length2)
 
 
 def _the_caller(prev: int = 0) -> str:
@@ -152,7 +122,75 @@ def test_ret_sorted() -> None:
 
 
 @pytest.mark.ok
+def test_assert_obj() -> None:
+
+    par_none = None
+    par_string_long = 'a legal string'
+    empty_string = ''
+    none_obj = None
+    par_ok = Feature([], '', '', 'name', set(), None, 1, '')
+
+    # inner_func ->
+    def _some_assert_obj_caller(p1: Any, p2: Any) -> None:
+        logging.info('==> _some_assert_obj_caller')
+        LogHelper.log_func_call()
+        logging.warning('\tLogHelper.assert_obj(p1):%s', p1)
+        LogHelper.assert_obj(p1)
+        logging.warning('\tLogHelper.assert_obj(p2):%s', p2)
+        LogHelper.assert_obj(p2)
+
+    # <- inner_func
+
+    with pytest.raises(AssertionError) as info:
+        # LogHelper.assert_string(none_param)
+        _some_assert_obj_caller(par_none, par_ok)
+        assert (
+            "The object param 'p1' in function _some_assert_obj_caller was no object" in info.value
+        )
+        assert False, '1Stopping here...'
+
+    with pytest.raises(AssertionError) as info:
+        # LogHelper.assert_string(none_param)
+        _some_assert_obj_caller(par_ok, par_none)
+        assert (
+            "The object param 'p2' in function _some_assert_obj_caller was no object" in info.value
+        )
+        assert False, '1Stopping here...'
+
+
+@pytest.mark.ok
 def test_assert_string() -> None:
+
+    # inner_func ->
+    def _some_assert_value_caller(
+        p1: str, p2: str, min_length1: int | None = None, min_length2: int | None = None
+    ) -> None:
+        logging.info('==> _some_assert_value_caller')
+        LogHelper.log_func_call()
+        if min_length1 is None and min_length2 is None:
+            logging.warning('\tLogHelper.assert_string(p1):%s', p1)
+            LogHelper.assert_string(p1)
+            logging.warning('\tLogHelper.assert_string(p2):%s', p2)
+            LogHelper.assert_string(p2)
+        elif min_length1 is not None and min_length2 is not None:
+            logging.warning('\tLogHelper.assert_string(p1, min_length1=%s):%s', min_length1, p1)
+            LogHelper.assert_string(p1, min_length1)
+            logging.warning('\tLogHelper.assert_string(p2, min_length2=%s):%s', min_length2, p2)
+            LogHelper.assert_string(p2, min_length2)
+        elif min_length1 is not None:
+            assert min_length2 is None
+            logging.warning('\tLogHelper.assert_string(p1, min_length1)')
+            LogHelper.assert_string(p1, min_length1)
+            logging.warning('\tLogHelper.assert_string(p2)')
+            LogHelper.assert_string(p2)
+        elif min_length2 is not None:
+            assert min_length1 is None
+            logging.warning('\tLogHelper.assert_string(p1)')
+            LogHelper.assert_string(p1)
+            logging.warning('\tLogHelper.assert_string(p2, min_length2)')
+            LogHelper.assert_string(p2, min_length2)
+
+    # <- inner_func
 
     par_none = None
     par_string_long = 'a legal string'
@@ -161,41 +199,85 @@ def test_assert_string() -> None:
 
     with pytest.raises(AssertionError) as info:
         _some_assert_value_caller(feature, par_string_long)
-        logging.info("str(info.value): %s", str(info.value))
-        logging.info("info.value: %s", info.value)
-        assert "The string param 'p1' in function _some_assert_value_caller was no string" in info.value
+        logging.info('str(info.value): %s', str(info.value))
+        logging.info('info.value: %s', info.value)
+        assert (
+            "The string param 'p1' in function _some_assert_value_caller was no string"
+            in info.value
+        )
 
     with pytest.raises(AssertionError) as info:
         # LogHelper.assert_string(none_param)
         _some_assert_value_caller(par_none, par_string_long)
-        assert "The string param 'p1' in function _some_assert_value_caller was no string" in info.value
+        assert (
+            "The string param 'p1' in function _some_assert_value_caller was no string"
+            in info.value
+        )
         # assert False, '1Stopping here...'
 
     with pytest.raises(AssertionError) as info:
         _some_assert_value_caller(None, par_string_long)
     # assert "The string param 'value_param' was not supplied a string " in str(info.value)
-    assert "The string param 'p1' in function _some_assert_value_caller was no string " in str(info.value)
+    assert "The string param 'p1' in function _some_assert_value_caller was no string" in str(
+        info.value
+    )
     # assert False, '2Stopping here...'
 
     with pytest.raises(AssertionError) as info:
         _some_assert_value_caller(par_string_long, par_none)
     # assert "The string param 'value_param' was not supplied a string " in str(info.value)
-    assert "The string param 'p2' in function _some_assert_value_caller was no string " in str(info.value)
+    assert "The string param 'p2' in function _some_assert_value_caller was no string" in str(
+        info.value
+    )
     # assert "The string param 'p2' was empty!" in str(info.value)
     # assert False, '3Stopping here...'
 
     with pytest.raises(AssertionError) as info:
         _some_assert_value_caller('', 'Param2')
-    assert "The string param 'p1' in function _some_assert_value_caller was too short" in str(info.value)
+    assert "The string param 'p1' in function _some_assert_value_caller was too short" in str(
+        info.value
+    )
 
     with pytest.raises(AssertionError) as info:
         _some_assert_value_caller('12345', 'Param2', 6)
-    assert "The string param 'p1' in function _some_assert_value_caller was too short" in str(info.value)
+    assert "The string param 'p1' in function _some_assert_value_caller was too short" in str(
+        info.value
+    )
     # Just showing the full assert output:
     assert (
         str(info.value)
         == "The string param 'p1' in function _some_assert_value_caller was too short: '12345' (reports assert_string())!"
     )
+
+
+@pytest.mark.ok
+def test_assert_object_have_name() -> None:
+    LogHelper.log_func_name()
+
+    # Given:
+    bdd_logger = PytestBddLogger()
+    # assert isinstance(bdd_logger, PytestBddLogger)
+
+    #### No named_obj:
+    # When _assert_obj_named() is called without named_obj param
+    named_obj = None
+    expect = 'No named_obj param!'
+    with pytest.raises(AssertionError) as assert_msg:
+        LogHelper.assert_object_have_name(named_obj)
+
+    assert expect in str(assert_msg.value), f'Expected: "{expect}", Actual: "{assert_msg.value}"'
+
+    #### Empty feature name:
+    # When before_feature() is called with a feature param with an empty name
+    expect = 'Feature name should be longer! Was just: "xx"'
+    name: str = 'xx'
+    feature = Feature(None, '', '', name, set(), None, 1, '')
+
+    assert feature.name == 'xx', f'Expected: "the name", Actual: "{feature.name}"'
+    with pytest.raises(AssertionError) as assert_msg:
+        LogHelper.assert_object_have_name(feature)
+    assert expect in str(assert_msg.value), f'Expected: "{expect}", Actual: "{assert_msg.value}"'
+    # ####
 
 
 @pytest.mark.ok
@@ -341,7 +423,7 @@ def test_log_func_name_xxx(caplog) -> None:
     assert_logged(caplog, level=INFO, expected=expected)
 
 
-@pytest.mark.skip
+@pytest.mark.ok
 def test_log_func_name_caplog(caplog) -> None:
     assert caplog, '*** No caplog param! ***'
     # Set the logger to capture log messages from
@@ -381,7 +463,7 @@ def test_quoted_string_from():
     assert LogHelper.quoted_string_from(feature) == f"'{name}'"
 
 
-@pytest.mark.wip
+@pytest.mark.ok
 def test_log_func_call():
     def inner_func_for_testing_log_func_call(_p1: str, _p2: str, _p3: int, _feature: Feature):
         LogHelper.log_func_call()
@@ -396,10 +478,11 @@ def test_log_func_call():
         print(a_call)
 
     # Assert that the mock_info was called with the expected arguments
-
-    expected_call = f"{COL_MSG}inner_func_for_testing_log_func_call{COL_INFO}\
-        (_p1='val1', _p2='val2', _p3=3, _feature='Feature_name'){COL_CONTEXT}\
-            (<- by log_func_call() with caller inner_func_for_testing_log_func_call())"
+    part2 = f"{COL_INFO}(_p1='val1', _p2='val2', _p3=3, _feature='Feature_name')"
+    part3 = (
+        f'{COL_CONTEXT}(<- by log_func_call() with caller inner_func_for_testing_log_func_call())'
+    )
+    expected_call = f'{COL_MSG}inner_func_for_testing_log_func_call{part2}{part3}'
     mock_info.assert_has_calls(
         [
             call(expected_call),
@@ -420,6 +503,42 @@ def test_log_func_call():
 # @mock.patch('tests.common.log_glue_incl.log_msg_start')
 # @mock.patch('tests.common.log_glue_incl.log_msg')
 # @mock.patch('tests.common.log_glue_incl.log_msg_end')
+
+
+@pytest.mark.wipz
+def test_log_headline_mock() -> None:
+    assert LogHelper.ret_func_name() == 'test_log_headline_mock'
+    # With default fillchar
+    default_fillchar = '#'
+    with patch('logging.info') as mock_info:
+        LogHelper.log_headline(LogHelper.ret_func_name())   # Using default fillchar
+
+        # Assert that the mock_info was called 3 times with the expected arguments
+        # mock_info.assert_has_calls([
+        mock_info.assert_has_calls(
+            [
+                call('\t%s', default_fillchar * 75),
+                call('\t%s', '  test_log_headline_mock  '.center(75, default_fillchar)),
+                call('\t%s', default_fillchar * 75),
+            ]
+        )
+    #
+
+    # With custom fillchar
+    custom_fillchar = '+'
+    with patch('logging.info') as mock_info:
+        LogHelper.log_headline(LogHelper.ret_func_name(), fillchar=custom_fillchar)
+
+        # Assert that the mock_info was called 3 times with the expected arguments
+        # mock_info.assert_has_calls([
+        mock_info.assert_has_calls(
+            [
+                call('\t%s', custom_fillchar * 75),
+                call('\t%s', '  test_log_headline_mock  '.center(75, custom_fillchar)),
+                call('\t%s', custom_fillchar * 75),
+            ]
+        )
+    #
 
 
 @pytest.mark.skip   # TODO Not working yet

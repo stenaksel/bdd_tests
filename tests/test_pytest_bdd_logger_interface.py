@@ -31,26 +31,16 @@ from tests.common.log_helper import (
     COL_CONTEXT,
     COL_MSG,
     COL_RESET,
-    # _ret_dict_info,
-    # log_func_name,
-)
-from tests.common.pytest_bdd_logger_interface import (
-    log_headline,
-    # ret_keys,
-    # _log_dict_now,  # TODO Make test
-    # _log_func_name,
-    # ret_classname,
-)
-
-from tests.common.pytest_bdd_tracer import PytestBddTracer
-from tests.common.pytest_bdd_logger import PytestBddLogger
-
-from tests.common.log_helper import (
     LogHelper,
     # ret_before_or_after,  # TODO Move to interface
     # ret_keys,  # TODO Move to interface
     # xret_sorted,  # TODO Move to interface
+    # _ret_dict_info,
+    # log_func_name,
 )
+from tests.common.pytest_bdd_tracer import PytestBddTracer
+from tests.common.pytest_bdd_logger import PytestBddLogger
+
 
 
 def _the_caller(prev: int = 0) -> str:
@@ -104,15 +94,15 @@ def test_ret_func_name() -> None:
     # logging.info('<== test__ret_func_name')
 
 
-@pytest.mark.skip
-def test_ret_func_name2() -> None:
+@pytest.mark.ok
+def test_ret_func_name_logging() -> None:
     this_func = '?'
     print(__file__)
-    with mock.patch('tests.common.log_glue_incl.logging') as mock_logger:
-        this_func = LogHelper.ret_func_name()
-        mock_logger.debug.assert_called_once_with('>> _ret_func_name')
+    with mock.patch('tests.common.log_helper.logging') as mock_logger:
+        this_func = LogHelper.ret_func_name(with_test_logging=True)
+        mock_logger.debug.assert_called_once_with('>> ret_func_name')
 
-    assert this_func == 'test__ret_func_name'
+    assert this_func == 'test_ret_func_name_logging'
 
 
 @pytest.mark.ok
@@ -278,25 +268,6 @@ def test_log_func_name_caplog(caplog) -> None:
 
 
 ###########################################################################
-@pytest.mark.ok
-def test_log_headline_mock() -> None:
-    assert LogHelper.ret_func_name() == 'test_log_headline_mock'
-    default_fillchar = '#'
-
-    with patch('logging.info') as mock_info:
-        log_headline(LogHelper.ret_func_name())   # Using default fillchar
-
-        # Assert that the mock_info was called 3 times with the expected arguments
-        # mock_info.assert_has_calls([
-        mock_info.assert_has_calls(
-            [
-                call('\t%s', default_fillchar * 75),
-                call('\t%s', '  test_log_headline_mock  '.center(75, default_fillchar)),
-                call('\t%s', default_fillchar * 75),
-            ]
-        )
-    #
-
 
 @pytest.mark.ok
 def test_log_headline_caplog(caplog) -> None:
@@ -311,7 +282,7 @@ def test_log_headline_caplog(caplog) -> None:
 
     _clear_caplog(caplog)
 
-    log_headline('test_log_headline_caplog')   # Using default fillchar
+    LogHelper.log_headline('test_log_headline_caplog')   # Using default fillchar
 
     assert_logged(caplog, level=INFO, expected=lines_expected)
 
@@ -323,16 +294,11 @@ def test_log_headline_with_fillchar() -> None:
 
     # #### Assert functions called
     module = 'tests.common.pytest_bdd_logger'
-    # with (
-    #     # patch(f'{module}.log_func_name') as mock_log_func_name,
-    #     patch(f'{module}.log_hook') as mock_log_hook, #TODO should log_hook be called?
-    #     # patch(f'{module}.log_feature') as mock_log_feature,
-    # ):
 
-    log_headline(msg='Just testing', fillchar=fillchar)
+    LogHelper.log_headline(msg='Just testing', fillchar=fillchar)
 
     with patch('logging.info') as mock_info:
-        log_headline(msg='Some Headline we want', fillchar=fillchar)
+        LogHelper.log_headline(msg='Some Headline we want', fillchar=fillchar)
         # Assert that the mock_info was called 3 times with the expected arguments
         # mock_info.assert_has_calls([
         mock_info.assert_has_calls(

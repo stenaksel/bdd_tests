@@ -19,10 +19,11 @@ from tests.common.log_helper import (  # log_msg_end,; TEST_CONTEXT,; GLUE_LOGGE
     LogHelper,
 )
 from tests.common.pytest_bdd_logger import PytestBddLogger
+from tests.common.pytest_bdd_logger_interface import PytestBddLoggerInterface
+from tests.common.pytest_bdd_tracer import PytestBddTracer
 
 # from tests.common.log_glue_incl import xret_sorted  # tested
 # from tests.common.log_glue_incl import xlog_msg, xlog_msg_start
-from tests.common.pytest_bdd_tracer import PytestBddTracer
 
 # from pytest_mock import MockerFixture
 
@@ -170,37 +171,7 @@ def test_log_msg_start() -> None:
 #     return mock_service
 
 
-@pytest.mark.ok
-def test_assert_obj_named() -> None:
-    LogHelper.log_func_name()
-
-    # Given:
-    bdd_logger = PytestBddLogger()
-    # assert isinstance(bdd_logger, PytestBddLogger)
-
-    #### No named_obj:
-    # When _assert_obj_named() is called without named_obj param
-    named_obj = None
-    expect = 'No named_obj param!'
-    with pytest.raises(AssertionError) as assert_msg:
-        bdd_logger._assert_obj_named(named_obj)
-
-    assert expect in str(assert_msg.value), f'Expected: "{expect}", Actual: "{assert_msg.value}"'
-
-    #### Empty feature name:
-    # When before_feature() is called with a feature param with an empty name
-    expect = 'Feature name should be longer! Was just: "xx"'
-    name: str = 'xx'
-    feature = Feature(None, '', '', name, set(), None, 1, '')
-
-    assert feature.name == 'xx'
-    with pytest.raises(AssertionError) as assert_msg:
-        bdd_logger._assert_obj_named(feature)
-    assert expect in str(assert_msg.value), f'Expected: "{expect}", Actual: "{assert_msg.value}"'
-    # ####
-
-
-@pytest.mark.ok
+@pytest.mark.wipz
 def test_before_feature() -> None:
     LogHelper.log_func_name()
 
@@ -213,19 +184,24 @@ def test_before_feature() -> None:
     # #### Assert functions called
     # When I call
     logging.info('When I call: before_feature(None, feature)')
-    # module = 'tests.common.pytest_bdd_tracer'
-    # with (
-    #     # patch(f'{module}.log_func_name') as mock_log_func_name,
-    #     # patch(f'{module}.log_hook') as mock_log_hook,  # TODO should log_hook be called?
-    #     patch(f'{module}.log_feature') as mock_log_feature,
-    # ):
-    #     bdd_logger.before_feature(None, feature)
+    module = 'tests.common.pytest_bdd_tracer'
+    with mock.patch.multiple(
+        PytestBddTracer,
+        log_hook=mock.DEFAULT,
+    ) as bdd_tracer_mock, mock.patch.multiple(
+        PytestBddLoggerInterface,
+        log_dict=mock.DEFAULT,
+    ) as bdd_logger_interface_mock:
+        bdd_logger.before_feature(None, feature)
 
-    # # Then assert that the mocked functions were called
-    # logging.info('Then assert that the mocked functions were called')
-    # # mock_log_func_name.assert_called_once()
-    # # mock_log_hook.assert_called_once()
-    # mock_log_feature.assert_called_once()
+        # Then assert that the mocked functions were called
+        logging.info('Then assert that the mocked functions were called')
+        # mock_log_func_name.assert_called_once()
+        # mock_log_hook.assert_called_once()
+        bdd_tracer_mock['log_hook'].assert_called_once()
+        bdd_logger_interface_mock['log_dict'].assert_called_once()
+
+    # assert False, 'Not passing test_before_feature!'
 
     # Enable warnings to be displayed as exceptions
     warnings.filterwarnings('error')
@@ -234,11 +210,11 @@ def test_before_feature() -> None:
         with patch('logging.info') as mock_info:
             bdd_logger.before_feature(None, feature)
 
-            # # Accessing the mock_calls attribute to see the logged messages
-            # logging.info('These messsages were logged:')
-            # for call in mock_info.mock_calls:
-            #     # print(call)
-            #     logging.info(call)
+            # Accessing the mock_calls attribute to see the logged messages
+            logging.info('These messsages were logged:')
+            for call in mock_info.mock_calls:
+                # print(call)
+                logging.info(call)
 
             # # Assert that the mock_info was called with the expected arguments
             # logging.info('Assert we got expected calls')
@@ -257,7 +233,7 @@ def test_before_feature() -> None:
         traceback.print_tb(w.__traceback__)
 
 
-@pytest.mark.todo
+@pytest.mark.wipz
 def test_before_feature_do_update_context() -> None:
     LogHelper.log_func_name()
     bdd_logger = PytestBddLogger()
@@ -267,15 +243,16 @@ def test_before_feature_do_update_context() -> None:
     feature = Feature(None, '', '', 'Feature_name', set(), None, 1, '')
 
     # #### Assert functions called
+    module = 'tests.common.log_helper'
     module = 'tests.common.pytest_bdd_logger'
     with (
         # patch(module + '.log_func_name') as mock_log_func_name, #TODO Moved to LogHelper
+        # patch(module + '.log_feature') as mock_log_feature,
         patch(module + '.log_feature') as mock_log_feature,
     ):
+        assert isinstance(bdd_logger, PytestBddLogger)
         # When I call
         logging.info('When I call: before_feature(None, feature)')
-        assert isinstance(bdd_logger, PytestBddLogger)
-
         bdd_logger.before_feature(None, feature)
 
         # Then assert that the mocked functions were called

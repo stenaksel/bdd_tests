@@ -1,14 +1,13 @@
 import logging
 from logging import INFO
 
-from tests.common.log_helper import LogHelper
-
 from tests.common.log_helper import(  # log_msg_end,; TEST_CONTEXT,
     # GLUE_LOGGER,
     KEY_DBG_LOG_GLUE,
     KEY_DBG_LOGGING,
     KEY_LOG_GLUE,
     KEY_LOGGER,
+    LogHelper
 )
 from tests.common.log_glue_incl import (  # log_msg_end,; TEST_CONTEXT,
     GLUE_LOGGER,

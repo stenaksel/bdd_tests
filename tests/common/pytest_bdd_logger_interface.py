@@ -1,75 +1,13 @@
 import logging
 from abc import ABC, abstractmethod
-from collections import OrderedDict
 from typing import Any, Callable, Optional
 
-from pytest import Config, FixtureRequest, Function, Item
 import pytest
+from pytest import Config, FixtureRequest, Function, Item
 from pytest_bdd.parser import Feature, Scenario, Step
 
-from src.ansi_colors import ANSIColor
-from tests.common.log_helper import (
-    LogHelper,
-    TEST_CONTEXT,
-    KEY_LOG_CONFIG,
-    KEY_CONFIG,
-    COL_CONTEXT,
-)
-
-
-def log_headline(msg: str, prev: int = 0, fillchar: str = '#') -> None:  # tested
-    assert msg != None, 'No message! (Got: None)'
-    assert fillchar != None, 'No fillchar! (Got: None)'
-    assert fillchar and len(fillchar) == 1, f"No fillchar (len 1)! (Got: '{fillchar}')"
-    caller = LogHelper.ret_func_name(1)
-    logging.debug(
-        "log_headline(msg='%s', prev=%s, fillchar='%s') << %s",
-        msg,
-        prev,
-        fillchar,
-        caller,
-    )
-    logging.debug('(using prev %s)', 1 + prev)
-
-    caller = LogHelper.ret_func_name(1 + prev)
-    name_info = f'  {msg}  '
-    # TODO debug:
-    logging.debug('Found "%s" (Used prev %s)', name_info, 1 + prev)
-    ###########################################################################
-    ###########################################################################
-    logging.info('\t%s', fillchar * 75)
-    logging.info('\t%s', name_info.center(75, fillchar))
-    logging.info('\t%s', fillchar * 75)
-
-
-# def _log_dict_now(the_dict: dict, name: str = None, prefix: str = '\t\t') -> None:
-
-#     assert isinstance(the_dict, dict), 'A dict was not given!'
-
-#     logging.info(' -------------------------------------> _log_dict_now B')
-#     _log_func_name(1)
-#     _log_func_name()
-
-#     # logging.info(
-#     #     '%s%s%s: --> %s %s',
-#     #     COL_CONTEXT,
-#     #     prefix,
-#     #     name if name else 'dict',
-#     #     # ret_func_name(),
-#     #     the_dict,
-#     #     self._ret_provider_info()
-#     # )
-
-#     the_length = len(the_dict) if the_dict else '--EMPTY!'
-#     # logging.info('\t%s%s #%s: %s %s', \
-# COL_CONTEXT, name, the_length, the_dict, self._ret_provider_info())
-
-#     # TODO Finish method: log_dict_now
-#     logging.info(LogHelper.ret_dict_info(the_dict, name, 'x'))
-#     # logging.info(LogHelper.ret_dict_info(the_dict, name, prefix))
-#     logging.info(' <------------------------------------- log_dict_now E')
-
-#     # log_items(the_dict, prefix)
+from tests.common.ansi_colors import ANSIColor
+from tests.common.log_helper import COL_CONTEXT, KEY_CONFIG, KEY_LOG_CONFIG, TEST_CONTEXT, LogHelper
 
 
 class PytestBddLoggerInterface(ABC):
@@ -121,8 +59,7 @@ class PytestBddLoggerInterface(ABC):
     #     # and performs better in terms of performance when retrieving the function name
     #     # (than the else alternative).
 
-
-    def log_dict(self, the_dict: dict, name: str, incl_items: bool = True) -> None:
+    def log_dict(self, the_dict: dict, name: str) -> None:   # ? + incl_items: bool = True
         """
         Function log_dict will log the given dict
         and its items if incl_items=True.
@@ -140,7 +77,6 @@ class PytestBddLoggerInterface(ABC):
         logging.info('%s', '_' * 100)
         #
 
-
     def maybe_log_configuration(self) -> None:
         LogHelper.log_func_name()
         if TEST_CONTEXT.get(KEY_LOG_CONFIG, True):
@@ -150,14 +86,13 @@ class PytestBddLoggerInterface(ABC):
             self.log_configuration(config)
             TEST_CONTEXT[KEY_LOG_CONFIG] = False
 
-
     def log_configuration(self, config: pytest.Config) -> None:
 
         LogHelper.log_func_name()
         assert config, 'config is None!'
 
         config: Config = TEST_CONTEXT.get('config', None)
-        LogHelper.log_dict_now(TEST_CONTEXT, "TEST_CONTEXT", "---->")
+        LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT', '---->')
 
         # Get the log level from the command-line option
         log_level = config.getoption('--log-cli-level')
@@ -168,9 +103,6 @@ class PytestBddLoggerInterface(ABC):
         log_level = config.getini('log_level')
         logging.warning('config: log_level: %s (from pyproject.toml)', log_level)
         print(f'     pyproject.toml config: log_level: {log_level}')
-
-
-
 
     ############################################################################
     ###########################   Abstract methods   ###########################
@@ -201,12 +133,11 @@ class PytestBddLoggerInterface(ABC):
         logging.warning(TEST_CONTEXT)
         # print('configure() called by: ', self._ret_func_name(1)) #TODO Remove
 
-
-        TEST_CONTEXT['config'] = config #TODO Needed?
+        TEST_CONTEXT['config'] = config   # TODO Needed?
         # log_configuration() will be called later to inform about config
         # (in runtest_protocol())
 
-    def runtest_protocol(self, item: Item, nextitem: Optional[Item]) -> bool:
+    def runtest_protocol(self, item: Item, _nextitem: Optional[Item]) -> bool:
         """
         perform additional actions before and after each test
         It takes a single argument, item, which represents the test item being executed.
@@ -216,6 +147,8 @@ class PytestBddLoggerInterface(ABC):
             nextitem: Optional[Item]
         """
         assert 'pytest_runtest_protocol' == LogHelper.ret_func_name(1)
+        assert item
+        # assert nextitem
         self.log_hook(f'(item.name: {item.name})')
 
         LogHelper.log_func_name_with_info(msg=f'(item.name: {item.name})', fillchar='h:')
@@ -243,18 +176,6 @@ class PytestBddLoggerInterface(ABC):
         #     item.obj = patched_step_func
         # log_msg_end()
 
-    def _assert_obj_named(
-        self, named_obj: Any, name_min_length: int = 3
-    ) -> None:  # TODO Start using this
-        assert named_obj is not None, f'No named_obj param! (_assert_obj_named)'
-        assert (
-            named_obj.name is not None
-        ), f'{named_obj.__class__.__name__} name is empty! (_assert_obj_named: {named_obj})'
-        assert (
-            len(named_obj.name) > name_min_length  # TODO is length check > 3 OK?
-        ), f'{named_obj.__class__.__name__} name should be longer! Was just: "{named_obj.name}" (_assert_obj_named)'
-        logging.info('Asserted scenario param: %s', named_obj.name)
-
     @abstractmethod
     def before_feature(self, _request: FixtureRequest, feature: Feature) -> None:
         raise NotImplementedError()
@@ -263,10 +184,7 @@ class PytestBddLoggerInterface(ABC):
     def before_scenario(
         self, _request: FixtureRequest, feature: Feature, scenario: Scenario
     ) -> None:
-        self._assert_obj_named(feature)
-        self._assert_obj_named(scenario)
-        LogHelper.log_func_name_with_info(scenario.name, fillchar='h:\t->\t ')
-        # LogHelper.log_func_name(fillchar='  ->', msg=scenario.name)
+        raise NotImplementedError()
 
     @abstractmethod
     def before_step(
