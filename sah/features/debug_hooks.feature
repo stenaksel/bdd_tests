@@ -21,24 +21,57 @@ Feature: Debug Hooks
     Given this scenario is tagged with "wip"
     When the scenario is run
 
-  @wip
+  @wipz
   Scenario: before_feature called once
-    Given a "pytest_bdd_before_scenario" hook function
+    Given a "pytest_bdd_before_scenario" hook-function in conftest.py
     # And
-    # Given a "pytest_bdd_before_scenario" Pytest-BDD hook function in conftest.py
+    # Given a "pytest_bdd_before_scenario" Pytest-BDD hook-function in conftest.py
     When the scenario is run
+    #TODO When the step definition is run
+    #TODO When the step definition after function is run
     # Then information in context "TEST_CONTEXT" will include "Current glue"
+    # Then "TEST_CONTEXT" should show that the hook-function "pytest_bdd_before_scenario" have been run
     Then "TEST_CONTEXT" should show that the function "before_scenario" have been run
+
+
+  @wip
+  Scenario Outline: Add information about running hooks
+    Given a "<hook>" hook-function in conftest.py
+    When the hook-function have run
+    # Then "TEST_CONTEXT" should show that the hook-function "<hook>" have been run
+    Then "TEST_CONTEXT" should show that the function "<func>" have been run
+
+    Examples:
+      | hook                       | func            | info |
+      # | pytest_configure           | configure       |                                                 |
+      # | pytest_bdd_before_scenario | before_feature  | before_feature will be called on first scenario |
+      | pytest_bdd_before_scenario | before_scenario |      |
+  # | pytest_bdd_after_scenario  | after_scenario  |                                                 |
+  # | pytest_bdd_before_step     | before_step     |                                                 |
+  # | pytest_bdd_after_step      | after_step      |                                                 |
+
+
+
+  Scenario Outline: Add information in TEST_CONTEXT when running
+    # And
+    # Given a "<hook>" Pytest-BDD hook-function in conftest.py
+    #TODO When the step definition is run
+    #TODO When the step definition after function is run
+    Examples:
+      | hook                       | func            |
+      | pytest_bdd_before_scenario | before_scenario |
+
 
   @wipz
   Scenario: Inform about the test run
     Given this scenario is tagged with "wip"
-    Given a "pytest_bdd_before_scenario" hook function
-    # Given a "pytest_bdd_before_scenario" Pytest-BDD hook function in conftest.py
-    When the scenario is run
-    Then at before each step the "before_step" function is called
+    Given a "pytest_bdd_before_step" hook-function in conftest.py
+    # Given a "pytest_bdd_before_scenario" Pytest-BDD hook-function in conftest.py
+    # When the scenario is run
+    When the hook-function have run
+    Then before each Gherkin step is run the "before_step" function is called
     # Then information in context "TEST_CONTEXT" will include "Current glue"
-    Then "TEST_CONTEXT" should show that the function "before_scenario" have been run
+    Then "TEST_CONTEXT" should show that the function "before_step" have been run
 
 
   # Then information in context will include "Current glue"
@@ -50,59 +83,17 @@ Feature: Debug Hooks
   # | Current Step     | N/A or Then/And? "TEST_CONTEXT" should show that the function "before_scenario" have been run
   # | Current glue     | N/A
 
-  @ok
+  @wip
   Scenario: Current information added to TEST_CONTEXT when running
     # Given the variable "DO_INCL_CURR_INFO" is set to "True"
     When the step definition is run
     Then information in TEST_CONTEXT will include "Current glue"
 
-  @wipz
-  Scenario: Add information in TEST_CONTEXT when running for pytest_bdd_before_scenario
-    # Given a Pytest-BDD test using the "log_glue" module
-    # And a "pytest_bdd_before_scenario" Pytest-BDD hook function in conftest.py
-    # And a Pytest-BDD hook function <hook> in conftest.py
-    When the step definition is run
-    Then "TEST_CONTEXT" should show that the hook-function "before_scenario" have been run
-
-  Scenario Outline: Add information in TEST_CONTEXT when running
-    Given a "<hook>" Pytest-BDD hook function in conftest.py
-    # Given a Pytest-BDD hook function <hook> in conftest.py
-    When the step definition is run
-    Then "TEST_CONTEXT" should show that the hook-function "<func>" have been run
-    Examples:
-      | hook                       | func            |
-      | pytest_bdd_before_scenario | before_scenario |
-  # | pytest_bdd_after_scenario  | after_scenario  |
-  # | pytest_bdd_before_step     | before_step     |
-  # | pytest_bdd_after_step      | after_step      |
-
-
-  @todo
-  Scenario: Inform about the running Feature
-    Given a "pytest_bdd_before_scenario" pytest.hook function in conftest.py
-    When you run "pytest -rA -m wip"
-    Then information about context stored in "TEST_CONTEXT" will include:
-      | key              |
-      | Current glue     |
-      | Current Step     |
-      | Current scenario |
-      | Current feature  |
-
-  Scenario: Inform about the running Scenario
-    Given a "pytest_bdd_before_scenario" pytest.hook function in conftest.py
-    When you run "pytest -rA -m wip"
-    Then information about context stored in "TEST_CONTEXT" will include:
-      | key              |
-      | Current glue     |
-      | Current Step     |
-      | Current scenario |
-      | Current feature  |
-
-
-  Scenario: Inform about the Pytest-BDD process (no params)
+  Scenario: Inform about the Pytest-BDD process (glue without params)
     Given a glue function without any parameters
-    And at the start of the glue code "log_params" function is called
-    Then information that no parameters will be shown
+    When the step definition is run
+    Then information about the glue call will be shown
+    And the information logged shows noe parameters were passed to the glue function
   # When you run "pytest -rA -m wip"
   # Then pytest will execute the tests tagged "@wip"
   # # (tests = scenarioes)
@@ -117,7 +108,7 @@ Feature: Debug Hooks
     And at before each step the "before_step" function is called
     And at after each step the "after_step" function is called
     And provide a detailed summary report
-    And the "log_glue" function will also display informative texts for the run
+    And the "log_glue" functions will also display informative texts for the run
 
 
   @todo
@@ -152,25 +143,13 @@ Feature: Debug Hooks
     And the log should include text "context: 1 key"
 
 
-  Scenario: Using context information
-    # Given a_given_step (glue in conftest.py)
-    # Given a_given_step
-    # Given a step without context
-    Given I have glue function without any parameters (no context)
-    Given I have step definition given a context parameter
-  # Given I have a step2
-  # Given I have a step3
-  # Given a given step
-  # When a when step
-  # Then a then step
-
   #####################################################################
   # Hooks
   #####################################################################
 
   @todo
   Scenario:
-    Given I have the hook function "pytest_bdd_before_scenario" declared
+    Given I have the hook-function "pytest_bdd_before_scenario" declared
     And it calls the function "before_scenario"
     When I run "pytest -rA"
     Then hook "pytest_bdd_before_scenario" function execution should be logged

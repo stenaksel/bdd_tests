@@ -43,7 +43,7 @@ class PytestBddLogger(PytestBddTracer):
         # logging.info('| Feature: %s', feature.name)
         # logging.info('|%s', '=' * 75)
         feature_name = f'Feature: {feature.name}'
-        LogHelper.log_func_call_info(logging.WARNING, -1, feature_name)
+        LogHelper.log_func_call_info(logging.INFO, -1, feature_name)
         logging.info('%s', '/' * 75)
         logging.info('|%s|', ' ' * 73)
         logging.info('|%s|', feature_name.center(73))
@@ -64,9 +64,9 @@ class PytestBddLogger(PytestBddTracer):
         # )
         # ret_context = self.get_context_info()
 
-        # self._assert_obj_named(feature)
-        # self._assert_obj_named(scenario)
-        # self._assert_obj_named(step)
+        # self.assert_object_have_name(feature)
+        # self.assert_object_have_name(scenario)
+        # self._assert_objassert_object_have_name_named(step)
 
     def log_scenario(self, scenario: Scenario) -> None:
         LogHelper.log_func_name_with_info(scenario.name, fillchar='Sc:')
@@ -96,13 +96,13 @@ class PytestBddLogger(PytestBddTracer):
 
         global TEST_CONTEXT  # pylint: disable=global-statement
 
-        # logging.warning(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT5', '---->'))
-        logging.warning('log_step ------------------------------------------->')
+        # logging.info(ret_dict_info(TEST_CONTEXT, 'TEST_CONTEXT5', '---->'))
+        logging.info('log_step ------------------------------------------->')
         LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT5', '---->')
 
         step_no = TEST_CONTEXT.get(KEY_STEP_COUNTER, 0)
         if step_no == 0:
-            logging.warning('\t- %s: %s', KEY_STEP_COUNTER, step_no)
+            logging.info('\t- %s: %s', KEY_STEP_COUNTER, step_no)
 
         # logging.info('%sStep:\t"%s"', X_COL_STEP, step.name)
         logging.info('\t- %s: %s', KEY_STEP_COUNTER, step_no)
@@ -118,9 +118,9 @@ class PytestBddLogger(PytestBddTracer):
         logging.info('\t- line_number : %s', step.line_number)
         logging.info('\t- lines       : %s', step.lines)
         # logging.debug('\t- lines      : %s', step.lines[0])
-        logging.warning('Step Background >>#######################################>>')
-        # ? logging.warning(step.background)
-        logging.warning('Step Background <<#######################################<<')
+        logging.info('Step Background >>#######################################>>')
+        # ? logging.info(step.background)
+        logging.info('Step Background <<#######################################<<')
         assert isinstance(TEST_CONTEXT, dict)
         LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT', '---->')
         step_no += 1
@@ -128,9 +128,9 @@ class PytestBddLogger(PytestBddTracer):
         line = '-' * (20 + len(step_text))
         logging.info(line)
         logging.info(LogHelper.ret_before_or_after(caller))
-        logging.warning('step_no=%s', step_no)
         logging.info('step_no=%s', step_no)
-        logging.warning('step_no=%s', step_no)
+        # logging.info('step_no=%s', step_no)
+        # logging.warning('step_no=%s', step_no)
         logging.info('step_text=%s', step_text)
         # logging.info(TEST_CONTEXT[KEY_CURR_STEP])
         # Increment the step_counter
@@ -143,7 +143,7 @@ class PytestBddLogger(PytestBddTracer):
         logging.info('Starting on step %s: %s', step_no, step_text)
         logging.info(line)
 
-        logging.warning(
+        logging.info(
             '\t%s) %s%s %s',
             step_no,
             COL_STEP,
@@ -157,8 +157,8 @@ class PytestBddLogger(PytestBddTracer):
             TEST_CONTEXT = dict(sorted(TEST_CONTEXT.items()))
             logging.info(LogHelper.ret_dict_info(TEST_CONTEXT, '< TEST_CONTEXT', ''))
 
-        logging.warning('log_step <-------------------------------------------')
+        logging.info('log_step <-------------------------------------------')
 
     # def after_step(request, feature, scenario, step, step_func, step_func_args) -> None:
-    #     logging.warning('----> Entered after_step')
-    #     logging.warning(ret_dict_info(step_func_args, 'step_func_args'))
+    #     logging.info('----> Entered after_step')
+    #     logging.info(ret_dict_info(step_func_args, 'step_func_args'))

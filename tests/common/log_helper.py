@@ -29,15 +29,6 @@ COL_DBG = ANSIColor.DBG.value  # TODO Remove DBG color
 
 DO_INCL_CURR_INFO = True
 
-# TEST_CONTEXT = {'name': 'TEST_CONTEXT'}
-TEST_CONTEXT = OrderedDict(
-    {
-        'name': 'TEST_CONTEXT',
-        'LOG_CONFIG': False,
-        '|PT_Hooks': [],
-        '|Hooks': [],
-    }  # TODO Remove hooks
-)   # TODO "LOG_CONFIG": True
 # Constants used for items in TEST_CONTEXT:
 KEY_CURR_FEATURE = 'Current feature'
 KEY_CURR_GLUE = 'Current glue'
@@ -57,6 +48,16 @@ KEY_PT_HOOKS = '|PtHooks'  # TODO Should add all Pytest(-BDD) hooks that gets ca
 KEY_MY_HOOKS = '|MyHooks'  # TODO Should add all my related functions that gets called by the hooks
 KEY_HOOKZ = '|Hooks'  # TODO Should add all hooks that gets called
 KEY_FEATURES = '|Features'  # TODO Should add features in play and reported (by before_feature)
+
+# TEST_CONTEXT = {'name': 'TEST_CONTEXT'}
+TEST_CONTEXT = OrderedDict(
+    {
+        'name': 'TEST_CONTEXT',
+        'LOG_CONFIG': False,
+        KEY_PT_HOOKS: [],
+        KEY_MY_HOOKS: [],
+    }  # TODO Remove hooks
+)   # TODO "LOG_CONFIG": True
 
 
 def _ret_item_info(name: str, item, prefix: str = 'i') -> str:
@@ -90,9 +91,9 @@ def _ret_items(the_dict: dict, prefix: str = '::') -> str:
 
 class LogHelper:
     @staticmethod
-    def assert_obj(value_param: Any) -> None:
+    def assert_object(value_param: Any) -> None:
         """
-        Function assert_obj asserts that the object is not None
+        Function assert_object asserts that the object is not None
             Param 1: value_param: Any
         """
         # me = LogHelper.ret_func_name()
@@ -112,12 +113,12 @@ class LogHelper:
             logging.info(some_info)
 
     @staticmethod
-    def assert_string(value_param: str, min_length: int = 1) -> None:
+    def assert_string(value_param: str, min_length: int = 2) -> None:
         """
         Function assert_string asserts that the string is not None or empty,
         and at least min_length long.
             Param 1: value_param: str
-            Param 2: min_length: int (default: 1)
+            Param 2: min_length: int (default: 2)
 
         The assert message informs about the calling functions param name that was in conflict.
         Eg. if a calling function "my_func" was called with param "my_string" that was too short,
@@ -173,7 +174,7 @@ class LogHelper:
         logging.info('for loop <- about=%s', about)
 
         if about != '-?-':
-            logging.warning("Found param to check & Running the check... about = '%s'", about)
+            logging.info("Found param to check & Running the check... about = '%s'", about)
             assert (
                 isinstance(value_param, str) and value_param is not None
             ), f"The string param '{about}' in function {caller} was no string! (reports {me}(), got: {type(value_param).__name__})"
@@ -189,14 +190,23 @@ class LogHelper:
     def assert_object_have_name(
         named_obj: Any, name_min_length: int = 3
     ) -> None:  # TODO Start using this
-        assert named_obj is not None, f'No named_obj param! (_assert_obj_named)'
+        assert named_obj is not None, f'No named_obj param!'
+        name = None
+        if isinstance(named_obj, dict):
+            name = named_obj.get('name', None)
+        elif hasattr(named_obj, 'name'):
+            name = named_obj.name
+        else:
+            assert True, f"_Couldn't find a name! In {named_obj.__class__.__name__}"
+
         assert (
-            named_obj.name is not None
-        ), f'{named_obj.__class__.__name__} name is empty! (_assert_obj_named: {named_obj})'
+            name is not None
+        ), f"Couldn't find a name! In {named_obj.__class__.__name__} : {named_obj}"
+        # f'{named_obj.__class__.__name__} name is empty (None)! (assert_object_have_name: {named_obj})'
         assert (
-            len(named_obj.name) > name_min_length  # TODO is length check > 3 OK?
-        ), f'{named_obj.__class__.__name__} name should be longer! Was just: "{named_obj.name}" (_assert_obj_named)'
-        logging.info('Asserted scenario param: %s', named_obj.name)
+            len(name) > name_min_length  # TODO is length check > 3 OK?
+        ), f'{named_obj.__class__.__name__} name should be longer! Was just: "{name}" (assert_object_have_name)'
+        # logging.info('Asserted scenario param: %s', named_obj.name)
 
     @staticmethod
     def ret_dict_info(
@@ -248,7 +258,7 @@ class LogHelper:
         #     xlog_msg(msg=ret, show_caller=False)
         #     # xlog_msg('ret_dict_info() : ', INFO, ret)
         #     GLUE_LOGGER.info('ret_dict_info() >> %s ', ret)
-        #     logging.warning('%sret_dict_info() >> %s ', COL_CONTEXT, ret)
+        #     logging.info('%sret_dict_info() >> %s ', COL_CONTEXT, ret)
 
         #     # return ret
         #     return str(COL_INFO) + ret + str(COL_RESET)
@@ -261,7 +271,7 @@ class LogHelper:
         * _ret_func_name(1) - will return the func_name of the caller
         * _ret_func_name(2) - will return the func_name of the callers caller
         """
-        if with_test_logging:   #TODO maybe remove? Just used for testing a test
+        if with_test_logging:   # TODO maybe remove? Just used for testing a test
             logging.debug('>> ret_func_name')
         return inspect.stack()[1 + prev][3]
 
@@ -293,8 +303,8 @@ class LogHelper:
         assert isinstance(the_dict, dict), 'A dict was not given!'
         assert prefix is not None, 'Prefix was not given!'
 
-        logging.warning(f"{prefix} {name if not None else '_?_'}: " + str(the_dict))
-        logging.warning(the_dict.get(KEY_PT_HOOKS, 'N/A'))
+        logging.info(f"{prefix} {name if not None else '_?_'}: " + str(the_dict))
+        logging.info(the_dict.get(KEY_PT_HOOKS, 'N/A'))
         return
 
         logging.info(' -------------------------------------> log_dict_now Begin')

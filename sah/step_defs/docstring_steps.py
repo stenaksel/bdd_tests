@@ -86,14 +86,14 @@ def when_i_ask_for_how_many_lines_the_message_have(context) -> None:
         message = context.get('message', None)
         # assert message is not None, 'No message in the context!'
         if message is not None:   # Found a message in the context!
-            logging.warning(message)
-            # logging.warning(message.splitlines())
+            logging.info(message)
+            # logging.info(message.splitlines())
             # num_lines = len(message.splitlines())
             print('message have %s lines', message.count('\n'))
             num_lines = 1 + message.count('\n')
         # endif
 
-        logging.warning('message have %d lines', num_lines)
+        logging.info('message have %d lines', num_lines)
     except KeyError as err:
         print('KeyError exception occurred:', err)
         message = None

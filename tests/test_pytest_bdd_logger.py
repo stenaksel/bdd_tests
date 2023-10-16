@@ -4,6 +4,8 @@ import warnings  # for debuggin my test finding out when warning was logged
 from typing import List
 from unittest import mock
 
+# from unittest.mock import Mock
+
 # from logging import DEBUG, INFO, WARN, LogRecord
 # from typing import Callable, Generator, List
 # from unittest import mock
@@ -171,7 +173,7 @@ def test_log_msg_start() -> None:
 #     return mock_service
 
 
-@pytest.mark.wipz
+@pytest.mark.ok
 def test_before_feature() -> None:
     LogHelper.log_func_name()
 
@@ -201,36 +203,46 @@ def test_before_feature() -> None:
         bdd_tracer_mock['log_hook'].assert_called_once()
         bdd_logger_interface_mock['log_dict'].assert_called_once()
 
+    # TODO
     # assert False, 'Not passing test_before_feature!'
 
-    # Enable warnings to be displayed as exceptions
-    warnings.filterwarnings('error')
 
-    try:
-        with patch('logging.info') as mock_info:
-            bdd_logger.before_feature(None, feature)
+@pytest.mark.ok
+def test_log_feature_when_before_feature():
+    #####
+    LogHelper.log_func_name()
+    bdd_logger = PytestBddLogger()
+    bdd_logger.log_feature = mock.Mock()
 
-            # Accessing the mock_calls attribute to see the logged messages
-            logging.info('These messsages were logged:')
-            for call in mock_info.mock_calls:
-                # print(call)
-                logging.info(call)
+    # Given a "valid feature" (in our test context)
+    feature = Feature(None, '', '', 'Feature_name', set(), None, 1, '')
+    bdd_logger.before_feature(None, feature)
 
-            # # Assert that the mock_info was called with the expected arguments
-            # logging.info('Assert we got expected calls')
-            # mock_info.assert_called_with(mock.ANY, 'H: log_hook()', mock.ANY)
-            # # mock_info.assert_called_with(mock.ANY, '*** before_feature ***', mock.ANY)
-            # mock_info.assert_has_calls(
-            #     [
-            #         # call("*** before_feature ***"),
-            #         call("-> ret_func_name(prev=0)"),
-            #         # call("->log_func_name(prev=0) (<- by log_func_name() with caller test_before_feature())"),
-            #     ]
-            # )
+    # #### Assert functions called
+    assert bdd_logger.log_feature.called
 
-    except Warning as w:
-        # Print the traceback to find the source of the warning
-        traceback.print_tb(w.__traceback__)
+    # TODO #### Assert function logged:
+    # with patch('logging.info') as mock_info:
+    #     bdd_logger.before_feature(None, feature)
+
+    # # Accessing the mock_calls attribute to see the logged messages
+    # for info_call in mock_info.mock_calls:
+    #     print(info_call)
+
+    # module = 'tests.common.pytest_bdd_logger'
+    # # with (
+    # # patch(module + '.log_func_name') as mock_log_func_name, #TODO Moved to LogHelper
+    # # patch(module + '.log_feature') as mock_log_feature,
+    # with patch(module + '.log_feature') as mock_log_feature:
+    #     assert isinstance(bdd_logger, PytestBddLogger)
+    #     # When I call
+    #     logging.info('When I call: before_feature(None, feature)')
+    #     bdd_logger.before_feature(None, feature)
+
+    #     # Then assert that the mocked functions were called
+    #     logging.info('Then assert that the mocked functions were called')
+    #     # mock_log_func_name.assert_called_once()
+    #     mock_log_feature.assert_called_once()
 
 
 @pytest.mark.wipz
@@ -243,15 +255,8 @@ def test_before_feature_do_update_context() -> None:
     feature = Feature(None, '', '', 'Feature_name', set(), None, 1, '')
 
     # #### Assert functions called
-    module = 'tests.common.log_helper'
     module = 'tests.common.pytest_bdd_logger'
-    with (
-        # patch(module + '.log_func_name') as mock_log_func_name, #TODO Moved to LogHelper
-        # patch(module + '.log_feature') as mock_log_feature,
-        patch(module + '.log_feature') as mock_log_feature,
-    ):
-        assert isinstance(bdd_logger, PytestBddLogger)
-        # When I call
+    with (patch(module + '.log_feature') as mock_log_feature,):
         logging.info('When I call: before_feature(None, feature)')
         bdd_logger.before_feature(None, feature)
 

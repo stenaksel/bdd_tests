@@ -27,10 +27,9 @@ def given_this_scenario_is_tagged_with_wip(tag: str) -> None:
     assert tag == 'wip'
 
 
-# @given('a {str} Pytest-BDD hook function')
-# @given('a {str} hook function')
-@given(parsers.parse('a "{func_name}" Pytest-BDD hook function'))
-@given(parsers.parse('a "{func_name}" hook function'))
+@given(parsers.parse('a "{func_name}" Pytest-BDD hook-function in conftest.py'))
+@given(parsers.parse('a "{func_name}" Pytest-BDD hook-function'))
+@given(parsers.parse('a "{func_name}" hook-function'))
 def pytest_bdd_hook_function(context: dict, func_name: str) -> None:
     assert context is not None, 'context must be provided'
     # assert func_name == "pytest_bdd_before_scenario", f"assert - [{func_name}]"
@@ -40,25 +39,27 @@ def pytest_bdd_hook_function(context: dict, func_name: str) -> None:
     # assert False, f'assert - ! {func_name}'
 
 
-# pytest.hook function in conftest.py
-@given(parsers.parse('a "{func_name}" hook function'))
+# pytest.hook-function in conftest.py
+@given(parsers.parse('a "{func_name}" hook-function'))
 def pytest_bdd_hook_function_in_conftest_py(context, func_name: str) -> None:
     print('pytest_bdd_hook_function_in_conftest_py context: %s', context)
     logger = logging.getLogger()
-    # TODO use TEST_CONTEXT and check if the func_name is in KEY_FUNC
-    # log_glue(context=context, func_name=func_name)
     logger.info(func_name)
     logger.info(__file__)
     logger.info(func_name)
     logger.info(LogHelper.ret_dict_info(TEST_CONTEXT, 'dbg =====> TEST_CONTEXT', '*--*'))
-    assert func_name == 'pytest_bdd_before_scenario', f'assert - {func_name}'  ##TODO remove
     called_functions = TEST_CONTEXT.get(KEY_PT_HOOKS, None)
     logger.info(called_functions)
-    logger.info(called_functions)
-    logger.info(called_functions)
-    # TODO assert called_functions
     # TODO assert func_name in called_functions
-    # xlog_glue_end(context)
+    assert (
+        func_name in called_functions
+    ), f"Didn't find '{func_name}' in called_functions: {called_functions}"
+
+
+@when('the hook-function have run')
+def when_the_hook_function_have_run(context: dict) -> None:
+    assert context is not None, 'context must be provided'
+    LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT')
 
 
 @when('the scenario is run')
@@ -74,8 +75,15 @@ def when_glue_is_run(context: dict) -> None:
     # xlog_glue_end(context)
 
 
-@then('I have the hook function {str} declared')
-@then('I have the hook function "{hook_function}" declared')
+@then(parsers.parse('"{ctx_name}" _should show that the {about} "{func_name}" have been run'))
+def then_shows_that_function_have_been_run(
+    context: dict, ctx_name: str, about: str, func_name: str
+) -> None:
+    logging.info('*--* dbg: then_shows_that_function_have_been_run() *--* ')
+
+
+@then('I have the hook-function {str} declared')
+@then('I have the hook-function "{hook_function}" declared')
 def then_hook_function_declared(context, hook_function) -> None:
     print("then_hook_function_declared: '%s' - context: %s", hook_function, context)
 

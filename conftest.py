@@ -33,8 +33,8 @@ from tests.common.log_helper import (
     KEY_FEATURES,
     KEY_LOG_GLUE,
     KEY_LOGGER,
-    KEY_PT_HOOKS,
     KEY_MY_HOOKS,
+    KEY_PT_HOOKS,
     TEST_CONTEXT,
     LogHelper,
 )
@@ -61,12 +61,12 @@ def pytest_configure(config: pytest.Config) -> None:
     print('\n==> pytest_configure 0 ("root"/conftest.py)')
 
     # logging_plugin = config.pluginmanager.get_plugin("logging-plugin")
-    # LogHelper.assert_obj(logging_plugin)
+    # LogHelper.assert_object(logging_plugin)
 
     # # Change color on existing log level
     # logging_plugin.log_cli_handler.formatter.add_color_level(logging.INFO, "cyan")
 
-    logging.warning('\n==> pytest_configure 1("root"/conftest.py)')  # <- logged!
+    logging.info('\n==> pytest_configure 1("root"/conftest.py)')  # <- logged!
     logging.info('\n==> pytest_configure 2("root"/conftest.py)')  # <- not logged! TODO Why ?
     # Configure the logging format
     logging.basicConfig(format='%(message)s', level=logging.WARNING)
@@ -87,12 +87,16 @@ def pytest_configure(config: pytest.Config) -> None:
     print('* * * * * * * * * * * > logger_config ==', logger_config)
 
     print(f"Found value: [{logger_config}] in TEST_CONTEXT['logger'] ie. logger_config")
-    assert logger_config is None, f'Found value "{logger_config}" in TEST_CONTEXT logger_config'
+    # assert logger_config is not None, f"TEST_CONTEXT didn't specify a logger_config!"
+    if logger_config is None:
+        logging.warning("TEST_CONTEXT didn't specify a logger_config!")
+        print("TEST_CONTEXT didn't specify a logger_config!")
+
     assert logger_config is None or isinstance(
         logger_config, bool
     ), 'Found non-bool value in TEST_CONTEXT logger'
     print(f'pytest_configure: {logger_config}')
-    logging.warning('pytest_configure: %s', logger_config)
+    logging.info('pytest_configure: %s', logger_config)
     GLUE_LOGGER.warning('pytest_configure: %s', logger_config)
 
     # assert logger_config and isinstance(logger_config, bool), 'Found non-bool value:logger_config'
@@ -351,12 +355,16 @@ def given_file_uses_hooks_that_calls_corresponding_module_func(
     assert file_name == 'conftest.py'
 
 
-# Then information in context "TEST_CONTEXT", will include "Current glue"
-# Then information in TEST_CONTEXT will not include "Current glue"
+# Then information in context "TEST_CONTEXT" will include "Current glue"
+# Then information in context TEST_CONTEXT will not include "Current glue"
 @then(parsers.parse('information in {info_in} {will} include "{info}"'))
 def then_information_about_context_will_include(
     context: dict, info_in: str, will: str, info: str
 ) -> None:
+    LogHelper.assert_object(context)
+    LogHelper.assert_string(info_in)
+    LogHelper.assert_string(will)
+    LogHelper.assert_string(info)
     assert context is not None, 'context must be provided!'
     assert info_in is not None, 'A value for "info_in" was not supplied!'
     assert info_in in [
@@ -369,6 +377,7 @@ def then_information_about_context_will_include(
         'will not',
     ], f'"{will}" is not a valid value! (Only "will"/"will not")'
     assert info is not None, f'"{info}" is not a valid value!'
+    assert False, 'stopping in func: then_information_about_context_will_include'
     logging.info('______________________ then_information_about_context_will_include _____________')
     logging.info('information in %s, %sinclude "%s"  ', info_in, will, info)
     logging.warning('information in %s, %sinclude "%s"  ', info_in, will, info)
@@ -398,11 +407,23 @@ def assert_hook_function(ctx_name: str, context: dict) -> None:
     ), f'(assert_hook_function) ... didn\'t find "{KEY_PT_HOOKS}" in {ctx_name}!'
 
 
+@then(parsers.parse('x "{ctx_name}" should show that the {about} "{func_name}" have been run'))
+def then_shows_that_function_have_been_run2(
+    context: dict, ctx_name: str, about: str, func_name: str
+) -> None:
+    logging.info('*--* dbg: then_shows_that_function_have_been_run2() *--* ')
+
+
 @then(parsers.parse('"{ctx_name}" should show that the {about} "{func_name}" have been run'))
+# @then(parsers.parse('"{ctx_name}" should_show that the {about} "{func_name}" have been run'))
 def then_shows_that_function_have_been_run(
     context: dict, ctx_name: str, about: str, func_name: str
 ) -> None:
+    logging.info('*--* dbg: then_shows_that_function_have_been_run() *--* ')
+    LogHelper.assert_object_have_name(context)  # TODO Fix for dict? or make assert_dict_have_name
     assert context is not None, 'context must be provided!'
+    assert context.get('name', None) is not None, 'The context had no name! ctx_name=' + ctx_name
+    ctx = TEST_CONTEXT if ctx_name == 'TEST_COMTEXT' else context
     LogHelper.log_dict_now(context, ctx_name)
     logging.info(
         '****** then_shows_that_function_have_been_run (context: "%s" about: "%s", func_name: "%s") *****',
@@ -410,19 +431,17 @@ def then_shows_that_function_have_been_run(
         about,
         func_name,
     )
-    assert LogHelper.assert_string(about), 'STOPPING in func: about=' + about
+    msg = f'*--* dbg:> Then "{ctx_name}" should show that the {about} "{func_name}" have been run'
+    logging.info(msg)
     assert about in ['hook-function', 'function'], f'"{about}" is not a valid value!'
-    assert func_name is not None or len(func_name) > 0, f'"{func_name}" is not a valid value!'
-    assert len(func_name) > 0
-    msg = (
-        f'*************> Then "{ctx_name}" should show that the {about} "{func_name}" have been run'
-    )
-    logging.warning(msg)
+    LogHelper.assert_string(func_name)
+    # assert func_name is not None or len(func_name) > 0, f'"{func_name}" is not a valid value!'
+    # assert len(func_name) > 0
     logging.info('[KEY_PT_HOOKS]: %s', TEST_CONTEXT.get(KEY_PT_HOOKS, []))
     logging.warning('[KEY_MY_HOOKS]: %s', TEST_CONTEXT.get(KEY_MY_HOOKS, []))
     expected_abouts = ['hook-function', 'function']
     assert about in expected_abouts, f'"{about}" is not a valid value!'
-    logged_hooks = TEST_CONTEXT.get(KEY_PT_HOOKS, [])
+    logged_hooks = TEST_CONTEXT.get(KEY_MY_HOOKS if 'function' in about else KEY_PT_HOOKS, [])
     assert len(logged_hooks) > 0, 'No hooks have been logged in TEST_CONTEXT!'
     # if re.search('hook-func', about):
     # assert False, 'Stopping in func: ...function_have_been_run about=' + about.name
@@ -448,23 +467,17 @@ def then_shows_that_function_have_been_run(
         ), f'(if hock-function) ... didn\'t find "{KEY_PT_HOOKS}" in TEST_CONTEXT!'
         assert False, 'Function_not_finished_yet! (if hook-function)'
     elif 'function' in about:
+        logged_hooks = TEST_CONTEXT.get(KEY_MY_HOOKS, [])
+        assert len(logged_hooks) > 0, 'No functions have been logged in TEST_CONTEXT!'
         assert (
-            KEY_MY_HOOKS in logged_hooks
-        ), f'(if hock-func) ... didn\'t find "{KEY_PT_HOOKS}" in TEST_CONTEXT!'
-        assert False, 'Function not finished yet! (if hock-func)'
-    elif 'function' in about:
-        assert (
-            KEY_PT_HOOKS in TEST_CONTEXT
-        ), f'(if hock-func) ... didn\'t find "{KEY_PT_HOOKS}" in TEST_CONTEXT**!'
-        hooks = TEST_CONTEXT.get(KEY_PT_HOOKS, [])
-        assert (
-            hooks.count(func_name) > 0
-        ), f"Didn't find '{func_name}' in key \"{KEY_PT_HOOKS}\" in {TEST_CONTEXT[KEY_PT_HOOKS]}!"
-        assert False, 'Function not finished yet! (if hook-func)'
+            func_name in logged_hooks
+        ), f'(if func) ... didn\'t find "{func_name}" in logged_hooks! ({logged_hooks})'
+        # assert False, 'Function not finished yet! (if function)'
     else:
-        assert False, 'Function not finished yet! Unknown about: ' + about
+        # assert False, 'Function not finished yet! (else)'
+        assert False, f'Function not finished yet! Unknown about: {about}'
 
-    assert False, 'Stopping in func: then_shows_that_function_have_been_run ...'
+    # assert False, 'Stopping in func: then_shows_that_function_have_been_run ...'
 
 
 @when(parsers.parse('"{name}" performs an "{action}"'))

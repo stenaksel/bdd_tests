@@ -68,12 +68,12 @@ class PytestBddLoggerInterface(ABC):
             Param 3: incl_items: bool (default: True)
         """
         logging.info('%s', '_' * 100)
-        logging.info('%s', '--1' * 25)
         temp = COL_CONTEXT + name  # TODO
-        logging.info('%s', '--2' * 25)
         temp += ' : ' + str(the_dict)
         temp += LogHelper.ret_dict_info(the_dict, name)
+        logging.info('%s', '-1-' * 25)
         logging.info(temp)
+        logging.info('%s', '-2-' * 25)
         logging.info('%s', '_' * 100)
         #
 
@@ -96,12 +96,12 @@ class PytestBddLoggerInterface(ABC):
 
         # Get the log level from the command-line option
         log_level = config.getoption('--log-cli-level')
-        logging.warning('pytest_configure config: log_level: %s (command-line option)', log_level)
+        logging.info('pytest_configure config: log_level: %s (command-line option)', log_level)
         print(f'command-line option config: log_level: {log_level}')
 
         # Get the log level from pyproject.toml
         log_level = config.getini('log_level')
-        logging.warning('config: log_level: %s (from pyproject.toml)', log_level)
+        logging.info('config: log_level: %s (from pyproject.toml)', log_level)
         print(f'     pyproject.toml config: log_level: {log_level}')
 
     ############################################################################
@@ -128,9 +128,9 @@ class PytestBddLoggerInterface(ABC):
         Returns:
             None
         """
-        logging.warning(TEST_CONTEXT)
+        logging.info(TEST_CONTEXT)
         self.log_hook(f'***configure*** (config.hook: {str(config.hook)})')
-        logging.warning(TEST_CONTEXT)
+        logging.info(TEST_CONTEXT)
         # print('configure() called by: ', self._ret_func_name(1)) #TODO Remove
 
         TEST_CONTEXT['config'] = config   # TODO Needed?

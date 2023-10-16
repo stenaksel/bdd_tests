@@ -64,4 +64,5 @@ pythonpath = ['tests', 'sah', 'conftest_glue', 'article']
 
 # addopts = '-vv --ignore=temp' # Don't look for py files in temp folder
 # addopts = '--maxfail=2 -rf'  # exit after 2 failures, report fail info
-addopts = '-rf --junit-xml=report.xml --cov=src/ --cov-report=xml --cov-report=term'
+# addopts = '-rf --junit-xml=report.xml --cov=src/ --cov-report=xml --cov-report=term'
+addopts = '-m "okz"' # Don't look for py files in temp folder

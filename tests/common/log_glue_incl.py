@@ -73,7 +73,7 @@ def xlog_msg_start(log_level: int = logging.INFO) -> None:
     xlog_msg(xret_func_name(1), show_caller=True)
     # GLUE_LOGGER.log(log_level, 'Heisann!')
 
-    logging.warning('<< ***xlog_msg_start***')
+    logging.info('<< ***xlog_msg_start***')
 
 
 def log_msg_end(log_level: int = logging.INFO) -> None:
@@ -209,7 +209,7 @@ def old_ret_dict_info(the_dict: dict, name: str, prefix: str = '') -> str:  # te
     xlog_msg(msg=ret, show_caller=False)
     # xlog_msg('ret_dict_info() : ', INFO, ret)
     # GLUE_LOGGER.info('ret_dict_info() >> %s ', ret)
-    # logging.warning('%sret_dict_info() >> %s ', COL_CONTEXT, ret)
+    # logging.info('%sret_dict_info() >> %s ', COL_CONTEXT, ret)
 
     # return ret
     return str(COL_INFO) + ret + str(X_COL_RESET)
@@ -227,29 +227,6 @@ def old_ret_dict_info(the_dict: dict, name: str, prefix: str = '') -> str:  # te
 #         info = ret_item_info(name=str(counter), item=name) + "\n"
 #         counter += 1
 #         GLUE_LOGGER.info(info)
-
-
-def assert_object(obj, msg: str) -> None:
-    assert obj, msg
-    if not obj:
-        GLUE_LOGGER.warning('param was not given to assert_object func for msg: %s', msg)
-        assert False, msg
-    GLUE_LOGGER.warning('assert_object func with obj: %s', obj)
-    GLUE_LOGGER.warning('assert_object func with msg: %s', msg)
-    if 'name!' in msg:
-        if not isinstance(obj, str) and obj.hasattr('name'):
-            assert len(obj.hasattr('name')) > 0, "No 'name' provided!"
-        else:
-            if isinstance(obj, str) and len(obj) == 0:
-                GLUE_LOGGER.warning("%s (name = '%s')", msg, obj)
-            assert isinstance(obj, str) and len(obj) > 0, msg
-        #
-    elif 'param!' in msg:
-        GLUE_LOGGER.warning(msg)
-        assert not obj, msg
-    else:
-        GLUE_LOGGER.warning('No check in assert_object for message %s', msg)
-        assert False, f'No check in assert_object for message {msg}'
 
 
 def xlog_scenario(scenario: Scenario) -> None:

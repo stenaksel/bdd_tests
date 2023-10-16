@@ -147,7 +147,7 @@ def then_value_should_be(context: dict, expected_value: str) -> None:
 
     if 'checked_context_name' in context and 'checked_context_name' == 'context':
         ctx = context
-        logging.warning('Switch ctx from TEST_CONTEXT to context')
+        logging.info('Switch ctx from TEST_CONTEXT to context')
 
     assert ctx is not None, 'Expected "ctx" to be present!'
 
@@ -378,7 +378,7 @@ def given_run_is_configured_with_at_least_log_level2(
     context: dict, wanted_level: str
 ):
     assert context is not None, 'context must be provided'
-    logging.warning('Given the run is configured with at least log_level = "%s"', wanted_level)
+    logging.info('Given the run is configured with at least log_level = "%s"', wanted_level)
     assert wanted_level == 'INFO', f'Unexpected log_level: "{wanted_level}"'
     # TODO Implement scenario "Given the run is configured with at least log_level = "INFO""
     # Get logger used for logging
@@ -451,7 +451,7 @@ def then_step_using_the_module(caplog_fixture, context: dict, want: str, module:
     # assert False, 'Stopping in func: given_step_using_the_module'
     assert len(caplog_fixture.records) == 0
     assert caplog_fixture.text == ''
-    logging.warning('\nwhen_the_scenario_is_run\n')
+    logging.info('\nwhen_the_scenario_is_run\n')
 
 
 # TODO Then there should not be any logging from "PytestBddLogger" functions
