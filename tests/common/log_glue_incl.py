@@ -278,8 +278,8 @@ def before_feature(_request: FixtureRequest, feature: Feature):
     So this function will be called by pytest_bdd_before_scenario,
     when the first scenario in the feature is run.
     """
-    assert feature and feature.name, 'No feature param!1'
-    assert feature is not None and feature.name != '', 'No feature param!2'
+    assert feature and feature.name, 'No feature param!'
+    assert feature is not None and feature.name != '', 'No feature param!'
     # log_msg('Found feature: ') # + feature.name)
     log_msg_start()
     log_feature(feature)
