@@ -1,6 +1,10 @@
 {
     "recommendations": [
-        "siarheikuchuk.gherkin-beautifier-vs-code-plugin",
+        "alexkrechik.cucumberautocomplete",
+        "kevinrose.vsc-python-indent",
+        "ms-python.isort",
+        "ms-python.python",
         "tamasfe.even-better-toml"
+        "twixes.pypi-assistant",
     ]
 }
