@@ -34,7 +34,7 @@
         "**/*_steps.py"
     ],
     "cucumberautocomplete.strictGherkinCompletion": true,
-    "cucumberautocomplete.gherkinDefinitionPart": "@(given|when|then|step)\\((?:\\s*parsers.parse\\(|)",
+    "cucumberautocomplete.gherkinDefinitionPart": "@(given|when|then|step)\\((?:\\s*parsers\\.parse\\(\\s*['\"][^'\"]+['\"]\\s*\\))",
     "cucumberautocomplete.skipDocStringsFormat": true,
     "terminal.integrated.fontFamily": "",
     "[markdown]": {
