@@ -1,11 +1,13 @@
 {
     "files.trimTrailingWhitespace": true,
-    // "python.formatting.provider": "black", // We use blue, the plugin believes it is black.
-    // "python.formatting.provider": "none"
-    // "python.formatting.blackPath": "blue",
+    "python.formatting.provider": "black", // We use blue, the plugin believes it is black.
+    "python.formatting.blackPath": "blue",
+    "python.formatting.blackArgs": [
+        "--line-length",
+        "100"
+    ],
     "[python]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "ms-python.black-formatter"
     },
     // "editor.defaultFormatter": "ms-python.python",
     "python.testing.unittestEnabled": false,
@@ -43,9 +45,6 @@
     "[ignore]": {
         "editor.defaultFormatter": "foxundermoon.shell-format"
     },
-    "python.analysis.extraPaths": [
-        "./tests/common"
-    ],
     "[jsonc]": {
         "editor.defaultFormatter": "vscode.json-language-features"
     },
