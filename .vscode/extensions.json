@@ -1,7 +1,7 @@
 {
     "recommendations": [
         "alexkrechik.cucumberautocomplete",
-        "vscode.json-language-features", 
+        "vscode.json-language-features",
         "tamasfe.even-better-toml"
     ]
 }
