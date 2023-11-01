@@ -40,9 +40,9 @@ disable = [ #TODO: Add more
 ignore = 'migrations' # Do not enforce naming rules for generated files.
 
 [tool.pytest.ini_options]
-log_cli = true
-log_cli_format = "%(asctime)s %(levelname)s %(message)s"
-log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+# log_cli = true
+# log_cli_format = "%(asctime)s %(levelname)s %(message)s"
+# log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 log_level = "INFO"
 log_format = "%(levelname)8s %(message)s"
 # log_format = "%(asctime)s %(levelname)8s %(message)s"
@@ -54,8 +54,8 @@ markers = [
   "wipz: marks tests as unfinished work-in-progesz (deselect with '-m \"not wipz\"')",
   "todo: marks tests as unfinished",
   "ok: marks tests as tested ok (deselect with '-m \"not ok\"')",
-  "okz: marks tests as old-ok test",
-  "order: marks ordering for tests (example)",
+  "okz: marks tests as old-ok test (mark it todo before checking in)",
+  "internal: marks test as internal for developers ",
 ]
 # testpaths = ['tests', 'article', 'conftest_glue', 'eat', 'sah']
 testpaths = ['tests', 'sah', 'conftest_glue', 'article']

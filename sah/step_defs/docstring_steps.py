@@ -69,7 +69,8 @@ def given_i_have_step_with_a_docstring(context, doc_string: str) -> None:
     # xlog_glue_end(context)
     # assert False, 'Not supposed to pass this point! bdd_tracer.py - docstring_steps.py - given_i_have_step_with_a_docstring'
 
-@given('the doc string don\'t contain any lines')
+
+@given("the doc string don't contain any lines")
 def the_doc_string_dont_contain_any_lines(context) -> None:
     pass
 

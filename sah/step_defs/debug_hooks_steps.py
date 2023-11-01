@@ -1,8 +1,8 @@
 import logging
 
-# from tests.common.log_glue import *
-from tests.common.log_helper import KEY_PT_HOOKS, LogHelper
-from tests.common.pytest_bdd_logger_interface import TEST_CONTEXT  # get_logger,; old_ret_dict_info,
+# from common.log_glue import *
+from common.log_helper import KEY_PT_HOOKS, LogHelper
+from common.pytest_bdd_logger_interface import TEST_CONTEXT  # get_logger,; old_ret_dict_info,
 
 from pytest_bdd import parsers, given, when, then  # isort:skip
 
@@ -27,9 +27,8 @@ def given_this_scenario_is_tagged_with_wip(tag: str) -> None:
     assert tag == 'wip'
 
 
-@given(parsers.parse('a "{func_name}" Pytest-BDD hook-function in conftest.py'))
-@given(parsers.parse('a "{func_name}" Pytest-BDD hook-function'))
-@given(parsers.parse('a "{func_name}" hook-function'))
+@given(parsers.parse('the Pytest-BDD hook-function "{func_name}" in conftest.py'))
+@given(parsers.parse('the Pytest-BDD hook-function "{func_name}"'))
 def pytest_bdd_hook_function(context: dict, func_name: str) -> None:
     assert context is not None, 'context must be provided'
     # assert func_name == "pytest_bdd_before_scenario", f"assert - [{func_name}]"

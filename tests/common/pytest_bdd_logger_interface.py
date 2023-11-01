@@ -3,11 +3,10 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Optional
 
 import pytest
+from common.ansi_colors import ANSIColor
+from common.log_helper import COL_CONTEXT, KEY_CONFIG, KEY_LOG_CONFIG, TEST_CONTEXT, LogHelper
 from pytest import Config, FixtureRequest, Function, Item
 from pytest_bdd.parser import Feature, Scenario, Step
-
-from tests.common.ansi_colors import ANSIColor
-from tests.common.log_helper import COL_CONTEXT, KEY_CONFIG, KEY_LOG_CONFIG, TEST_CONTEXT, LogHelper
 
 
 class PytestBddLoggerInterface(ABC):
@@ -59,7 +58,7 @@ class PytestBddLoggerInterface(ABC):
     #     # and performs better in terms of performance when retrieving the function name
     #     # (than the else alternative).
 
-    def log_dict(self, the_dict: dict, name: str) -> None:   # ? + incl_items: bool = True
+    def log_dict(self, the_dict: dict, name: str) -> None:  # ? + incl_items: bool = True
         """
         Function log_dict will log the given dict
         and its items if incl_items=True.
@@ -87,7 +86,6 @@ class PytestBddLoggerInterface(ABC):
             TEST_CONTEXT[KEY_LOG_CONFIG] = False
 
     def log_configuration(self, config: pytest.Config) -> None:
-
         LogHelper.log_func_name()
         assert config, 'config is None!'
 
@@ -133,7 +131,7 @@ class PytestBddLoggerInterface(ABC):
         logging.info(TEST_CONTEXT)
         # print('configure() called by: ', self._ret_func_name(1)) #TODO Remove
 
-        TEST_CONTEXT['config'] = config   # TODO Needed?
+        TEST_CONTEXT['config'] = config  # TODO Needed?
         # log_configuration() will be called later to inform about config
         # (in runtest_protocol())
 

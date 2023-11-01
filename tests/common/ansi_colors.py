@@ -17,7 +17,7 @@ class ANSIColor(Enum):
     CYAN = '\033[36m'
     WHITE = '\033[37m'
     GRAY = '\033[90m'
-    DBG = '\033[91m'    #TODO Remove DBG color
+    DBG = '\033[91m'    # TODO Remove DBG color
 
 
 # # Accessing enum members

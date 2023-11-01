@@ -1,9 +1,7 @@
 import logging
 
-# from tests.common.log_glue import *
-
-from pytest_bdd import parsers, given, when, then   # isort:skip
-from tests.common.log_helper import LogHelper
+from common.log_helper import LogHelper
+from pytest_bdd import parsers, given, when, then  # isort:skip
 
 # pylint: disable=invalid-name ## ( => sah: using "it" )
 

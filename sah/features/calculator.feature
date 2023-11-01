@@ -1,6 +1,6 @@
 Feature: Calculator
 
-  @ok
+  @wip
   Scenario: Add numbers
     # Given I have a simple calculator
     Given I have a calculator
@@ -8,7 +8,7 @@ Feature: Calculator
     Then the result should be 5
   # Then the expected result should be 5
 
-  @ok
+  @wip
   Scenario Outline: Outline Add numbers <num1> & <num2>
     Given I have a calculator
     When I add <num1> and <num2>

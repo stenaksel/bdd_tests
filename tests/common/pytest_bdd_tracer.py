@@ -2,14 +2,13 @@ import logging
 from abc import abstractmethod
 from typing import Any, Callable, OrderedDict
 
+# from common.log_glue_incl import TEST_CONTEXT
+
+# from common.log_helper import COL_CONTEXT, KEY_CONFIG, KEY_LOG_CONFIG, TEST_CONTEXT, LogHelper
+from common.log_helper import KEY_CURR_FEATURE, KEY_MY_HOOKS, KEY_PT_HOOKS, TEST_CONTEXT, LogHelper
+from common.pytest_bdd_logger_interface import PytestBddLoggerInterface
 from pytest import FixtureRequest
 from pytest_bdd.parser import Feature, Scenario, Step
-
-from tests.common.log_glue_incl import TEST_CONTEXT
-
-# from tests.common.log_helper import COL_CONTEXT, KEY_CONFIG, KEY_LOG_CONFIG, TEST_CONTEXT, LogHelper
-from tests.common.log_helper import KEY_CURR_FEATURE, KEY_MY_HOOKS, KEY_PT_HOOKS, LogHelper
-from tests.common.pytest_bdd_logger_interface import PytestBddLoggerInterface
 
 # TODO: switch "log_glue" to "bdd_logger" (?? and "log_msg" to "log")
 
@@ -75,11 +74,11 @@ class PytestBddTracer(PytestBddLoggerInterface):
         Returns:
             None
         """
+        logging.info(' -------------------------------------> before_feature')
         LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT', prefix='BFe->')
         self.log_hook('*** before_feature ***')
         LogHelper.assert_object_have_name(feature)
         # self._before_feature_assert_params(request, feature)
-        logging.info(' -------------------------------------> before_feature')
         caller = LogHelper.ret_func_name(1)  # TODO make better name 2
         logging.info("func 'before_feature' caller '%s'", caller)
         LogHelper.log_func_name_with_info(feature.name, fillchar='h:\t3->\t ')
@@ -98,8 +97,9 @@ class PytestBddTracer(PytestBddLoggerInterface):
         # self.log_hook("pytest_bdd_before_feature - don't exist!")
         LogHelper.log_func_name_with_info(feature.name)
         self.log_feature(feature)
-        LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT-BFe<-')
-        self.log_dict(TEST_CONTEXT, 'show TEST_CONTEXT')   # TODO remove. Just testing
+        # LogHelper.log_dict_now(TEST_CONTEXT, 'TEST_CONTEXT-BFe<-')
+        self.log_dict(TEST_CONTEXT, 'show TEST_CONTEXT')  # TODO remove. Just testing
+        logging.info(' <------------------------------------- before_feature')
 
     # @abstractmethod #TODO?
     def before_scenario(

@@ -1,8 +1,8 @@
 import inspect
-import pytest
-from pytest_bdd import given
-from tests.common.pytest_bdd_logger_interface import _ret_dict_info, _ret_item_info
 
+import pytest
+from common.pytest_bdd_logger_interface import _ret_dict_info, _ret_item_info
+from pytest_bdd import given
 
 # def _ret_dict_info(the_dict: dict, name: str, prefix: str = '::') -> str:
 #     """
@@ -46,7 +46,6 @@ def step_with_glue_code(*args, **kwargs) -> None:
 
 
 def test_my_monkeypatch(monkeypatch: pytest.MonkeyPatch) -> None:
-
     print('Calling original function: ')
     result = step_with_glue_code(None, None)
     print(result)

@@ -1,9 +1,6 @@
 import logging
 
-from pytest_bdd.parser import Feature  # , Scenario, ScenarioTemplate, Step
-from pytest_bdd.parser import Scenario, Step
-
-from tests.common.log_helper import (
+from common.log_helper import (
     COL_CONTEXT,
     COL_INFO,
     COL_SCENARIO,
@@ -14,7 +11,9 @@ from tests.common.log_helper import (
     TEST_CONTEXT,
     LogHelper,
 )
-from tests.common.pytest_bdd_tracer import PytestBddTracer
+from common.pytest_bdd_tracer import PytestBddTracer
+from pytest_bdd.parser import Feature  # , Scenario, ScenarioTemplate, Step
+from pytest_bdd.parser import Scenario, Step
 
 ############################################################################
 
@@ -53,7 +52,7 @@ class PytestBddLogger(PytestBddTracer):
 
     def log_feature(self, feature: Feature) -> None:
         LogHelper.log_func_name_with_info(feature.name, fillchar='F:')
-        super().log_feature(feature)  # TODO: don't use super() ?
+        # super().log_feature(feature)  # TODO: don't use super() ?
         LogHelper.assert_object_have_name(feature)
         self.log(f'\t {self.COL_MSG}Feature: "{feature.name}"')
         # logging.info(

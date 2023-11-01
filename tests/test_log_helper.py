@@ -20,19 +20,11 @@ from typing import Any, List
 from unittest.mock import call, patch
 
 import pytest
+from common.log_helper import COL_CONTEXT, COL_INFO, COL_MSG, COL_RESET, TEST_CONTEXT, LogHelper
+
+# from common.pytest_bdd_tracer import PytestBddTracer
+from common.pytest_bdd_logger import PytestBddLogger
 from pytest_bdd.parser import Feature  # , Scenario, ScenarioTemplate, Step
-
-from tests.common.log_helper import (
-    COL_CONTEXT,
-    COL_INFO,
-    COL_MSG,
-    COL_RESET,
-    TEST_CONTEXT,
-    LogHelper,
-)
-
-# from tests.common.pytest_bdd_tracer import PytestBddTracer
-from tests.common.pytest_bdd_logger import PytestBddLogger
 
 # (
 #     # ret_keys,
@@ -94,7 +86,6 @@ def test_ret_classname() -> None:
 
 @pytest.mark.ok
 def test_log_func_name() -> None:
-
     # logging.info('==> test_log_func_name')
 
     assert LogHelper.ret_func_name() == 'test_log_func_name'
@@ -103,14 +94,14 @@ def test_log_func_name() -> None:
     # that will be passed on to _the_caller and should return themself
     # _the_caller is the only function calling LogHelper.log_func_name function.
 
-    assert _the_caller() == '_the_caller'   # _the_caller of LogHelper.log_func_name
-    assert _func1() == '_func1'             # will only call _the_caller
-    assert _func2() == '_func2'             # will only call _func1
-    assert _func3() == '_func3'             # will only call _func2
-    assert _func3(3) == '_func3'            # will only call _func2(prev=3)
-    assert _func3(2) == '_func2'            # will only call _func2(prev=2)
-    assert _func3(1) == '_func1'            # will only call _func2(prev=1)
-    assert _func3(0) == '_the_caller'       # will only call _func2(prev=0)
+    assert _the_caller() == '_the_caller'  # _the_caller of LogHelper.log_func_name
+    assert _func1() == '_func1'  # will only call _the_caller
+    assert _func2() == '_func2'  # will only call _func1
+    assert _func3() == '_func3'  # will only call _func2
+    assert _func3(3) == '_func3'  # will only call _func2(prev=3)
+    assert _func3(2) == '_func2'  # will only call _func2(prev=2)
+    assert _func3(1) == '_func1'  # will only call _func2(prev=1)
+    assert _func3(0) == '_the_caller'  # will only call _func2(prev=0)
 
     # logging.info('<== test__log_func_name')
 
@@ -136,7 +127,6 @@ def test_ret_sorted() -> None:
 
 @pytest.mark.ok
 def test_assert_object() -> None:
-
     par_none = None
     par_string_long = 'a legal string'
     empty_string = ''
@@ -158,7 +148,8 @@ def test_assert_object() -> None:
         # LogHelper.assert_string(none_param)
         _some_assert_object_caller(par_none, par_ok)
         assert (
-            "The object param 'p1' in function _some_assert_object_caller was no object" in info.value
+            "The object param 'p1' in function _some_assert_object_caller was no object"
+            in info.value
         )
         assert False, '1Stopping here...'
 
@@ -166,14 +157,14 @@ def test_assert_object() -> None:
         # LogHelper.assert_string(none_param)
         _some_assert_object_caller(par_ok, par_none)
         assert (
-            "The object param 'p2' in function _some_assert_object_caller was no object" in info.value
+            "The object param 'p2' in function _some_assert_object_caller was no object"
+            in info.value
         )
         assert False, '1Stopping here...'
 
 
 @pytest.mark.ok
 def test_assert_string() -> None:
-
     # inner_func ->
     def _some_assert_value_caller(
         p1: str, p2: str, min_length1: int | None = None, min_length2: int | None = None
@@ -331,7 +322,6 @@ def test_ret_dict_info() -> None:
 
 @pytest.mark.ok
 def test_ret_before_or_after() -> None:
-
     with pytest.raises(AssertionError) as excinfo:
         LogHelper.ret_before_or_after(None)
     assert str(excinfo.value) == 'No param "func_name"'
@@ -384,7 +374,7 @@ def remove_ansi_escape_sequences(text: str):
 
 def assert_logged(
     caplog, level, expected: List, _in_sequence: bool = False
-) -> None:   # TODO in_sequence
+) -> None:  # TODO in_sequence
     assert isinstance(expected, list)
     assert len(expected) > 0, 'No expected messages passed to assert_logged'
     assert bool(expected), 'No expected messages passed to assert_logged'
@@ -447,7 +437,6 @@ def assert_logged(
 
 @pytest.mark.ok
 def test_log_func_name_xxx(caplog) -> None:
-
     _clear_caplog(caplog)
     LogHelper.log_func_name()
     expected = [
@@ -486,7 +475,6 @@ def test_log_func_name_caplog(caplog) -> None:
 
 @pytest.mark.ok
 def test_quoted_string_from():
-
     # Given a string param
     param = 'simly a string'
     assert LogHelper.quoted_string_from(param) == f"'{param}'"
@@ -501,29 +489,33 @@ def test_quoted_string_from():
 @pytest.mark.ok
 def test_log_func_call():
     def inner_func_for_testing_log_func_call(_p1: str, _p2: str, _p3: int, _feature: Feature):
-        LogHelper.log_func_call()
+        # logging.info('==> inner_func_for_testing_log_func_call')
+        LogHelper.log_func_call(logging.DEBUG)
 
     # Given a "valid feature" (in our test context)
     feature = Feature(None, '', '', 'Feature_name', set(), None, 1, '')
-    with patch('logging.info') as mock_info:
+    with patch('logging.debug') as mock_debug:
         inner_func_for_testing_log_func_call('val1', 'val2', 3, feature)
 
-    # Accessing the mock_calls attribute to see the logged messages
-    for a_call in mock_info.mock_calls:
-        print(a_call)
-
-    # Assert that the mock_info was called with the expected arguments
+    # Assert that the mock_debug was called with the expected arguments
     part2 = f"{COL_INFO}(_p1='val1', _p2='val2', _p3=3, _feature='Feature_name')"
     part3 = (
         f'{COL_CONTEXT}(<- by log_func_call() with caller inner_func_for_testing_log_func_call())'
     )
-    expected_call = f'{COL_MSG}inner_func_for_testing_log_func_call{part2}{part3}'
-    mock_info.assert_has_calls(
+    expected_call = f'*--* dbg: {COL_MSG}inner_func_for_testing_log_func_call{part2}{part3}'
+    print(expected_call)
+
+    # Accessing the mock_calls attribute to see the logged messages
+    for a_call in mock_debug.mock_calls:
+        print(a_call)
+        logging.warning(a_call)
+
+    mock_debug.assert_has_calls(
         [
             call(expected_call),
+            # call("expected_call"),
         ]
     )
-    #
 
 
 # @pytest.fixture
@@ -535,9 +527,9 @@ def test_log_func_call():
 #     return mock_service
 
 
-# @mock.patch('tests.common.log_glue_incl.log_msg_start')
-# @mock.patch('tests.common.log_glue_incl.log_msg')
-# @mock.patch('tests.common.log_glue_incl.log_msg_end')
+# @mock.patch('common.log_glue_incl.log_msg_start')
+# @mock.patch('common.log_glue_incl.log_msg')
+# @mock.patch('common.log_glue_incl.log_msg_end')
 
 
 @pytest.mark.ok
@@ -546,7 +538,7 @@ def test_log_headline_mock() -> None:
     # With default fillchar
     default_fillchar = '#'
     with patch('logging.info') as mock_info:
-        LogHelper.log_headline(LogHelper.ret_func_name())   # Using default fillchar
+        LogHelper.log_headline(LogHelper.ret_func_name())  # Using default fillchar
 
         # Assert that the mock_info was called 3 times with the expected arguments
         # mock_info.assert_has_calls([
@@ -576,7 +568,7 @@ def test_log_headline_mock() -> None:
     #
 
 
-@pytest.mark.skip   # TODO Not working yet
+@pytest.mark.skip  # TODO Not working yet
 def test_log_msg() -> None:
     LogHelper.log_func_name()
 

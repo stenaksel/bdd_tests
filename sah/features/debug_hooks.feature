@@ -21,11 +21,9 @@ Feature: Debug Hooks
     Given this scenario is tagged with "wip"
     When the scenario is run
 
-  @wipz
+  @ok
   Scenario: before_feature called once
-    Given a "pytest_bdd_before_scenario" hook-function in conftest.py
-    # And
-    # Given a "pytest_bdd_before_scenario" Pytest-BDD hook-function in conftest.py
+    Given the Pytest-BDD hook-function "pytest_bdd_before_scenario" in conftest.py
     When the scenario is run
     #TODO When the step definition is run
     #TODO When the step definition after function is run
@@ -34,38 +32,28 @@ Feature: Debug Hooks
     Then "TEST_CONTEXT" should show that the function "before_scenario" have been run
 
 
-  @wip
+  @ok
   Scenario Outline: Add information about running hooks
-    Given a "<hook>" hook-function in conftest.py
+    Given the Pytest-BDD hook-function "<hook>" in conftest.py
     When the hook-function have run
     # Then "TEST_CONTEXT" should show that the hook-function "<hook>" have been run
     Then "TEST_CONTEXT" should show that the function "<func>" have been run
 
     Examples:
-      | hook                       | func            | info |
-      # | pytest_configure           | configure       |                                                 |
-      # | pytest_bdd_before_scenario | before_feature  | before_feature will be called on first scenario |
-      | pytest_bdd_before_scenario | before_scenario |      |
-  # | pytest_bdd_after_scenario  | after_scenario  |                                                 |
-  # | pytest_bdd_before_step     | before_step     |                                                 |
-  # | pytest_bdd_after_step      | after_step      |                                                 |
-
-
-
-  Scenario Outline: Add information in TEST_CONTEXT when running
-    # And
-    # Given a "<hook>" Pytest-BDD hook-function in conftest.py
-    #TODO When the step definition is run
-    #TODO When the step definition after function is run
-    Examples:
+      # Hint: before_feature will be called on first scenario
       | hook                       | func            |
-      | pytest_bdd_before_scenario | before_scenario |
+      # | pytest_configure           | configure       |
+      | pytest_bdd_before_scenario | before_feature  |
+      # | pytest_bdd_before_scenario | before_scenario |
+      # | pytest_bdd_after_scenario  | after_scenario  |
+      # | pytest_bdd_before_step     | before_step     |
+      # | pytest_bdd_after_step      | after_step      |
 
 
   @wipz
   Scenario: Inform about the test run
     Given this scenario is tagged with "wip"
-    Given a "pytest_bdd_before_step" hook-function in conftest.py
+    And the Pytest-BDD hook-function "pytest_bdd_before_step" in conftest.py
     # Given a "pytest_bdd_before_scenario" Pytest-BDD hook-function in conftest.py
     # When the scenario is run
     When the hook-function have run
@@ -83,7 +71,7 @@ Feature: Debug Hooks
   # | Current Step     | N/A or Then/And? "TEST_CONTEXT" should show that the function "before_scenario" have been run
   # | Current glue     | N/A
 
-  @wip
+  @wipz
   Scenario: Current information added to TEST_CONTEXT when running
     # Given the variable "DO_INCL_CURR_INFO" is set to "True"
     When the step definition is run

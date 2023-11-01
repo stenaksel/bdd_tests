@@ -4,16 +4,16 @@ import logging
 from collections import OrderedDict
 from typing import Any, List
 
+# finding out
+from common.ansi_colors import ANSIColor
 from pytest import FixtureRequest
 
-from tests.common.ansi_colors import ANSIColor
-
-# from tests.common.ansi_colors import ANSIColor
+# from common.ansi_colors import ANSIColor
 
 # from pytest_bdd.parser import Feature, Scenario, Step
 
 
-# from tests.common.pytest_bdd_logger_interface import (
+# from common.pytest_bdd_logger_interface import (
 #     TEST_CONTEXT
 # )
 
@@ -41,7 +41,7 @@ KEY_DBG_LOGGING = 'dbg_logging'  # TODO: Values: None, False,  True, Hooks, Feat
 KEY_DBG_LOG_GLUE = 'KEY_DBG_LOG_GLUE'
 KEY_LOGGER = 'logger'  # TODO: Values: False,  True
 
-KEY_LOG_CONFIG = 'LOG_CONFIG'   # Boolean for calling log_configuration or not (default true)
+KEY_LOG_CONFIG = 'LOG_CONFIG'  # Boolean for calling log_configuration or not (default true)
 KEY_CONFIG = 'config'
 KEY_FUNC = '|Func'  # TODO Should add all glue functions that gets called
 KEY_PT_HOOKS = '|PtHooks'  # TODO Should add all Pytest(-BDD) hooks that gets called
@@ -57,7 +57,7 @@ TEST_CONTEXT = OrderedDict(
         KEY_PT_HOOKS: [],
         KEY_MY_HOOKS: [],
     }  # TODO Remove hooks
-)   # TODO "LOG_CONFIG": True
+)  # TODO "LOG_CONFIG": True
 
 
 def _ret_item_info(name: str, item, prefix: str = 'i') -> str:
@@ -271,7 +271,7 @@ class LogHelper:
         * _ret_func_name(1) - will return the func_name of the caller
         * _ret_func_name(2) - will return the func_name of the callers caller
         """
-        if with_test_logging:   # TODO maybe remove? Just used for testing a test
+        if with_test_logging:  # TODO maybe remove? Just used for testing a test
             logging.debug('>> ret_func_name')
         return inspect.stack()[1 + prev][3]
 
@@ -368,7 +368,6 @@ class LogHelper:
 
     @staticmethod
     def quoted_string_from(value: Any, quote: str = "'") -> Any:
-
         if hasattr(value, 'name'):
             return f'{quote}{value.name}{quote}'
         # else:
@@ -380,7 +379,7 @@ class LogHelper:
         if isinstance(value, str):
             return f'{quote}{value}{quote}'
 
-        return repr(value)   # no quotes here yet
+        return repr(value)  # no quotes here yet
 
     @staticmethod
     def log_func_call(
@@ -402,8 +401,10 @@ class LogHelper:
                 if arg != 'self'
             ]
         )
-        wanted_logged = f'{COL_MSG}{caller}{COL_INFO}({args}){LogHelper.ret_provider_info()}'
-        logging.info(wanted_logged)  # TODO: use log_level
+        wanted_logged = (
+            f'*--* dbg: {COL_MSG}{caller}{COL_INFO}({args}){LogHelper.ret_provider_info()}'
+        )
+        logging.debug(wanted_logged)  # TODO: use log_level
         # logging.info("-> %s(%s)", calling_function, args)  # TODO: use log_level
         # ==> "-> func_name(param1='val1, param2:'val2', param3=3 ...)"
 
@@ -512,7 +513,7 @@ class LogHelper:
         return ''
 
     @staticmethod
-    def assert_messages(caplog, level, messages: List) -> None:   # ? + in_sequence: bool = False
+    def assert_messages(caplog, level, messages: List) -> None:  # ? + in_sequence: bool = False
         print('#### messages:')
         for msg in messages:
             print(msg)

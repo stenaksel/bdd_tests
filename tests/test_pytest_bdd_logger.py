@@ -4,28 +4,28 @@ import warnings  # for debuggin my test finding out when warning was logged
 from typing import List
 from unittest import mock
 
-# from unittest.mock import Mock
-
 # from logging import DEBUG, INFO, WARN, LogRecord
 # from typing import Callable, Generator, List
 # from unittest import mock
 from unittest.mock import call, patch
 
 import pytest
-from pytest_bdd.parser import Feature  # , Scenario, ScenarioTemplate, Step
-
-from tests.common.log_helper import (  # log_msg_end,; TEST_CONTEXT,; GLUE_LOGGER,; KEY_DBG_LOG_GLUE,; KEY_DBG_LOGGING,; KEY_LOGGER,
+from common.log_helper import (  # log_msg_end,; TEST_CONTEXT,; GLUE_LOGGER,; KEY_DBG_LOG_GLUE,; KEY_DBG_LOGGING,; KEY_LOGGER,
     COL_CONTEXT,
     KEY_LOG_GLUE,
     TEST_CONTEXT,
     LogHelper,
 )
-from tests.common.pytest_bdd_logger import PytestBddLogger
-from tests.common.pytest_bdd_logger_interface import PytestBddLoggerInterface
-from tests.common.pytest_bdd_tracer import PytestBddTracer
+from common.pytest_bdd_logger import PytestBddLogger
+from common.pytest_bdd_logger_interface import PytestBddLoggerInterface
+from common.pytest_bdd_tracer import PytestBddTracer
+from pytest_bdd.parser import Feature  # , Scenario, ScenarioTemplate, Step
 
-# from tests.common.log_glue_incl import xret_sorted  # tested
-# from tests.common.log_glue_incl import xlog_msg, xlog_msg_start
+# from unittest.mock import Mock
+
+
+# from common.log_glue_incl import xret_sorted  # tested
+# from common.log_glue_incl import xlog_msg, xlog_msg_start
 
 # from pytest_mock import MockerFixture
 
@@ -186,7 +186,7 @@ def test_before_feature() -> None:
     # #### Assert functions called
     # When I call
     logging.info('When I call: before_feature(None, feature)')
-    module = 'tests.common.pytest_bdd_tracer'
+    module = 'common.pytest_bdd_tracer'
     with mock.patch.multiple(
         PytestBddTracer,
         log_hook=mock.DEFAULT,
@@ -229,7 +229,7 @@ def test_log_feature_when_before_feature():
     # for info_call in mock_info.mock_calls:
     #     print(info_call)
 
-    # module = 'tests.common.pytest_bdd_logger'
+    # module = 'common.pytest_bdd_logger'
     # # with (
     # # patch(module + '.log_func_name') as mock_log_func_name, #TODO Moved to LogHelper
     # # patch(module + '.log_feature') as mock_log_feature,
@@ -245,22 +245,24 @@ def test_log_feature_when_before_feature():
     #     mock_log_feature.assert_called_once()
 
 
-@pytest.mark.wipz
+@pytest.mark.ok
 def test_before_feature_do_update_context() -> None:
     LogHelper.log_func_name()
     bdd_logger = PytestBddLogger()
     # assert bdd_logger.get_test_context() == TEST_CONTEXT
 
     # Given a "valid feature" (in our test context)
-    feature = Feature(None, '', '', 'Feature_name', set(), None, 1, '')
+    # feature = Feature(None, "", "", "Feature_name", set(), None, 1, "")
 
     # #### Assert functions called
-    module = 'tests.common.pytest_bdd_logger'
-    with (patch(module + '.log_feature') as mock_log_feature,):
+    with mock.patch.object(bdd_logger, 'log_feature') as mock_log_feature:
         logging.info('When I call: before_feature(None, feature)')
+
+        # Given a "valid feature" (in our test context)
+        feature = Feature(None, '', '', 'Feature_name', set(), None, 1, '')
+
         bdd_logger.before_feature(None, feature)
 
-        # Then assert that the mocked functions were called
-        logging.info('Then assert that the mocked functions were called')
-        # mock_log_func_name.assert_called_once()
+        # Then assert that the mocked function log_feature were called
+        logging.info('Then assert that log_feature() was called')
         mock_log_feature.assert_called_once()

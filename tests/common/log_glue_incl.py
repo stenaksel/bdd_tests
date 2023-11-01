@@ -3,13 +3,19 @@ import inspect
 import logging
 from logging import Logger
 from typing import Any
-from pytest_bdd.parser import Feature, Scenario, ScenarioTemplate, Step
-from tests.common.ansi_colors import ANSIColor
-from tests.common.log_helper import (
+
+from common.ansi_colors import ANSIColor
+from common.log_helper import (
     LogHelper,
     KEY_DBG_FUNC_NAME,
     KEY_LOG_GLUE,
     TEST_CONTEXT,
+)
+from pytest_bdd.parser import (
+    Feature,
+    Scenario,
+    ScenarioTemplate,
+    Step,
 )
 
 # TODO: Create this as a template class
